@@ -16,6 +16,7 @@ RUN yum install -y bind-utils && \
     yum clean all
 
 ADD ./nginx.conf /usr/local/openresty/nginx/conf/
+RUN md5sum /usr/local/openresty/nginx/conf/nginx.conf | cut -d' ' -f 1 > /container_default_ngx
 ADD ./go.sh /
 
 WORKDIR /usr/local/openresty
