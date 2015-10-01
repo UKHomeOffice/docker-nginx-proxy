@@ -24,6 +24,9 @@ In order to run this container you'll need docker installed.
 
 * `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy
 * `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy
+* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .conf to be loaded)
+* `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
+* `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
 
 ### Ports
 
@@ -37,6 +40,7 @@ This container exposes
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
   signed one is provided if they have not been mounted.
+* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default nginx.conf.
   
 ### Examples
 
