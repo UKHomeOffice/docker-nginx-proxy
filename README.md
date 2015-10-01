@@ -50,7 +50,7 @@ This container exposes
 docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.1.1
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.0
 ```
 
 #### Custom SSL Certificate
@@ -62,7 +62,7 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.1.1
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.0
 ```
 
 ## Built With
