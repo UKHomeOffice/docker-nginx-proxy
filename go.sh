@@ -8,7 +8,7 @@ function download() {
     file_md5=$2
     download_path=$3
 
-    file_path=${file_path}/$(basename ${file_url})
+    file_path=${download_path}/$(basename ${file_url})
     error=0
 
     for i in {1..5}; do
@@ -80,6 +80,10 @@ if [ "${NAXSI_RULES_URL_CSV}" != "" ]; then
     for i in "${!NAXSI_RULES_URL_ARRAY[@]}"; do
         download ${NAXSI_RULES_URL_ARRAY[$i]} ${NAXSI_RULES_MD5_ARRAY[$i]} /usr/local/openresty/naxsi
     done
+fi
+if [ "${NAXSI_USE_DEFAULT_RULES}" == "FALSE" ]; then
+    echo "Deleting core rules..."
+    rm -f /usr/local/openresty/naxsi/naxsi_core.rules
 fi
 
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""

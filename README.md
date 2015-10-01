@@ -26,7 +26,7 @@ In order to run this container you'll need docker installed.
 * `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy
 * `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) rules to use. (Files must end in .conf to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
-* `NAXSI_USE_DEFAULT_RULES` - If set to "false" will delete the default rules file...
+* `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
 
 ### Ports
 
