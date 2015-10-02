@@ -2,6 +2,8 @@
 
 set -e
 
+NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
+
 function download() {
 
     file_url=$1
@@ -51,7 +53,7 @@ for i in 1..3 ; do
 done
 
 # Detect default configuration...
-md5sum /usr/local/openresty/nginx/conf/nginx.conf | cut -d' ' -f 1 >/tmp/nginx_new
+md5sum ${NGIX_CONF_DIR}/nginx.conf | cut -d' ' -f 1 >/tmp/nginx_new
 if diff /container_default_ngx /tmp/nginx_new ; then
     if [ "$PROXY_SERVICE_HOST" == "" ] || [ "$PROXY_SERVICE_PORT" == "" ] || [ "$PROXY_HOST" == "" ]; then
         echo "Default config requires PROXY_SERVICE_HOST and PROXY_SERVICE_HOST to be set."
@@ -78,12 +80,20 @@ if [ "${NAXSI_RULES_URL_CSV}" != "" ]; then
         exit 1
     fi
     for i in "${!NAXSI_RULES_URL_ARRAY[@]}"; do
-        download ${NAXSI_RULES_URL_ARRAY[$i]} ${NAXSI_RULES_MD5_ARRAY[$i]} /usr/local/openresty/naxsi
+        download ${NAXSI_RULES_URL_ARRAY[$i]} ${NAXSI_RULES_MD5_ARRAY[$i]} /usr/local/openresty/naxsi/location
     done
 fi
 if [ "${NAXSI_USE_DEFAULT_RULES}" == "FALSE" ]; then
     echo "Deleting core rules..."
     rm -f /usr/local/openresty/naxsi/naxsi_core.rules
+fi
+if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
+    echo "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
+    cp ${NGIX_CONF_DIR}/nginx_listen_proxy_protocol.conf ${NGIX_CONF_DIR}/nginx_listen.conf
+    echo -e "\nset_real_ip_from ${LOAD_BALANCER_CIDR};" >> ${NGIX_CONF_DIR}/nginx_listen.conf
+else
+    echo "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
+    cp ${NGIX_CONF_DIR}/nginx_listen_plain.conf ${NGIX_CONF_DIR}/nginx_listen.conf
 fi
 
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""
