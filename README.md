@@ -27,7 +27,7 @@ In order to run this container you'll need docker installed.
 * `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .conf to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
-* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#Preserve%20Client%20IP).
+* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#preserve-client-ip).
 
 ### Ports
 
