@@ -27,6 +27,7 @@ In order to run this container you'll need docker installed.
 * `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .conf to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
+* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#Preserve%20Client%20IP).
 
 ### Ports
 
@@ -50,7 +51,7 @@ This container exposes
 docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.0
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 ```
 
 #### Custom SSL Certificate
@@ -62,7 +63,29 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.0
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+```
+#### Preserve Client IP
+
+This proxy supports [Proxy Protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt).
+
+To use this feature you will need:
+
+* To enable [proxy protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) on your load balancer.  
+  For AWS, see [Enabling Proxy Protocol for AWS](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-proxy-protocol.html).
+* Find the private address range of your load balancer.  
+  For AWS, this could be any address in the destination network. E.g.
+  if you have three compute subnets defined as 10.50.0.0/24, 10.50.1.0/24 and 10.50.2.0/24,
+  then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
+  
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
+           -v /path/to/key:/etc/keys/key:ro \
+           -v /path/to/crt:/etc/keys/crt:ro \
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 ```
 
 ## Built With
