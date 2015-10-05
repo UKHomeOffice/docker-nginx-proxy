@@ -83,9 +83,18 @@ if [ "${NAXSI_RULES_URL_CSV}" != "" ]; then
         download ${NAXSI_RULES_URL_ARRAY[$i]} ${NAXSI_RULES_MD5_ARRAY[$i]} /usr/local/openresty/naxsi/location
     done
 fi
+if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
+    echo "Auto UUID request parameter disabled."
+else
+    echo "Auto UUID request parameter enabled."
+fi
 if [ "${NAXSI_USE_DEFAULT_RULES}" == "FALSE" ]; then
     echo "Deleting core rules..."
     rm -f /usr/local/openresty/naxsi/naxsi_core.rules
+    rm -f /usr/local/openresty/naxsi/location/location.rules
+else
+    echo "Core NAXSI rules enabled @ /usr/local/openresty/naxsi/naxsi_core.rules"
+    echo "Core NAXSI location rules enabled @ /usr/local/openresty/naxsi/location/location.rules"
 fi
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     echo "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
