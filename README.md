@@ -1,5 +1,7 @@
 # OpenResty Docker Container
 
+[![Build Status](https://travis-ci.org/UKHomeOffice/docker-ngx-openresty.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-ngx-openresty)
+
 This container aims to be a generic proxy layer for your web services. It includes OpenResty with 
 Lua and NAXSI filtering compiled in.
 
