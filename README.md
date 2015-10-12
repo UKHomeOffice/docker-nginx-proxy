@@ -26,7 +26,7 @@ In order to run this container you'll need docker installed.
 
 * `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy
 * `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy
-* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .conf to be loaded)
+* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .rules to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
 * `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#preserve-client-ip).
