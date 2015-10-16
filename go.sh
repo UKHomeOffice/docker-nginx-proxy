@@ -95,6 +95,11 @@ if [ "${NAXSI_USE_DEFAULT_RULES}" == "FALSE" ]; then
 else
     echo "Core NAXSI rules enabled @ /usr/local/openresty/naxsi/naxsi_core.rules"
     echo "Core NAXSI location rules enabled @ /usr/local/openresty/naxsi/location/location.rules"
+    if [ "${EXTRA_NAXSI_RULES}" != "" ]; then
+        echo "Adding extra NAXSI rules from environment"
+        echo ''>>/usr/local/openresty/naxsi/location/location.rules
+        echo ${EXTRA_NAXSI_RULES}>>/usr/local/openresty/naxsi/location/location.rules
+    fi
 fi
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     echo "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."

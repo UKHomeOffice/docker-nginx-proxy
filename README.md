@@ -29,6 +29,8 @@ In order to run this container you'll need docker installed.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
 * `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#preserve-client-ip).
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. Defaults will add this for easy tracking in logs.
+* `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra  
+rules to be specified without downloading or mounting in a rule file.
 
 ### Ports
 
@@ -57,7 +59,6 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
 
 #### Custom SSL Certificate
 
-
 ```shell
 docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -e 'PROXY_SERVICE_PORT=8080' \
@@ -66,6 +67,7 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 ```
+
 #### Preserve Client IP
 
 This proxy supports [Proxy Protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt).
@@ -85,6 +87,20 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+```
+
+#### Extra NAXSI Rules from Environment
+
+The example below allows large documents to be POSTED to the /documents/uploads and /documents/other_uploads locations.
+See [Whitelist NAXSI rules](https://github.com/nbs-system/naxsi/wiki/whitelists) for more examples.
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
+               BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 ```
