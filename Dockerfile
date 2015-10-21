@@ -15,12 +15,17 @@ RUN yum install -y openssl && \
 RUN yum install -y bind-utils && \
     yum clean all
 
-RUN mkdir -p /usr/local/openresty/naxsi/location
-ADD ./location.rules /usr/local/openresty/naxsi/location/
+ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
 
 ADD ./nginx*.conf /usr/local/openresty/nginx/conf/
+RUN mkdir /usr/local/openresty/nginx/conf/locations
+RUN mkdir -p /usr/local/openresty/nginx/lua
+ADD ./lua/* /usr/local/openresty/nginx/lua/
 RUN md5sum /usr/local/openresty/nginx/conf/nginx.conf | cut -d' ' -f 1 > /container_default_ngx
+ADD ./defaults.sh /
 ADD ./go.sh /
+ADD ./enable_location.sh /
+ADD ./location_template.conf /
 
 WORKDIR /usr/local/openresty
 
