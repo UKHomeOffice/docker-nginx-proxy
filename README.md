@@ -24,15 +24,33 @@ In order to run this container you'll need docker installed.
 
 ### Enviroment Variables
 
-* `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy
-* `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy
-* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. (Files must end in .rules to be loaded)
+#### Multi-location Variables
+
+Variables to control how to configure the proxy (can be set per location, see LOCATIONS_CSV below).
+
+* `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy.
+* `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy.
+* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. 
+(Files must end in .rules to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file...
-* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see [Preserve Client IP](#preserve-client-ip).
-* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. Defaults will add this for easy tracking in logs.
 * `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra  
 rules to be specified without downloading or mounting in a rule file.
+
+#### Single set Variables
+
+Note the following variables can only be set once:
+
+* `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example 
+[Using Multiple Locations](#using-multiple-locations).
+* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
+ for easy tracking in logs.
+* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see 
+[Preserve Client IP](#preserve-client-ip).
+* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
+
+The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
+managed by Docker or Kubernetes.  
 
 ### Ports
 
@@ -46,7 +64,8 @@ This container exposes
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
   signed one is provided if they have not been mounted.
-* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default nginx.conf.
+* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
+nginx.conf.
   
 ### Examples
 
@@ -106,6 +125,21 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 ```
+
+#### Using Multiple Locations
+
+When the LOCATIONS_CSV option is set, multiple locations can be proxied. The settings for each proxy location can be 
+controlled with the use of any [Multi-location Variables](#multi-location-variables) by prefixing the variable name with
+ both a number, and the '_' character, as listed in the LOCATIONS_CSV variable. The example below configures a simple 
+ proxy with two locations '/' (location 1) and '/api' (location 2):
+
+docker run -e 'LOCATIONS_CSV=/,/api' \ 
+           -e '1_PROXY_SERVICE_HOST=upstream_web.com' \
+           -e '1_PROXY_SERVICE_PORT=8080' \
+           -e '2_PROXY_SERVICE_HOST=upstream_api.com' \
+           -e '2_PROXY_SERVICE_PORT=8888' \
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
 
 ## Built With
 
