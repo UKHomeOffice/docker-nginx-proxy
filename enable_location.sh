@@ -56,6 +56,7 @@ NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
 NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
+CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
 
 echo "Setting up location '${LOCATION}' to be proxied to http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
 
@@ -102,10 +103,17 @@ else
     fi
 fi
 
+if [ "${CLIENT_CERT_REQUIRED}" == "TRUE" ]; then
+    CERT_TXT="if (\$ssl_client_verify != SUCCESS) { return 403; }"
+else
+    CERT_TXT=""
+fi
 # Now create the location specific include file.
 mkdir -p /usr/local/openresty/nginx/locations
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
+    ${CERT_TXT}
+
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
