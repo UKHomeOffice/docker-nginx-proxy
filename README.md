@@ -38,7 +38,7 @@ Variables to control how to configure the proxy (can be set per location, see
 rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
- for easy tracking in logs.
+ for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 
 #### Single set Variables
@@ -77,21 +77,21 @@ nginx.conf.
 #### Self signed SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream' \
+docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
 
 #### Custom SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream' \
-           -e 'PROXY_SERVICE_PORT=8080' \
+docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
+           -e 'PROXY_SERVICE_PORT=80' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
 
 #### Preserve Client IP
@@ -108,8 +108,8 @@ To use this feature you will need:
   then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
   
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream' \
-           -e 'PROXY_SERVICE_PORT=8080' \
+docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
+           -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
@@ -123,7 +123,7 @@ The example below allows large documents to be POSTED to the /documents/uploads 
 See [Whitelist NAXSI rules](https://github.com/nbs-system/naxsi/wiki/whitelists) for more examples.
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream' \
+docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
                BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
@@ -140,18 +140,29 @@ controlled with the use of any [Multi-location Variables](#multi-location-variab
 
 ```shell
 docker run -e 'LOCATIONS_CSV=/,/api' \ 
-           -e 'PROXY_SERVICE_HOST_1=upstream_web.com' \
+           -e 'PROXY_SERVICE_HOST_1=myapp.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT_1=8080' \
-           -e 'PROXY_SERVICE_HOST_2=upstream_api.com' \
+           -e 'PROXY_SERVICE_HOST_2=myapi.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```           
 
+The example below is will proxy the same address for two locations but will disable the UUID (nginxId) parameter for the
+/api location only:
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -e 'LOCATIONS_CSV=/,/api' \
+           -e 'ENABLE_UUID_PARAM_2=FALSE' \
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+```
+
 #### Client Certs
 
 If a client CA certificate is mounted, the proxy will be configured to load it. If a client has the cert, the client CN
-will be set in the X-Username header.
+will be set in the X-Username header and logged.
 ```shell
 docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
            -e 'PROXY_SERVICE_PORT=8080' \
@@ -171,22 +182,7 @@ docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
            quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
 
-See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.
-
-#### Complex example
-
-The example below will proxy a single server but prevent access to the `/api` location unless the client has a 
-client cert.
-  
-```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -e 'LOCATIONS_CSV=/,/api' \
-           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
-```
+See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
 
 ## Built With
 
