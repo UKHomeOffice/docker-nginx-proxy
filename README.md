@@ -12,7 +12,7 @@ It will also pass A UUID as an additional query parameter to the URL, using the 
 
 In this section I'll show you some examples of how you might run this container with docker.
 
-### Prerequisities
+### Prerequisites
 
 In order to run this container you'll need docker installed.
 
@@ -26,7 +26,8 @@ In order to run this container you'll need docker installed.
 
 #### Multi-location Variables
 
-Variables to control how to configure the proxy (can be set per location, see LOCATIONS_CSV below).
+Variables to control how to configure the proxy (can be set per location, see 
+[Using Multiple Locations](#using-multiple-locations)).
 
 * `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy.
 * `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy.
@@ -174,7 +175,7 @@ See [./client_certs](./client_certs) for scripts that can be used to generate a 
 
 #### Complex example
 
-The example below will proxy a single server but manage prevent access to the `/api` location unless the client has a 
+The example below will proxy a single server but prevent access to the `/api` location unless the client has a 
 client cert.
   
 ```shell
