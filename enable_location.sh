@@ -49,7 +49,7 @@ LOCATION=$2
 NAXSI_LOCATION_RULES=/usr/local/openresty/naxsi/locations/${LOCATION_ID}
 mkdir -p ${NAXSI_LOCATION_RULES}
 
-# Resolve any variable names here:
+# Resolve any location specific variable names here:
 PROXY_SERVICE_HOST=$(get_id_var ${LOCATION_ID} PROXY_SERVICE_HOST)
 PROXY_SERVICE_PORT=$(get_id_var ${LOCATION_ID} PROXY_SERVICE_PORT)
 NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
@@ -57,6 +57,8 @@ NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
 CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
+PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
+ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 
 echo "Setting up location '${LOCATION}' to be proxied to http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
 
@@ -110,8 +112,25 @@ else
 fi
 # Now create the location specific include file.
 mkdir -p /usr/local/openresty/nginx/locations
+if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
+    PROXY_HOST_SETTING='$host'
+else
+    PROXY_HOST_SETTING='$host:$server_port'
+fi
+if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
+    UUID_ARGS=''
+    echo "Auto UUID request parameter disabled for location ${LOCATION_ID}."
+else
+    UUID_ARGS='set $args $args$uuidopt;'
+    # Ensure nginx enables this globaly
+    export LOG_UUID=TRUE
+    echo "Auto UUID request parameter enabled for location ${LOCATION_ID}."
+fi
+
+# Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
+    ${UUID_ARGS}
     ${CERT_TXT}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
@@ -119,5 +138,6 @@ location ${LOCATION} {
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
     $(cat /location_template.conf)
+    proxy_set_header Host ${PROXY_HOST_SETTING};
 }
 EOF_LOCATION_CONF

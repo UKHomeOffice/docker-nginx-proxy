@@ -1,4 +1,4 @@
-if os.getenv("ENABLE_UUID_PARAM") == "FALSE" then
+if os.getenv("LOG_UUID") == "FALSE" then
     return ""
 else
     local socket = require("socket")

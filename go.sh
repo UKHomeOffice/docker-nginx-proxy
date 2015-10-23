@@ -2,6 +2,8 @@
 
 set -e
 
+export LOG_UUID=FALSE
+
 . /defaults.sh
 
 if [ "${LOCATIONS_CSV}" == "" ]; then
@@ -16,15 +18,8 @@ done
 if [ "${NAME_RESOLVER}" == "" ]; then
     export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
 fi
-
 echo "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
-
-if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
-    echo "Auto UUID request parameter disabled."
-else
-    echo "Auto UUID request parameter enabled."
-fi
 
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     echo "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."

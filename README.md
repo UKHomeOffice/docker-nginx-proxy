@@ -36,6 +36,8 @@ Variables to control how to configure the proxy (can be set per location, see LO
 * `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra  
 rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
+* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
+ for easy tracking in logs.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location.
 
 #### Single set Variables
@@ -45,8 +47,6 @@ Note the following variables can only be set once:
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example 
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default 
 location.
-* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
- for easy tracking in logs.
 * `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see 
 [Preserve Client IP](#preserve-client-ip).
 * `SSL_CLIENT_CERTIFICATE` - If set to `TRUE` will expect a client cert to be mounted at `/etc/keys/client_ca.crt`. 
@@ -68,7 +68,7 @@ This container exposes
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
   signed one is provided if they have not been mounted.
-* `/etc/keys/client_ca`
+* `/etc/keys/client_ca` Where to mount a client ca cert.
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
   
