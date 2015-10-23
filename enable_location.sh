@@ -92,8 +92,8 @@ if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
 else
     UUID_ARGS='set $args $args$uuidopt;'
     # Ensure nginx enables this globaly
-    export LOG_UUID=TRUE
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
+    export LOG_UUID=TRUE
 fi
 
 # Now create the location specific include file.
