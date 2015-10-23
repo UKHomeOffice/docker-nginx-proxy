@@ -4,4 +4,4 @@ services:
   - docker
 
 script:
-  - docker build -t quay.io/ukhomeofficedigital/ngx-openresty:travis .
+  - ./ci-build.sh
