@@ -77,8 +77,6 @@ else
     CERT_TXT=""
 fi
 
-# Now create the location specific include file.
-mkdir -p /usr/local/openresty/nginx/locations
 if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
     msg "Setting host only proxy header"
     PROXY_HOST_SETTING='$host'
@@ -93,7 +91,7 @@ else
     UUID_ARGS='set $args $args$uuidopt;'
     # Ensure nginx enables this globaly
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
-    export LOG_UUID=TRUE
+    touch ${UUID_FILE}
 fi
 
 # Now create the location specific include file.

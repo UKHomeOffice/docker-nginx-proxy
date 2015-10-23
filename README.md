@@ -135,8 +135,11 @@ docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
 
 When the LOCATIONS_CSV option is set, multiple locations can be proxied. The settings for each proxy location can be 
 controlled with the use of any [Multi-location Variables](#multi-location-variables) by suffixing the variable name with
- both a number, and the '_' character, as listed in the LOCATIONS_CSV variable. The example below configures a simple 
- proxy with two locations '/' (location 1) and '/api' (location 2):
+ both a number, and the '_' character, as listed in the LOCATIONS_CSV variable. 
+ 
+##### Two servers 
+
+The example below configures a simple proxy with two locations '/' (location 1) and '/api' (location 2):
 
 ```shell
 docker run -e 'LOCATIONS_CSV=/,/api' \ 
@@ -148,8 +151,15 @@ docker run -e 'LOCATIONS_CSV=/,/api' \
            quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```           
 
-The example below is will proxy the same address for two locations but will disable the UUID (nginxId) parameter for the
-/api location only:
+For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separate-proxied-servers).
+
+##### One Server, Multiple locations
+
+The example below will proxy the same address for two locations but will disable the UUID (nginxId) parameter for the
+/api location only.
+
+See the [generated config](./docs/GeneratedConfigs.md#same-server-proxied) for below:
+
 ```shell
 docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
            -e 'PROXY_SERVICE_PORT=8080' \

@@ -12,7 +12,7 @@ fi
 
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
-    . /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
 done
 
 if [ "${NAME_RESOLVER}" == "" ]; then
@@ -28,6 +28,10 @@ if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
 else
     msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
     cp ${NGIX_CONF_DIR}/nginx_listen_plain.conf ${NGIX_CONF_DIR}/nginx_listen.conf
+fi
+
+if [ -f ${UUID_FILE} ]; then
+    export LOG_UUID=TRUE
 fi
 
 if [ -f /etc/keys/client_ca ]; then

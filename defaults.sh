@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
+export UUID_FILE=/tmp/uuid_on
 
 function download() {
 
