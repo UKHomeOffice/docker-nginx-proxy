@@ -18,27 +18,26 @@ done
 if [ "${NAME_RESOLVER}" == "" ]; then
     export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
 fi
-echo "Resolving proxied names using resolver:${NAME_RESOLVER}"
+msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
-    echo "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
+    msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     cp ${NGIX_CONF_DIR}/nginx_listen_proxy_protocol.conf ${NGIX_CONF_DIR}/nginx_listen.conf
     echo -e "\nset_real_ip_from ${LOAD_BALANCER_CIDR};" >> ${NGIX_CONF_DIR}/nginx_listen.conf
 else
-    echo "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
+    msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
     cp ${NGIX_CONF_DIR}/nginx_listen_plain.conf ${NGIX_CONF_DIR}/nginx_listen.conf
 fi
 
-if [ "${SSL_CLIENT_CERTIFICATE}" == "TRUE" ]; then
-    if [ ! -f /etc/keys/client_ca ]; then
-        echo "Must mount a client CA (/etc/keys/client_ca) to use this option."
-        exit 1
-    fi
+if [ -f /etc/keys/client_ca ]; then
+    msg "Loading client certs."
 	cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
 		ssl_client_certificate /etc/keys/client_ca;
 		ssl_verify_client optional;
 	EOF_CLIENT_CONF
+else
+    msg "No client certs mounted - not loading..."
 fi
 
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""

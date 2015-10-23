@@ -22,7 +22,7 @@ In order to run this container you'll need docker installed.
 
 ## Usage
 
-### Enviroment Variables
+### Environment Variables
 
 #### Multi-location Variables
 
@@ -38,7 +38,7 @@ rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
  for easy tracking in logs.
-* `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location.
+* `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 
 #### Single set Variables
 
@@ -49,8 +49,6 @@ Note the following variables can only be set once:
 location.
 * `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see 
 [Preserve Client IP](#preserve-client-ip).
-* `SSL_CLIENT_CERTIFICATE` - If set to `TRUE` will expect a client cert to be mounted at `/etc/keys/client_ca.crt`. 
-Also see `CLIENT_CERT_REQUIRED` above.
 * `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
 
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
@@ -68,7 +66,8 @@ This container exposes
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
   signed one is provided if they have not been mounted.
-* `/etc/keys/client_ca` Where to mount a client ca cert.
+* `/etc/keys/client_ca` If a client CA is mounted here, it will be loaded and configured. 
+See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
   
@@ -114,7 +113,7 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
 
 #### Extra NAXSI Rules from Environment
@@ -128,7 +127,7 @@ docker run -e 'PROXY_SERVICE_HOST=upstream' \
            -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
                BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
 
 #### Using Multiple Locations
@@ -138,13 +137,55 @@ controlled with the use of any [Multi-location Variables](#multi-location-variab
  both a number, and the '_' character, as listed in the LOCATIONS_CSV variable. The example below configures a simple 
  proxy with two locations '/' (location 1) and '/api' (location 2):
 
+```shell
 docker run -e 'LOCATIONS_CSV=/,/api' \ 
            -e 'PROXY_SERVICE_HOST_1=upstream_web.com' \
            -e 'PROXY_SERVICE_PORT_1=8080' \
            -e 'PROXY_SERVICE_HOST_2=upstream_api.com' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.2.3
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+```           
+
+#### Client Certs
+
+If a client CA certificate is mounted, the proxy will be configured to load it. If a client has the cert, the client CN
+will be set in the X-Username header.
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+```
+
+The following example will specifically deny access to clients without a cert:
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -e 'CLIENT_CERT_REQUIRED=TRUE' \
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+```
+
+See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.
+
+#### Complex example
+
+The example below will proxy a single server but manage prevent access to the `/api` location unless the client has a 
+client cert.
+  
+```shell
+docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
+           -e 'PROXY_SERVICE_PORT=8080' \
+           -e 'LOCATIONS_CSV=/,/api' \
+           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
+           -d \ 
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+```
 
 ## Built With
 
