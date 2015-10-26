@@ -97,25 +97,24 @@ cd ./client_certs/
 ./create_client_csr_and_key.sh
 ./sign_client_key_with_ca.sh
 cd ..
-start_test "Start with Client CA, and single proxy. Block unauth for /news" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=www.bbc.co.uk\" \
+start_test "Start with Client CA, and single proxy. Block unauth for /standards" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"LOCATIONS_CSV=/,/news\" \
+           -e \"LOCATIONS_CSV=/,/standards/\" \
            -e \"CLIENT_CERT_REQUIRED_2=TRUE\" \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca "
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca "
 
 echo "Test access OK for basic area..."
-wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
-echo "Test access denied for /news..."
-if wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news ; then
+echo "Test access denied for /standards/..."
+if wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ ; then
     echo "Error - expecting auth fail!"
     exit 1
 else
     echo "Passed auth fail"
 fi
-echo "Test access OK for /news... with client cert..."
-wget -O /dev/null --no-check-certificate \
-   --certificate=./client_certs/client.crt \
-   --private-key=./client_certs/client.key \
-   --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
+echo "Test access OK for /standards/... with client cert..."
+     wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
+     --certificate=./client_certs/client.crt \
+     --private-key=./client_certs/client.key

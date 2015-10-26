@@ -67,7 +67,7 @@ This container exposes
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
   signed one is provided if they have not been mounted.
-* `/etc/keys/client_ca` If a client CA is mounted here, it will be loaded and configured. 
+* `/etc/keys/client-ca` If a client CA is mounted here, it will be loaded and configured. 
 See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
@@ -176,7 +176,7 @@ will be set in the X-Username header and logged.
 ```shell
 docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
            -e 'PROXY_SERVICE_PORT=8080' \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```
@@ -187,7 +187,7 @@ The following example will specifically deny access to clients without a cert:
 docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -e 'CLIENT_CERT_REQUIRED=TRUE' \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client_ca
+           -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca
            -d \ 
            quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
 ```

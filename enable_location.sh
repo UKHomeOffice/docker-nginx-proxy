@@ -67,8 +67,8 @@ else
 fi
 
 if [ "${CLIENT_CERT_REQUIRED}" == "TRUE" ]; then
-    if [ ! -f /etc/keys/client_ca ]; then
-        exit_error_msg "Missing client CA cert at location:/etc/keys/client_ca"
+    if [ ! -f /etc/keys/client-ca ]; then
+        exit_error_msg "Missing client CA cert at location:/etc/keys/client-ca"
     fi
     msg "Denying access to '${LOCATION}' for clients with no certs."
     CERT_TXT="if (\$ssl_client_verify != SUCCESS) { return 403; }"

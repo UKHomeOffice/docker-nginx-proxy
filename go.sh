@@ -34,10 +34,10 @@ if [ -f ${UUID_FILE} ]; then
     export LOG_UUID=TRUE
 fi
 
-if [ -f /etc/keys/client_ca ]; then
+if [ -f /etc/keys/client-ca ]; then
     msg "Loading client certs."
 	cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
-		ssl_client_certificate /etc/keys/client_ca;
+		ssl_client_certificate /etc/keys/client-ca;
 		ssl_verify_client optional;
 	EOF_CLIENT_CONF
 else
