@@ -5,9 +5,6 @@
 This container aims to be a generic proxy layer for your web services. It includes OpenResty with 
 Lua and NAXSI filtering compiled in.
 
-It will also pass A UUID as an additional query parameter to the URL, using the following schema
-`http://$PROXY_SERVICE_HOST:$PROXY_SERVICE_PORT/?nginxId=$uuid`
-
 ## Getting Started
 
 In this section I'll show you some examples of how you might run this container with docker.
