@@ -47,8 +47,7 @@ Note the following variables can only be set once:
 location.
 * `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see 
 [Preserve Client IP](#preserve-client-ip).
-* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
-
+* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL). 
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
 managed by Docker or Kubernetes.  
 
@@ -74,21 +73,21 @@ nginx.conf.
 #### Self signed SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 #### Custom SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
+           -p 8443:443 \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 #### Preserve Client IP
@@ -105,13 +104,11 @@ To use this feature you will need:
   then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
   
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
-           -v /path/to/key:/etc/keys/key:ro \
-           -v /path/to/crt:/etc/keys/crt:ro \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 #### Extra NAXSI Rules from Environment
@@ -124,8 +121,8 @@ docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
                BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 #### Using Multiple Locations
@@ -139,13 +136,13 @@ controlled with the use of any [Multi-location Variables](#multi-location-variab
 The example below configures a simple proxy with two locations '/' (location 1) and '/api' (location 2):
 
 ```shell
-docker run -e 'LOCATIONS_CSV=/,/api' \ 
-           -e 'PROXY_SERVICE_HOST_1=myapp.svc.cluster.local' \
-           -e 'PROXY_SERVICE_PORT_1=8080' \
-           -e 'PROXY_SERVICE_HOST_2=myapi.svc.cluster.local' \
+docker run -e 'PROXY_SERVICE_HOST_1=stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT_1=80' \
+           -e 'PROXY_SERVICE_HOST_2=api.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+           -e 'LOCATIONS_CSV=/,/api' \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```           
 
 For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separate-proxied-servers).
@@ -153,17 +150,17 @@ For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separ
 ##### One Server, Multiple locations
 
 The example below will proxy the same address for two locations but will disable the UUID (nginxId) parameter for the
-/api location only.
+/about location only.
 
 See the [generated config](./docs/GeneratedConfigs.md#same-server-proxied) for below:
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -e 'LOCATIONS_CSV=/,/api' \
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'LOCATIONS_CSV=/,/about' \
            -e 'ENABLE_UUID_PARAM_2=FALSE' \
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 #### Client Certs
@@ -171,22 +168,23 @@ docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
 If a client CA certificate is mounted, the proxy will be configured to load it. If a client has the cert, the client CN
 will be set in the X-Username header and logged.
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 The following example will specifically deny access to clients without a cert:
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=upstream_web.com' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -e 'CLIENT_CERT_REQUIRED=TRUE' \
-           -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca
-           -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.0
+docker run -e 'PROXY_SERVICE_HOST=serverfault.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'LOCATIONS_CSV=/,/about' \
+           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
+           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.3.1
 ```
 
 See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
