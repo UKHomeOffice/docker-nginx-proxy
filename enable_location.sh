@@ -21,6 +21,7 @@ EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
 CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
+ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -93,12 +94,16 @@ else
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}
 fi
-
+if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
+    ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
+fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
     ${UUID_ARGS}
     ${CERT_TXT}
+
+    error_page ${ERROR_REDIRECT_CODES} /50x.html;
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 

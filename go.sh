@@ -16,8 +16,14 @@ for i in "${!LOCATIONS_ARRAY[@]}"; do
 done
 
 if [ "${NAME_RESOLVER}" == "" ]; then
-    export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
+    if [ "${DNSMASK}" == "TRUE" ]; then
+        dnsmasq
+        export NAME_RESOLVER=127.0.0.1
+    else
+        export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
+    fi
 fi
+
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
@@ -43,5 +49,4 @@ if [ -f /etc/keys/client-ca ]; then
 else
     msg "No client certs mounted - not loading..."
 fi
-
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""

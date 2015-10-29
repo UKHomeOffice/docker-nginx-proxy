@@ -1,0 +1,26 @@
+---
+ - name: All OK
+   request:
+     uri: /
+     method: GET
+   response:
+     code: 200
+     body: '200 is OK :)'
+ - name: API
+   request:
+     uri: /api/
+     method: GET
+   response:
+     code: 200
+     body: '{"message": "OK here"}'
+     headers:
+       content-type: text/json
+ - name: API 500
+   request:
+     uri: /api/dead
+     method: GET
+   response:
+     code: 500
+     body: '{"message": "Oh dear!"}'
+     headers:
+       content-type: text/json
