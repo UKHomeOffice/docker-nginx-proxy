@@ -13,6 +13,7 @@ RUN yum install -y openssl && \
     openssl req -x509 -newkey rsa:2048 -keyout key -out crt -days 360 -nodes -subj '/CN=test'
 
 RUN yum install -y bind-utils && \
+    yum install -y dnsmasq && \
     yum clean all
 
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
