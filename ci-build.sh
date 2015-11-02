@@ -9,15 +9,24 @@ START_INSTANCE="docker run --privileged=true "
 
 source ./helper.sh
 
-function tear_down() {
+function tear_down_container() {
+    container=$1
     if [ "${TEAR_DOWN}" == "true" ]; then
-        if docker ps -a | grep ${INSTANCE} &>/dev/null ; then
-            if docker ps | grep ${INSTANCE} &>/dev/null ; then
-                ${SUDO_CMD} docker stop ${INSTANCE}
+        if docker ps -a | grep "${container}" &>/dev/null ; then
+            if docker ps | grep "${container}" &>/dev/null ; then
+                ${SUDO_CMD} docker stop "${container}"
             fi
-            ${SUDO_CMD} docker rm ${INSTANCE}
+            ${SUDO_CMD} docker rm "${container}"
         fi
     fi
+}
+
+function tear_down() {
+    tear_down_container ${INSTANCE}
+}
+
+function clean_up() {
+    tear_down_container mocking-server
 }
 
 function wait_until_started() {
@@ -26,11 +35,15 @@ function wait_until_started() {
 }
 
 function start_test() {
-    tear_down
     COUNT=$((COUNT + 1))
     PORT=$((PORT + 1))
     INSTANCE=${TAG}_$COUNT
+    tear_down
+    echo ""
+    echo ""
+    echo "_____________"
     echo "STARTING TEST:$1"
+    echo "============="
     shift
     echo "Running:$@ --name ${INSTANCE} -p ${PORT}:443 ${TAG}"
     bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:443 ${TAG}"
@@ -51,6 +64,7 @@ else
     DOCKER_HOST_NAME=$(docker-machine ip ${DOCKER_MACHINE_NAME})
     TEAR_DOWN=true
     SUDO_CMD=""
+    clean_up
 fi
 STD_CMD="${SUDO_CMD} ${START_INSTANCE}"
 
@@ -58,6 +72,14 @@ echo "========"
 echo "BUILD..."
 echo "========"
 ${SUDO_CMD} docker build -t ${TAG} .
+
+echo "+++++++++++++++++"
+echo "Mock server build..."
+echo "+++++++++++++++++"
+cd ./test-servers/
+${SUDO_CMD} docker build -t mock-server-tag .
+cd ..
+${SUDO_CMD} docker run -d -P --name=mocking-server mock-server-tag
 
 echo "=========="
 echo "TESTING..."
@@ -118,3 +140,21 @@ echo "Test access OK for /standards/... with client cert..."
      wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
+
+start_test "Start with Custom error pages redirect off" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"LOCATIONS_CSV=/,/api/\" \
+           -e \"ERROR_REDIRECT_CODES_2=502\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mocking-server:mock-server "
+echo "Test All ok..."
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
+if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/api/dead | grep "Oh dear" ; then
+    echo "Passed return text on error with ERROR_REDIRECT_CODES"
+else
+    echo "Failed return text on error with ERROR_REDIRECT_CODES"
+    exit 1
+fi
