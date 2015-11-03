@@ -166,6 +166,7 @@ start_test "Start with Custom upload size" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"CLIENT_MAX_BODY_SIZE=15\" \
            -e \"NAXSI_USE_DEFAULT_RULES=FALSE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"DNSMASK=TRUE\" \
            --link mocking-server:mock-server "
 dd if=/dev/urandom of=/tmp/file.txt bs=1048576 count=10
@@ -174,3 +175,13 @@ echo "Upload a large file"
 curl -k -v -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc | grep "Thanks for the big doc"
 
+start_test "Start with listen for port 80" "${STD_CMD} \
+           -p 8888:80 \
+           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"HTTPS_PORT=$((PORT + 1))\" \
+           --link mocking-server:mock-server "
+echo "Test Redirect ok..."
+wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
