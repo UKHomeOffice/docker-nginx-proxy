@@ -16,8 +16,14 @@ for i in "${!LOCATIONS_ARRAY[@]}"; do
 done
 
 if [ "${NAME_RESOLVER}" == "" ]; then
-    export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
+    if [ "${DNSMASK}" == "TRUE" ]; then
+        dnsmasq
+        export NAME_RESOLVER=127.0.0.1
+    else
+        export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
+    fi
 fi
+
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
@@ -33,6 +39,11 @@ fi
 if [ -f ${UUID_FILE} ]; then
     export LOG_UUID=TRUE
 fi
+if [ "${CLIENT_MAX_BODY_SIZE}" != "" ]; then
+    UPLOAD_SETTING="client_max_body_size ${CLIENT_MAX_BODY_SIZE}m;"
+    echo "${UPLOAD_SETTING}">${NGIX_CONF_DIR}/upload_size.conf
+    msg "Setting '${UPLOAD_SETTING};'"
+fi
 
 if [ -f /etc/keys/client-ca ]; then
     msg "Loading client certs."
@@ -43,5 +54,4 @@ if [ -f /etc/keys/client-ca ]; then
 else
     msg "No client certs mounted - not loading..."
 fi
-
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""

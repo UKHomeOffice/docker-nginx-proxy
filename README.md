@@ -37,6 +37,8 @@ rules to be specified without downloading or mounting in a rule file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
+* `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to the error page. Defaults to 
+"`500 501 502 503 504`"
 
 #### Single set Variables
 
@@ -50,6 +52,7 @@ location.
 * `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL). 
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
 managed by Docker or Kubernetes.  
+* `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 
 ### Ports
 
@@ -67,6 +70,8 @@ This container exposes
 See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
+* `/usr/local/openresty/nginx/html/50x.html` - HTML displayed when a 500 error occurs. See ERROR_REDIRECT_CODES to 
+change this.
   
 ### Examples
 

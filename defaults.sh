@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
 export UUID_FILE=/tmp/uuid_on
+export DEFAULT_ERROR_CODES="500 501 502 503 504"
 
 function download() {
 

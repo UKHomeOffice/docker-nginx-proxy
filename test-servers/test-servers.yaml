@@ -1,0 +1,34 @@
+---
+ - name: All OK
+   request:
+     uri: /
+     method: GET
+   response:
+     code: 200
+     body: '200 is OK :)'
+ - name: Big Doc
+   request:
+     uri: /uploads/doc
+     method: POST
+     content-type: multipart/form-data
+   response:
+     code: 100
+     body: 'Thanks for the big doc'
+ - name: API
+   request:
+     uri: /api/
+     method: GET
+   response:
+     code: 200
+     body: '{"message": "OK here"}'
+     headers:
+       content-type: text/json
+ - name: API 500
+   request:
+     uri: /api/dead
+     method: GET
+   response:
+     code: 500
+     body: '{"message": "Oh dear!"}'
+     headers:
+       content-type: text/json
