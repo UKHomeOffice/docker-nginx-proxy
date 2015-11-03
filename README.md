@@ -53,6 +53,8 @@ location.
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
 managed by Docker or Kubernetes.  
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
+* `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
+ when testing or for development instances. 
 
 ### Ports
 
