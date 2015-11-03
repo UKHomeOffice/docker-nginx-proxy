@@ -185,3 +185,6 @@ start_test "Start with listen for port 80" "${STD_CMD} \
            --link mocking-server:mock-server "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
+
+echo "__________________________________"
+echo "We got here, ALL tests successfull"
