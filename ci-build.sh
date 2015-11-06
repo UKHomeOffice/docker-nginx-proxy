@@ -82,6 +82,7 @@ ${SUDO_CMD} docker build -t mock-server-tag .
 cd ..
 ${SUDO_CMD} docker run -d -P --name=mocking-server mock-server-tag
 
+sleep 5
 echo "=========="
 echo "TESTING..."
 echo "=========="
@@ -185,6 +186,29 @@ start_test "Start with listen for port 80" "${STD_CMD} \
            --link mocking-server:mock-server "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
+
+start_test "Test text logging format..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"LOG_FORMAT_NAME=extended_text\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mocking-server:mock-server "
+echo "Test request (with logging as text)..."
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+echo "Testing text logs format..."
+${SUDO_CMD} docker logs ${INSTANCE} | grep '127.0.0.1 - -'
+
+start_test "Test json logging format..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"LOG_FORMAT_NAME=extended_json\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mocking-server:mock-server "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+echo "Testing json logs format..."
+${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"

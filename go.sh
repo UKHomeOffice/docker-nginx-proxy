@@ -54,4 +54,15 @@ if [ -f /etc/keys/client-ca ]; then
 else
     msg "No client certs mounted - not loading..."
 fi
+
+case "${LOG_FORMAT_NAME}" in
+    "extended_json" | "extended_text")
+        msg "Logging set to ${LOG_FORMAT_NAME}"
+        echo "access_log /dev/stdout ${LOG_FORMAT_NAME};">${NGIX_CONF_DIR}/logging.conf
+        ;;
+    *)
+        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expenting extended_json or extended_text."
+    ;;
+esac
+
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""
