@@ -173,8 +173,9 @@ start_test "Start with Custom upload size" "${STD_CMD} \
 dd if=/dev/urandom of=/tmp/file.txt bs=1048576 count=10
 
 echo "Upload a large file"
-curl -k -v -F "file=@/tmp/file.txt;filename=nameinpost" \
-     https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc | grep "Thanks for the big doc"
+curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
+     https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
+grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
 start_test "Start with listen for port 80" "${STD_CMD} \
            -p 8888:80 \
