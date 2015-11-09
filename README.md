@@ -55,7 +55,7 @@ managed by Docker or Kubernetes.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 * `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
  when testing or for development instances.
-* `LOG_FORMAT_NAME` - Can be set to `extended_text` or `extended_json` (default).
+* `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 
 ### Ports
 

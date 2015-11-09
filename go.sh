@@ -56,12 +56,12 @@ else
 fi
 
 case "${LOG_FORMAT_NAME}" in
-    "extended_json" | "extended_text")
+    "json" | "text")
         msg "Logging set to ${LOG_FORMAT_NAME}"
-        echo "access_log /dev/stdout ${LOG_FORMAT_NAME};">${NGIX_CONF_DIR}/logging.conf
+        echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME};">${NGIX_CONF_DIR}/logging.conf
         ;;
     *)
-        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expenting extended_json or extended_text."
+        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting json or text."
     ;;
 esac
 

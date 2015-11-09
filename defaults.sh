@@ -2,7 +2,7 @@
 export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
 export UUID_FILE=/tmp/uuid_on
 export DEFAULT_ERROR_CODES="500 501 502 503 504"
-export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-extended_json}
+export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-json}
 
 export HTTPS_PORT_STRING=":${HTTPS_PORT}"
 if [ "${HTTPS_PORT_STRING}" == ":" ]; then

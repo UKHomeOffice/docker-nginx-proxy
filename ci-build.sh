@@ -191,7 +191,7 @@ start_test "Test text logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=mock-server\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
-           -e \"LOG_FORMAT_NAME=extended_text\" \
+           -e \"LOG_FORMAT_NAME=text\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mocking-server:mock-server "
 echo "Test request (with logging as text)..."
@@ -203,7 +203,7 @@ start_test "Test json logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=mock-server\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
-           -e \"LOG_FORMAT_NAME=extended_json\" \
+           -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mocking-server:mock-server "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
