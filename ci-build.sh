@@ -80,10 +80,6 @@ echo "+++++++++++++++++"
 cd ./test-servers/
 ${SUDO_CMD} docker build -t mockservertag .
 cd ..
-echo "Running mocking-server..."
-${SUDO_CMD} docker run -d -P --name=mockserver mockservertag
-
-sleep 5
 echo "=========="
 echo "TESTING..."
 echo "=========="
@@ -144,6 +140,13 @@ echo "Test access OK for /standards/... with client cert..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
+
+echo "May have to disbale Mock server tests (travis failing with linked server...)?"
+echo "Running mocking-server..."
+${SUDO_CMD} docker run -d -P --name=mockserver mockservertag
+echo "sleep 5..."
+sleep 5
+${SUDO_CMD} docker ps
 
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=mockserver\" \
