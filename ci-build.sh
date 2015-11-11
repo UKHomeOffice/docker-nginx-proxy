@@ -149,6 +149,12 @@ echo "sleep 5..."
 sleep 5
 ${SUDO_CMD} docker ps
 
+if [ "${DOCKER_MACHINE_NAME}" == "" ]; then
+    echo "Not running tests requiring linked servers on Travis (for now)..."
+    echo "Run ./ci_build.sh locally for now..."
+    exit 0
+fi
+
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=mock-server\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
