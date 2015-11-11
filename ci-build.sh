@@ -27,7 +27,7 @@ function tear_down() {
 
 function clean_up() {
     rm -f /tmp/file.txt
-    tear_down_container mocking-server
+    tear_down_container mockserver
 }
 
 function wait_until_started() {
@@ -78,9 +78,10 @@ echo "+++++++++++++++++"
 echo "Mock server build..."
 echo "+++++++++++++++++"
 cd ./test-servers/
-${SUDO_CMD} docker build -t mock-server-tag .
+${SUDO_CMD} docker build -t mockservertag .
 cd ..
-${SUDO_CMD} docker run -d -P --name=mocking-server mock-server-tag
+echo "Running mocking-server..."
+${SUDO_CMD} docker run -d -P --name=mockserver mockservertag
 
 sleep 5
 echo "=========="
@@ -140,18 +141,19 @@ else
     echo "Passed auth fail"
 fi
 echo "Test access OK for /standards/... with client cert..."
-     wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
 
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"LOCATIONS_CSV=/,/api/\" \
            -e \"ERROR_REDIRECT_CODES_2=502\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link mocking-server:mock-server "
+           --link mockserver:mockserver "
+
 echo "Test All ok..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
@@ -163,13 +165,13 @@ else
 fi
 
 start_test "Start with Custom upload size" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"CLIENT_MAX_BODY_SIZE=15\" \
            -e \"NAXSI_USE_DEFAULT_RULES=FALSE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"DNSMASK=TRUE\" \
-           --link mocking-server:mock-server "
+           --link mockserver:mockserver "
 dd if=/dev/urandom of=/tmp/file.txt bs=1048576 count=10
 
 echo "Upload a large file"
@@ -179,37 +181,46 @@ grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
 start_test "Start with listen for port 80" "${STD_CMD} \
            -p 8888:80 \
-           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTPS_PORT=$((PORT + 1))\" \
-           --link mocking-server:mock-server "
+           --link mockserver:mockserver "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
 
 start_test "Test text logging format..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=text\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link mocking-server:mock-server "
+           --link mockserver:mockserver "
 echo "Test request (with logging as text)..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing text logs format..."
 ${SUDO_CMD} docker logs ${INSTANCE} | grep '127.0.0.1 - -'
 
 start_test "Test json logging format..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mock-server\" \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link mocking-server:mock-server "
+           --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing json logs format..."
 ${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+
+start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_WEB_SOCKETS=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mockserver:mockserver "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"

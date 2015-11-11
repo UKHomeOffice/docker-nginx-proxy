@@ -99,7 +99,8 @@ if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
     ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
 fi
 if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
-    WEB_SOCKETS="include ${NAXSI_LOCATION_RULES}/nginx_web_sockets_proxy.conf;"
+    msg "Enable web socket support"
+    WEB_SOCKETS="include ${NGIX_CONF_DIR}/nginx_web_sockets_proxy.conf;"
 else
     unset WEB_SOCKETS
 fi
