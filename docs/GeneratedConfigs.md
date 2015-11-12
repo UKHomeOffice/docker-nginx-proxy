@@ -13,7 +13,7 @@ docker run -e 'LOCATIONS_CSV=/,/api' \
            -e 'PROXY_SERVICE_HOST_2=myapi.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
            -d \ 
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.0
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
 ```
 
 The configurations below are generated:
@@ -70,7 +70,7 @@ docker run --rm=true -it -p 8443:443 \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'ENABLE_UUID_PARAM_2=FALSE' \
            -e 'PORT_IN_HOST_HEADER_1=FALSE' \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.0`
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2`
 ```
 
 The configuration below is generated for `/`. Note specifically the `PORT_IN_HOST_HEADER_1` option above and that the 
