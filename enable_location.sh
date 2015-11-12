@@ -22,6 +22,7 @@ CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
+ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -97,6 +98,12 @@ fi
 if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
     ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
 fi
+if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
+    msg "Enable web socket support"
+    WEB_SOCKETS="include ${NGIX_CONF_DIR}/nginx_web_sockets_proxy.conf;"
+else
+    unset WEB_SOCKETS
+fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
@@ -109,6 +116,7 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
+    ${WEB_SOCKETS}
     $(cat /location_template.conf)
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
