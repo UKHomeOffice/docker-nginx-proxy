@@ -1,6 +1,6 @@
 # OpenResty Docker Container
 
-[![Build Status](https://travis-ci.org/UKHomeOffice/docker-ngx-openresty.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-ngx-openresty)
+[![Build Status](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy)
 
 This container aims to be a generic proxy layer for your web services. It includes OpenResty with 
 Lua and NAXSI filtering compiled in.
@@ -208,7 +208,7 @@ See [./client_certs](./client_certs) for scripts that can be used to generate a 
 
 ## Find Us
 
-* [GitHub](https://github.com/UKHomeOffice/docker-ngx-openresty)
+* [GitHub](https://github.com/UKHomeOffice/docker-nginx-proxy)
 * [Quay.io](https://quay.io/repository/ukhomeofficedigital/ngx-openresty)
 
 ## Contributing
@@ -228,7 +228,7 @@ We use [SemVer](http://semver.org/) for the version tags available See the tags 
 * **Lewis Marshal** - *Initial work* - [lewismarshall](https://github.com/lewismarshall)
 
 See also the list of 
-[contributors](https://github.com/UKHomeOffice/docker-ngx-openresty/graphs/contributors) who 
+[contributors](https://github.com/UKHomeOffice/docker-nginx-proxy/graphs/contributors) who 
 participated in this project.
 
 ## License
