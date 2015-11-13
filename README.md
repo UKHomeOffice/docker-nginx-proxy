@@ -39,6 +39,7 @@ rules to be specified without downloading or mounting in a rule file.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to the error page. Defaults to 
 "`500 501 502 503 504`"
+* `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context.
 
 #### Single set Variables
 
