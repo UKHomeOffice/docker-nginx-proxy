@@ -82,7 +82,7 @@ ${SUDO_CMD} docker build -t mockservertag .
 cd ..
 echo "May have to disbale Mock server tests (travis failing with linked server...)?"
 echo "Running mocking-server..."
-${SUDO_CMD} docker run -d -p 8080:8080 --name=mockserver mockservertag
+${STD_CMD} -d -p 8080:8080 --name=mockserver mockservertag
 echo "sleep 5..."
 sleep 5
 ${SUDO_CMD} docker ps
