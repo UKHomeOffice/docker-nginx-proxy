@@ -6,6 +6,12 @@ export LOG_UUID=FALSE
 
 . /defaults.sh
 
+cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
+    ssl_certificate     ${SERVER_CERT};
+    ssl_certificate_key ${SERVER_KEY};
+EOF_CERT_CONF
+
+
 if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
