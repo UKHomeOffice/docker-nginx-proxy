@@ -80,6 +80,12 @@ echo "+++++++++++++++++"
 cd ./test-servers/
 ${SUDO_CMD} docker build -t mockservertag .
 cd ..
+echo "May have to disbale Mock server tests (travis failing with linked server...)?"
+echo "Running mocking-server..."
+${STD_CMD} -d -p 8080:8080 --name=mockserver mockservertag
+echo "sleep 5..."
+sleep 5
+${SUDO_CMD} docker ps
 
 echo "=========="
 echo "TESTING..."
@@ -91,6 +97,8 @@ start_test "Start with minimal settings" "${STD_CMD} \
 
 echo "Test it's up and working..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+
+
 
 start_test "Start with multi locations settings" "${STD_CMD} \
            -e \"LOCATIONS_CSV=/,/news\" \
@@ -104,6 +112,8 @@ wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test for news..."
 wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
 
+
+
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.bbc.co.uk\" \
            -e \"PROXY_SERVICE_PORT=80\" \
@@ -113,6 +123,9 @@ start_test "Start with Multiple locations, single proxy and NAXSI download." "${
 
 echo "Test for all OK..."
 wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+
+
+
 
 echo "Test client certs..."
 cd ./client_certs/
@@ -142,18 +155,15 @@ wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/sta
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
 
-echo "May have to disbale Mock server tests (travis failing with linked server...)?"
-echo "Running mocking-server..."
-${SUDO_CMD} docker run -d -P --name=mockserver mockservertag
-echo "sleep 5..."
-sleep 5
-${SUDO_CMD} docker ps
+
 
 if [ "${DOCKER_MACHINE_NAME}" == "" ]; then
     echo "Not running tests requiring linked servers on Travis (for now)..."
     echo "Run ./ci_build.sh locally for now..."
     exit 0
 fi
+
+
 
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=mockserver\" \
@@ -163,7 +173,6 @@ start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
-
 echo "Test All ok..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
@@ -231,6 +240,17 @@ start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+
+start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"LOCATIONS_CSV=/,/api/\" \
+           -e \"ADD_NGINX_LOCATION_CFG=return 200 NICE;\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mockserver:mockserver "
+echo "Test extra param works"
+wget -O- --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"
