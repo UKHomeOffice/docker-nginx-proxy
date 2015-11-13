@@ -39,6 +39,8 @@ rules to be specified without downloading or mounting in a rule file.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to the error page. Defaults to 
 "`500 501 502 503 504`"
+* `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see 
+[Arbitrary Config](#arbitrary-config).
 
 #### Single set Variables
 
@@ -194,8 +196,18 @@ docker run -e 'PROXY_SERVICE_HOST=serverfault.com' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
 ```
-
 See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
+
+#### Arbitrary Config
+
+The example below will return "ping ok" for the URL /ping.
+```shell
+docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'ADD_NGINX_LOCATION_CFG=if ($uri = /proxy-ping) return 200 "ping ok";' \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+```
 
 ## Built With
 

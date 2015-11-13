@@ -23,6 +23,7 @@ PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
+ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -104,11 +105,15 @@ if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
 else
     unset WEB_SOCKETS
 fi
+if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
+    msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
+fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
     ${UUID_ARGS}
     ${CERT_TXT}
+    ${ADD_NGINX_LOCATION_CFG}
 
     error_page ${ERROR_REDIRECT_CODES} /50x.html;
 
