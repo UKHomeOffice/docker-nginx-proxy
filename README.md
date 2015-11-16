@@ -58,8 +58,8 @@ managed by Docker or Kubernetes.
 * `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
  when testing or for development instances.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
-* `SERVER_CERT` - Can override where to find the server's SSL key
-* ``
+* `SERVER_CERT` - Can override where to find the server's SSL cert.
+* `SERVER_KEY` - Can override where to find the server's SSL key.
 
 ### Ports
 
@@ -213,9 +213,10 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 
 ## Built With
 
-* [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web 
+* [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web
   application server by bundling the standard Nginx core, lots of 3rd-party Nginx modules, as well 
   as most of their external dependencies.
+* [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
 * [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
   rules maintenance WAF for NGINX 
@@ -223,7 +224,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 ## Find Us
 
 * [GitHub](https://github.com/UKHomeOffice/docker-nginx-proxy)
-* [Quay.io](https://quay.io/repository/ukhomeofficedigital/ngx-openresty)
+* [Quay.io](https://quay.io/repository/ukhomeofficedigital/nginx-proxy)
 
 ## Contributing
 
