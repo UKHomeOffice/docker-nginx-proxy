@@ -74,15 +74,12 @@ echo "BUILD..."
 echo "========"
 ${SUDO_CMD} docker build -t ${TAG} .
 
-echo "+++++++++++++++++"
-echo "Mock server build..."
-echo "+++++++++++++++++"
-cd ./test-servers/
-${SUDO_CMD} docker build -t mockservertag .
-cd ..
-echo "May have to disbale Mock server tests (travis failing with linked server...)?"
 echo "Running mocking-server..."
-${STD_CMD} -d -p 8080:8080 --name=mockserver mockservertag
+${STD_CMD} -d -p 8080:8080 \
+           -v ${PWD}/test-servers.yaml:/test-servers.yaml \
+           --name=mockserver quay.io/ukhomeofficedigital/mockingj-server:v0.1.0 \
+           -config=/test-servers.yaml \
+           -port=8080
 echo "sleep 5..."
 sleep 5
 ${SUDO_CMD} docker ps
@@ -154,14 +151,6 @@ echo "Test access OK for /standards/... with client cert..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
-
-
-
-if [ "${DOCKER_MACHINE_NAME}" == "" ]; then
-    echo "Not running tests requiring linked servers on Travis (for now)..."
-    echo "Run ./ci_build.sh locally for now..."
-    exit 0
-fi
 
 
 

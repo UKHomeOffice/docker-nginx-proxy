@@ -58,8 +58,8 @@ managed by Docker or Kubernetes.
 * `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
  when testing or for development instances.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
-* `SERVER_CERT` - Can override where to find the server's SSL key
-* ``
+* `SERVER_CERT` - Can override where to find the server's SSL cert.
+* `SERVER_KEY` - Can override where to find the server's SSL key.
 
 ### Ports
 
@@ -88,7 +88,7 @@ change this.
 docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 #### Custom SSL Certificate
@@ -99,7 +99,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -p 8443:443 \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 #### Preserve Client IP
@@ -120,7 +120,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 #### Extra NAXSI Rules from Environment
@@ -134,7 +134,7 @@ docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
            -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
                BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 #### Using Multiple Locations
@@ -154,7 +154,7 @@ docker run -e 'PROXY_SERVICE_HOST_1=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
            -e 'LOCATIONS_CSV=/,/api' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```           
 
 For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separate-proxied-servers).
@@ -172,7 +172,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'LOCATIONS_CSV=/,/about' \
            -e 'ENABLE_UUID_PARAM_2=FALSE' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 #### Client Certs
@@ -184,7 +184,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 The following example will specifically deny access to clients without a cert:
@@ -196,7 +196,7 @@ docker run -e 'PROXY_SERVICE_HOST=serverfault.com' \
            -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
            -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
 
@@ -208,14 +208,15 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'ADD_NGINX_LOCATION_CFG=if ($uri = /proxy-ping) return 200 "ping ok";' \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/ngx-openresty:v0.5.2
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
 ## Built With
 
-* [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web 
+* [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web
   application server by bundling the standard Nginx core, lots of 3rd-party Nginx modules, as well 
   as most of their external dependencies.
+* [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
 * [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
   rules maintenance WAF for NGINX 
@@ -223,7 +224,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 ## Find Us
 
 * [GitHub](https://github.com/UKHomeOffice/docker-nginx-proxy)
-* [Quay.io](https://quay.io/repository/ukhomeofficedigital/ngx-openresty)
+* [Quay.io](https://quay.io/repository/ukhomeofficedigital/nginx-proxy)
 
 ## Contributing
 
