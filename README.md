@@ -58,6 +58,8 @@ managed by Docker or Kubernetes.
 * `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
  when testing or for development instances.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
+* `SERVER_CERT` - Can override where to find the server's SSL key
+* ``
 
 ### Ports
 
