@@ -41,6 +41,7 @@ rules to be specified without downloading or mounting in a rule file.
 "`500 501 502 503 504`"
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see 
 [Arbitrary Config](#arbitrary-config).
+* `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
 
 #### Single set Variables
 
