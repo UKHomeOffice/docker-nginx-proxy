@@ -12,6 +12,9 @@ RUN yum install -y openssl && \
     cd /etc/keys && \
     openssl req -x509 -newkey rsa:2048 -keyout key -out crt -days 360 -nodes -subj '/CN=test'
 
+# This takes a while so best to do it during build
+RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
+
 RUN yum install -y bind-utils && \
     yum install -y dnsmasq && \
     yum clean all
