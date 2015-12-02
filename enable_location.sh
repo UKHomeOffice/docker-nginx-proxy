@@ -25,8 +25,15 @@ ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 
+# Backwards compatability
+# This tests for the presence of :// which if missing means we do nt have 
+# a protocol so we default to http://
+if [ "`echo ${PROXY_SERVICE_HOST} | grep '://'`" = "" ]; then
+  PROXY_SERVICE_HOST="http://${PROXY_SERVICE_HOST}"
+fi
+
 msg "Setting up location '${LOCATION}' to be proxied to " \
-    "http://${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
+    "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
 
 eval PROXY_HOST=$(eval "echo $PROXY_SERVICE_HOST")
 export PROXY_SERVICE_PORT=$(eval "echo $PROXY_SERVICE_PORT")
@@ -40,8 +47,9 @@ if diff /container_default_ngx /tmp/nginx_new ; then
         echo "PROXY_SERVICE_PORT=$PROXY_SERVICE_PORT"
         exit 1
     fi
-    msg "Proxying to : http://$PROXY_SERVICE_HOST:$PROXY_SERVICE_PORT"
+    msg "Proxying to : $PROXY_SERVICE_HOST:$PROXY_SERVICE_PORT"
 fi
+
 
 if [ "${NAXSI_RULES_URL_CSV}" != "" ]; then
     if [ "${NAXSI_RULES_MD5_CSV}" == "" ]; then

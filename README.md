@@ -86,7 +86,7 @@ change this.
 #### Self signed SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
@@ -95,7 +95,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 #### Custom SSL Certificate
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -p 8443:443 \
            -v /path/to/key:/etc/keys/key:ro \
@@ -117,7 +117,7 @@ To use this feature you will need:
   then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
   
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
            -p 8443:443 \
@@ -130,7 +130,7 @@ The example below allows large documents to be POSTED to the /documents/uploads 
 See [Whitelist NAXSI rules](https://github.com/nbs-system/naxsi/wiki/whitelists) for more examples.
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=myapp.svc.cluster.local' \
+docker run -e 'PROXY_SERVICE_HOST=http://myapp.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT=8080' \
            -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
                BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
@@ -149,9 +149,9 @@ controlled with the use of any [Multi-location Variables](#multi-location-variab
 The example below configures a simple proxy with two locations '/' (location 1) and '/api' (location 2):
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST_1=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST_1=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT_1=80' \
-           -e 'PROXY_SERVICE_HOST_2=api.svc.cluster.local' \
+           -e 'PROXY_SERVICE_HOST_2=https://api.svc.cluster.local' \
            -e 'PROXY_SERVICE_PORT_2=8888' \
            -e 'LOCATIONS_CSV=/,/api' \
            -p 8443:443 \
@@ -168,7 +168,7 @@ The example below will proxy the same address for two locations but will disable
 See the [generated config](./docs/GeneratedConfigs.md#same-server-proxied) for below:
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOCATIONS_CSV=/,/about' \
            -e 'ENABLE_UUID_PARAM_2=FALSE' \
@@ -181,7 +181,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 If a client CA certificate is mounted, the proxy will be configured to load it. If a client has the cert, the client CN
 will be set in the X-Username header and logged.
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
            -p 8443:443 \
@@ -191,7 +191,7 @@ docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
 The following example will specifically deny access to clients without a cert:
 
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=serverfault.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOCATIONS_CSV=/,/about' \
            -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
@@ -205,7 +205,7 @@ See [./client_certs](./client_certs) for scripts that can be used to generate a 
 
 The example below will return "ping ok" for the URL /ping.
 ```shell
-docker run -e 'PROXY_SERVICE_HOST=stackexchange.com' \
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'ADD_NGINX_LOCATION_CFG=if ($uri = /proxy-ping) return 200 "ping ok";' \
            -p 8443:443 \
