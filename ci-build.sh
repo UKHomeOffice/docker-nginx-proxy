@@ -98,9 +98,9 @@ echo "Test limited protcol and SSL cipher... "
 echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT}
 echo "Test sslv2 not excepted...."
 set +e
-echo "GET /" | openssl s_client -sslv2 -connect ${DOCKER_HOST_NAME}:${PORT}
-if [ $? -gt 0 ]; then 
-  echo "Allow very bad version of ssl..." 
+echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT}
+if [ $? -ne 1 ]; then 
+  echo "FAIL SSL defaults settings allow ssl2 ......" 
   exit 2 
 fi
 set -e
