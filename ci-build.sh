@@ -108,10 +108,10 @@ set -e
 start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"SSL_CIPHER=\" \
+           -e \"SSL_CIPHER=RC4-MD5\" \
            -e \"SSL_PROTOCOL=TLSv1.1\""
-echo "Test exceots defined protocol and cipher....."
-echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_1 -connect ${DOCKER_HOST_NAME}:${PORT}
+echo "Test excepts defined protocol and cipher....."
+echo "GET /" | openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${DOCKER_HOST_NAME}:${PORT}
 
 start_test "Start with multi locations settings" "${STD_CMD} \
            -e \"LOCATIONS_CSV=/,/news\" \
