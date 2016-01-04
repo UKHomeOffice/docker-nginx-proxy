@@ -94,8 +94,24 @@ start_test "Start with minimal settings" "${STD_CMD} \
 
 echo "Test it's up and working..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+echo "Test limited protcol and SSL cipher... "
+echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT}
+echo "Test sslv2 not excepted...."
+set +e
+echo "GET /" | openssl s_client -sslv2 -connect ${DOCKER_HOST_NAME}:${PORT}
+if [ $? -gt 0 ]; then 
+  echo "Allow very bad version of ssl..." 
+  exit 2 
+fi
+set -e
 
-
+start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
+           -e \"PROXY_SERVICE_PORT=80\" \
+           -e \"SSL_CIPHER=\" \
+           -e \"SSL_PROTOCOL=TLSv1.1\""
+echo "Test exceots defined protocol and cipher....."
+echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_1 -connect ${DOCKER_HOST_NAME}:${PORT}
 
 start_test "Start with multi locations settings" "${STD_CMD} \
            -e \"LOCATIONS_CSV=/,/news\" \

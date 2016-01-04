@@ -61,6 +61,8 @@ managed by Docker or Kubernetes.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
+* `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
+* `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
 
 ### Ports
 
