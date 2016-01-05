@@ -6,9 +6,20 @@ export LOG_UUID=FALSE
 
 . /defaults.sh
 
+
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     ${SERVER_CERT};
     ssl_certificate_key ${SERVER_KEY};
+    # Can add SSLv3 for IE 6 but this opens up to poodle
+    ssl_protocols ${SSL_PROTOCOLS};
+    # reduction to only the best ciphers
+    # And make sure we prefer them
+    ssl_ciphers ${SSL_CIPHERS};
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_stapling on;
+    ssl_dhparam ${NGIX_CONF_DIR}/dhparam.pem;
 EOF_CERT_CONF
 
 
