@@ -26,7 +26,9 @@ ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 
 # Backwards compatability
-if [ "`echo ${PROXY_SERVICE_HOST} | grep -i 'https\?://'`" = "" ]; then
+# This tests for the presence of :// which if missing means we do nt have 
+# a protocol so we default to http://
+if [ "`echo ${PROXY_SERVICE_HOST} | grep '://'`" = "" ]; then
   PROXY_SERVICE_HOST="http://${PROXY_SERVICE_HOST}"
 fi
 

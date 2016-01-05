@@ -89,7 +89,7 @@ echo "TESTING..."
 echo "=========="
 
 start_test "Start with minimal settings" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
+           -e \"PROXY_SERVICE_HOST=http://www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test it's up and working..."
@@ -113,12 +113,21 @@ start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
 echo "Test excepts defined protocol and cipher....."
 echo "GET /" | openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${DOCKER_HOST_NAME}:${PORT}
 
+start_test "Start we auto add a protocol " "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
+           -e \"PROXY_SERVICE_PORT=80\""
+
+echo "Test It works if we do not define the protocol.."
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+
+
 start_test "Start with multi locations settings" "${STD_CMD} \
            -e \"LOCATIONS_CSV=/,/news\" \
-           -e \"PROXY_SERVICE_HOST_1=www.w3.org\" \
+           -e \"PROXY_SERVICE_HOST_1=http://www.w3.org\" \
            -e \"PROXY_SERVICE_PORT_1=80\" \
-           -e \"PROXY_SERVICE_HOST_2=www.bbc.co.uk\" \
+           -e \"PROXY_SERVICE_HOST_2=http://www.bbc.co.uk\" \
            -e \"PROXY_SERVICE_PORT_2=80\""
+
 
 echo "Test for location 1 @ /..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
@@ -128,7 +137,7 @@ wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://
 
 
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=www.bbc.co.uk\" \
+           -e \"PROXY_SERVICE_HOST=http://www.bbc.co.uk\" \
            -e \"PROXY_SERVICE_PORT=80\" \
            -e \"LOCATIONS_CSV=/,/news\" \
            -e \"NAXSI_RULES_URL_CSV_1=https://raw.githubusercontent.com/nbs-system/naxsi-rules/master/drupal.rules\" \
@@ -147,7 +156,7 @@ cd ./client_certs/
 ./sign_client_key_with_ca.sh
 cd ..
 start_test "Start with Client CA, and single proxy. Block unauth for /standards" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
+           -e \"PROXY_SERVICE_HOST=http://www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
            -e \"LOCATIONS_CSV=/,/standards/\" \
            -e \"CLIENT_CERT_REQUIRED_2=TRUE\" \
@@ -171,7 +180,7 @@ wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/sta
 
 
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"LOCATIONS_CSV=/,/api/\" \
            -e \"ERROR_REDIRECT_CODES_2=502\" \
@@ -189,7 +198,7 @@ else
 fi
 
 start_test "Start with Custom upload size" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"CLIENT_MAX_BODY_SIZE=15\" \
            -e \"NAXSI_USE_DEFAULT_RULES=FALSE\" \
@@ -205,7 +214,7 @@ grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
 start_test "Start with listen for port 80" "${STD_CMD} \
            -p 8888:80 \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
@@ -215,7 +224,7 @@ echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
 
 start_test "Test text logging format..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=text\" \
@@ -227,7 +236,7 @@ echo "Testing text logs format..."
 ${SUDO_CMD} docker logs ${INSTANCE} | grep '127.0.0.1 - -'
 
 start_test "Test json logging format..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=json\" \
@@ -238,7 +247,7 @@ echo "Testing json logs format..."
 ${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
 
 start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_WEB_SOCKETS=TRUE\" \
@@ -247,7 +256,7 @@ start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
 start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=mockserver\" \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"LOCATIONS_CSV=/,/api/\" \
            -e \"ADD_NGINX_LOCATION_CFG=return 200 NICE;\" \
