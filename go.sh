@@ -62,6 +62,17 @@ if [ "${CLIENT_MAX_BODY_SIZE}" != "" ]; then
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
+if [ "${ADD_NGINX_SERVER_CFG}" == "" ]; then
+    echo 'server_name $host;'>${NGIX_CONF_DIR}/extra_server.conf
+    msg 'Enabling default server config (server_name $host)'
+else
+    msg 'Enabling custom server config from ADD_NGINX_SERVER_CFG...'
+	cat > ${NGIX_CONF_DIR}/extra_server.conf <<- EOF_SERVER_CONF
+		${ADD_NGINX_SERVER_CFG}
+	EOF_SERVER_CONF
+fi
+
+
 if [ -f /etc/keys/client-ca ]; then
     msg "Loading client certs."
 	cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
