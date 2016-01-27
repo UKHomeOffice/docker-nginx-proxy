@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/docker-centos-base:master
+FROM quay.io/ukhomeofficedigital/centos-base:master
 
 MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
