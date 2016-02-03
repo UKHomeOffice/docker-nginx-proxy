@@ -46,11 +46,21 @@ echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
-    cp ${NGIX_CONF_DIR}/nginx_listen_proxy_protocol.conf ${NGIX_CONF_DIR}/nginx_listen.conf
-    echo -e "\nset_real_ip_from ${LOAD_BALANCER_CIDR};" >> ${NGIX_CONF_DIR}/nginx_listen.conf
+    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN-PP
+		listen ${HTTP_LISTEN_PORT} proxy_protocol;
+		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
+		real_ip_recursive on;
+		real_ip_header proxy_protocol;
+		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
+		set_real_ip_from ${LOAD_BALANCER_CIDR};
+	EOF-LISTEN-PP
 else
     msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
-    cp ${NGIX_CONF_DIR}/nginx_listen_plain.conf ${NGIX_CONF_DIR}/nginx_listen.conf
+    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
+		listen ${HTTP_LISTEN_PORT} ;
+		listen ${HTTPS_LISTEN_PORT} ssl;
+		set \$real_client_ip_if_set '';
+	EOF-LISTEN
 fi
 
 if [ -f ${UUID_FILE} ]; then

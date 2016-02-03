@@ -63,6 +63,8 @@ managed by Docker or Kubernetes.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
+* `HTTP_LISTEN_PORT` - Change the default from 80
+* `HTTPS_LISTEN_PORT` - Change the default from 443 
 
 ### Ports
 
@@ -70,6 +72,8 @@ This container exposes
 
 * `80` - HTTP
 * `443` - HTTPS
+
+N.B. see HTTP(S)_LISTEN_PORT above
 
 ### Useful File Locations
 
