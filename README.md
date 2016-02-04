@@ -47,6 +47,8 @@ rules to be specified without downloading or mounting in a rule file.
 
 Note the following variables can only be set once:
 
+* `ADD_NGINX_SERVER_CFG` - Arbitrary extra NGINX configuration to be added to the server context, see 
+[Arbitrary Config](#arbitrary-config)
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example 
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default 
 location.
@@ -214,6 +216,15 @@ The example below will return "ping ok" for the URL /ping.
 docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'ADD_NGINX_LOCATION_CFG=if ($uri = /proxy-ping) return 200 "ping ok";' \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
+```
+
+The example below will return "404" for the URL /notfound.
+```shell
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'ADD_NGINX_SERVER_CFG=location /notfound { return 404; };' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
