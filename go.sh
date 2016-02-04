@@ -93,4 +93,9 @@ case "${LOG_FORMAT_NAME}" in
     ;;
 esac
 
+if [ "${ADD_NGINX_SERVER_CFG}" != "" ]; then
+    msg "Adding extra config for server context."
+    echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras*.conf
+fi
+
 eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""
