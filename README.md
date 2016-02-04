@@ -56,13 +56,15 @@ location.
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
 managed by Docker or Kubernetes.  
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
-* `HTTPS_PORT` - Only required for http to https redirect and only a non-standard https port is in use. This is useful
- when testing or for development instances.
+* `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use. 
+This is useful when testing or for development instances or when a load-balancer mandates a non-standard port.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
+* `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
+* `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
 
 ### Ports
 
@@ -70,6 +72,8 @@ This container exposes
 
 * `80` - HTTP
 * `443` - HTTPS
+
+N.B. see HTTP(S)_LISTEN_PORT above
 
 ### Useful File Locations
 

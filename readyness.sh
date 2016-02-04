@@ -12,5 +12,6 @@ function run_test() {
     fi
 }
 
+source /tmp/readyness.cfg
 # Test for port ready...
-run_test "wget -O /dev/null --no-check-certificate https://localhost:443/ping" $1
+run_test "wget -O /dev/null --no-check-certificate https://localhost:${HTTPS_LISTEN_PORT}/ping" $1

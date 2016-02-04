@@ -39,6 +39,8 @@ function start_test() {
     COUNT=$((COUNT + 1))
     PORT=$((PORT + 1))
     INSTANCE=${TAG}_$COUNT
+    HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-443}
+
     tear_down
     echo ""
     echo ""
@@ -46,8 +48,8 @@ function start_test() {
     echo "STARTING TEST:$1"
     echo "============="
     shift
-    echo "Running:$@ --name ${INSTANCE} -p ${PORT}:443 ${TAG}"
-    bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:443 ${TAG}"
+    echo "Running:$@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     if ! wait_until_started ; then
         echo "Error, not started in time..."
         ${SUDO_CMD} docker logs ${INSTANCE}
@@ -104,6 +106,18 @@ if [ $? -ne 1 ]; then
   exit 2 
 fi
 set -e
+
+HTTPS_LISTEN_PORT=$((PORT + 1))
+start_test "Start with listen for HTTPS port 4430" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}\" \
+           --link mockserver:mockserver "
+echo "Test ok..."
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+unset HTTPS_LISTEN_PORT
 
 start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
@@ -212,16 +226,20 @@ curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
+
+
 start_test "Start with listen for port 80" "${STD_CMD} \
            -p 8888:80 \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"HTTPS_PORT=$((PORT + 1))\" \
+           -e \"HTTPS_REDIRECT_PORT=$((PORT + 1))\" \
            --link mockserver:mockserver "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
+
+
 
 start_test "Test text logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -265,6 +283,8 @@ start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
            --link mockserver:mockserver "
 echo "Test extra param works"
 wget -O- --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
+
+
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"

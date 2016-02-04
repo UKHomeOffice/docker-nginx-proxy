@@ -7,11 +7,12 @@ export SERVER_CERT=${SERVER_CERT:-/etc/keys/crt}
 export SERVER_KEY=${SERVER_KEY:-/etc/keys/key}
 export SSL_CIPHERS=${SSL_CIPHERS:-'AES256+EECDH:AES256+EDH:!aNULL'}
 export SSL_PROTOCOLS=${SSL_PROTOCOLS:-'TLSv1.2'}
+export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-80}
+export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-443}
 
-
-export HTTPS_PORT_STRING=":${HTTPS_PORT}"
-if [ "${HTTPS_PORT_STRING}" == ":" ]; then
-    export HTTPS_PORT_STRING=""
+export HTTPS_REDIRECT_PORT_STRING=":${HTTPS_REDIRECT_PORT}"
+if [ "${HTTPS_REDIRECT_PORT_STRING}" == ":" ]; then
+    export HTTPS_REDIRECT_PORT_STRING=""
 fi
 
 function download() {
