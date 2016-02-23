@@ -119,6 +119,14 @@ echo "Test ok..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 unset HTTPS_LISTEN_PORT
 
+start_test "Test response has gzip" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           --link mockserver:mockserver "
+echo "Test gzip ok..."
+curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT} | grep -q 'Content-Encoding: gzip'
+
 start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
@@ -238,7 +246,6 @@ start_test "Start with listen for port 80" "${STD_CMD} \
            --link mockserver:mockserver "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
-
 
 
 start_test "Test text logging format..." "${STD_CMD} \
