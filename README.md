@@ -67,6 +67,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
+* `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
 
 ### Ports
 
@@ -229,6 +230,27 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
+#### Basic Auth
+
+To add basic auth to your server you need to define the username and password by mounting a file and defining that file in the `BASIC_AUTH` variable, then add the location config to you config.
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'ADD_NGINX_LOCATION_CFG='auth_basic "Restricted"; auth_basic_user_file /etc/secrets/.htpasswd;' \
+           -e BASIC_AUTH='/etc/secrets/basic-auth'
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
+```
+
+My basic auth file will look like this.
+```shell
+admin:testing
+username:password
+```
+
+
+
 ## Built With
 
 * [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web
@@ -236,8 +258,8 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
   as most of their external dependencies.
 * [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
-* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
-  rules maintenance WAF for NGINX 
+* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low
+  rules maintenance WAF for NGINX
 
 ## Find Us
 
