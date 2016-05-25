@@ -45,9 +45,10 @@ if [ -z ${BASIC_AUTH+x} ]; then
   echo "Basic Auth not set, skipping..."
 else
   HTPASSWD=$(dirname ${BASIC_AUTH})
-  if [ -f $HTPASSWD ]; then #has the htpasswd file already been created.
-    echo "$HTPASSWD already created, skipping"
+  if [ -f "$HTPASSWD/.htpasswd" ]; then #has the htpasswd file already been created.
+    echo "$HTPASSWD/.htpasswd already created, skipping"
   else
+    echo "Creating .htpasswd file from ${BASIC_AUTH}"
     sed -i '/^$/d' ${BASIC_AUTH} #remove all empty lines.
     while IFS= read line
        do
