@@ -24,6 +24,7 @@ ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
+BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
 
 # Backwards compatability
 # This tests for the presence of :// which if missing means we do nt have 
@@ -76,7 +77,28 @@ else
         echo ${EXTRA_NAXSI_RULES}>>${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
     fi
 fi
-
+# creates .htpasswd file from file
+if [[ "${BASIC_AUTH}" == "" ]]; then
+  
+  echo "Basic Auth not set for Location $LOCATION_ID, skipping..."
+else
+  HTPASSWD=$(dirname ${BASIC_AUTH})
+  if [ -f "$HTPASSWD/.htpasswd_${LOCATION_ID}" ]; then #has the htpasswd file already been created.
+    echo "$HTPASSWD/.htpasswd_$LOCATION_ID already created, skipping"
+  else
+    echo "Creating .htpasswd file from ${BASIC_AUTH} in location ${LOCATION_ID}"
+    sed -i '/^$/d' ${BASIC_AUTH} #remove all empty lines.
+    while IFS= read line
+       do
+          #for every line in the file add user and password to .htpasswd
+          USER=$(echo $line | cut -d ":" -f 1 |  tr -d '[[:space:]]')
+          PASSWORD=$(echo $line | cut -d ":" -f 2 | tr -d '[[:space:]]') #remove whitespace from lines.
+          printf "$USER:$(openssl passwd -crypt $PASSWORD)\n" >> ${HTPASSWD}/.htpasswd_$LOCATION_ID
+       done < ${BASIC_AUTH}
+      rm ${BASIC_AUTH} #delete file now not needed
+  fi
+  BASIC_AUTH_CONFIG="auth_basic \"Restricted\"; auth_basic_user_file $HTPASSWD/.htpasswd_$LOCATION_ID;"
+fi
 if [ "${CLIENT_CERT_REQUIRED}" == "TRUE" ]; then
     if [ ! -f /etc/keys/client-ca ]; then
         exit_error_msg "Missing client CA cert at location:/etc/keys/client-ca"
@@ -122,6 +144,7 @@ location ${LOCATION} {
     ${UUID_ARGS}
     ${CERT_TXT}
     ${ADD_NGINX_LOCATION_CFG}
+    ${BASIC_AUTH_CONFIG}
 
     error_page ${ERROR_REDIRECT_CODES} /50x.html;
 

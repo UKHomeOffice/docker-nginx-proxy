@@ -42,6 +42,7 @@ rules to be specified without downloading or mounting in a rule file.
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see 
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
+* `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
 
 #### Single set Variables
 
@@ -67,7 +68,6 @@ This is useful when testing or for development instances or when a load-balancer
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
-* `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
 
 ### Ports
 
@@ -240,14 +240,31 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'ADD_NGINX_LOCATION_CFG='auth_basic "Restricted"; auth_basic_user_file /etc/secrets/.htpasswd;' \
            -e BASIC_AUTH='/etc/secrets/basic-auth'
            -p 8443:443 \
+           -v ~/Documents:/etc/secrets/
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
-My basic auth file will look like this.
+The basic auth file will look like this.
 ```shell
 admin:testing
 username:password
 ```
+##### Basic Auth on mutliple Locations
+
+If you're using multiple locations then we need to define the location that basic_auth will be set in relation to the `LOCATIONS_CSV`
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
+           -e 'PROXY_SERVICE_PORT=80' \
+           -e 'LOCATIONS_CSV=/,/about' \
+           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
+           -e BASIC_AUTH_2=/etc/secrets/basic-auth \
+           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
+```
+
+this will setup basic-auth for the the `/about` location or simply swap the 2 for a 1 to setup basic auth for the root location. 
 
 
 

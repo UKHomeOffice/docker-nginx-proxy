@@ -40,28 +40,6 @@ if [ "${NAME_RESOLVER}" == "" ]; then
         export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
     fi
 fi
-# creates .htpasswd file from file
-if [ -z ${BASIC_AUTH+x} ]; then
-  echo "Basic Auth not set, skipping..."
-else
-  HTPASSWD=$(dirname ${BASIC_AUTH})
-  if [ -f "$HTPASSWD/.htpasswd" ]; then #has the htpasswd file already been created.
-    echo "$HTPASSWD/.htpasswd already created, skipping"
-  else
-    echo "Creating .htpasswd file from ${BASIC_AUTH}"
-    sed -i '/^$/d' ${BASIC_AUTH} #remove all empty lines.
-    while IFS= read line
-       do
-          #for every line in the file add user and password to .htpasswd
-
-          USER=$(echo $line | cut -d ":" -f 1 |  tr -d '[[:space:]]')
-          PASSWORD=$(echo $line | cut -d ":" -f 2 | tr -d '[[:space:]]') #remove whitespace from lines.
-          printf "$USER:$(openssl passwd -crypt $PASSWORD)\n" >> ${HTPASSWD}/.htpasswd
-       done < ${BASIC_AUTH}
-      rm ${BASIC_AUTH} #delete file now not needed
-  fi
-fi
-
 
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
