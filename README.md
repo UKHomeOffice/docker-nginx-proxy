@@ -275,8 +275,8 @@ this will setup basic-auth for the the `/about` location or simply swap the 2 fo
   as most of their external dependencies.
 * [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
-* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low
-  rules maintenance WAF for NGINX
+* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
+  rules maintenance WAF for NGINX 
 
 ## Find Us
 
