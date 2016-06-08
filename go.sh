@@ -86,7 +86,9 @@ fi
 case "${LOG_FORMAT_NAME}" in
     "json" | "text")
         msg "Logging set to ${LOG_FORMAT_NAME}"
-        echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME};">${NGIX_CONF_DIR}/logging.conf
+        echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
+
+        echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
         ;;
     *)
         exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting json or text."
