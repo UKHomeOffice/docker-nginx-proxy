@@ -46,7 +46,7 @@ cd ..
 mkdir -p /usr/local/openresty/naxsi/
 cp ./naxsi-master/naxsi_config/naxsi_core.rules  /usr/local/openresty/naxsi/
 
-cd luarocks-2.2.1
+cd luarocks-${LUAROCKS_VER}
 ./configure --with-lua=/usr/local/openresty/luajit \
     --lua-suffix=jit-2.1.0-beta1 \
     --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
