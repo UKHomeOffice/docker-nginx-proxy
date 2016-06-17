@@ -46,6 +46,7 @@ echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
+    export REMOTE_IP_VAR="proxy_protocol_addr"
     cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN-PP
 		listen ${HTTP_LISTEN_PORT} proxy_protocol;
 		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
@@ -56,6 +57,7 @@ if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
 	EOF-LISTEN-PP
 else
     msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
+    export REMOTE_IP_VAR="remote_addr"
     cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
 		listen ${HTTP_LISTEN_PORT} ;
 		listen ${HTTPS_LISTEN_PORT} ssl;

@@ -25,6 +25,8 @@ ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
+REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
+CONCURRENT_CONNS_PER_IP=$(get_id_var ${LOCATION_ID} CONCURRENT_CONNS_PER_IP)
 
 # Backwards compatability
 # This tests for the presence of :// which if missing means we do nt have 
@@ -138,9 +140,23 @@ fi
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
     msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
 fi
+if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
+    msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
+    echo "limit_req_zone \$${REMOTE_IP_VAR} zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
+        >${NGIX_CONF_DIR}/rate_limits_${LOCATION_ID}.conf
+    REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID};"
+fi
+if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
+    msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
+    echo "limit_conn_zone \$${REMOTE_IP_VAR} zone=connbuffer${LOCATION_ID}:10m;" \
+        >>${NGIX_CONF_DIR}/rate_limits_${LOCATION_ID}.conf
+    CONN_LIMITS="limit_conn connbuffer ${CONCURRENT_CONNS_PER_IP};"
+fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
+    ${REQ_LIMITS}
+    ${CON_LIMITS}
     ${UUID_ARGS}
     ${CERT_TXT}
     ${ADD_NGINX_LOCATION_CFG}

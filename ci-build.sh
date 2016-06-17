@@ -107,6 +107,21 @@ if [ $? -ne 1 ]; then
 fi
 set -e
 
+start_test "Test rate limits 1/second" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"REQS_PER_MIN_PER_IP=60\" \
+           --link mockserver:mockserver "
+echo "Test two connections in the same second get blocked..."
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+if curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/ ; then
+    echo "Passed return text on error with ERROR_REDIRECT_CODES"
+else
+    echo "Failed return text on error with ERROR_REDIRECT_CODES"
+    exit 1
+fi
+
 HTTPS_LISTEN_PORT=$((PORT + 1))
 start_test "Start with listen for HTTPS port 4430" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
