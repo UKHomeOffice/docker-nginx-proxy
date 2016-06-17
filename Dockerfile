@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/centos-base:master
+FROM quay.io/ukhomeofficedigital/centos-base:latest
 
 MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
@@ -33,6 +33,9 @@ ADD ./location_template.conf /
 ADD ./readyness.sh /
 ADD ./helper.sh /
 
+RUN yum remove -y kernel-headers && \
+    yum clean all
+    
 WORKDIR /usr/local/openresty
 
 ENTRYPOINT ["/go.sh"]
