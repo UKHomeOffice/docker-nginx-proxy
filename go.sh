@@ -27,23 +27,6 @@ if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
 
-IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
-for i in "${!LOCATIONS_ARRAY[@]}"; do
-    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
-done
-
-if [ "${NAME_RESOLVER}" == "" ]; then
-    if [ "${DNSMASK}" == "TRUE" ]; then
-        dnsmasq
-        export NAME_RESOLVER=127.0.0.1
-    else
-        export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
-    fi
-fi
-
-msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
-echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
-
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     export REMOTE_IP_VAR="proxy_protocol_addr"
@@ -64,6 +47,24 @@ else
 		set \$real_client_ip_if_set '';
 	EOF-LISTEN
 fi
+
+IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
+for i in "${!LOCATIONS_ARRAY[@]}"; do
+    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+done
+
+if [ "${NAME_RESOLVER}" == "" ]; then
+    if [ "${DNSMASK}" == "TRUE" ]; then
+        dnsmasq
+        export NAME_RESOLVER=127.0.0.1
+    else
+        export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
+    fi
+fi
+
+msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
+echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
+
 echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 
 if [ -f ${UUID_FILE} ]; then
