@@ -107,20 +107,39 @@ if [ $? -ne 1 ]; then
 fi
 set -e
 
-start_test "Test rate limits 1/second" "${STD_CMD} \
+start_test "Test rate limits 1 per second" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"REQS_PER_MIN_PER_IP=60\" \
+           -e \"CONCURRENT_CONNS_PER_IP=1\" \
            --link mockserver:mockserver "
 echo "Test two connections in the same second get blocked..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-if curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/ ; then
-    echo "Passed return text on error with ERROR_REDIRECT_CODES"
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/
+if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+   | grep '503 Service Temporarily Unavailable' ; then
+    echo "Passed return text on error with REQS_PER_MIN_PER_IP"
 else
-    echo "Failed return text on error with ERROR_REDIRECT_CODES"
+    echo "Failed return text on error with REQS_PER_MIN_PER_IP"
     exit 1
 fi
+echo "Wait a second to clear condition above..."
+sleep 1
+echo "Test two concurrent connections in the same second get blocked..."
+echo "First background 3 second request..."
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+echo "Now wait one second to clear req limit..."
+sleep 1
+echo "Now test we get blocked with second concurrent request..."
+if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+   | grep '503 Service Temporarily Unavailable' ; then
+    echo "Passed return text on error with CONCURRENT_CONNS_PER_IP"
+else
+    echo "Failed return text on error with CONCURRENT_CONNS_PER_IP"
+    exit 1
+fi
+
 
 HTTPS_LISTEN_PORT=$((PORT + 1))
 start_test "Start with listen for HTTPS port 4430" "${STD_CMD} \

@@ -140,17 +140,18 @@ fi
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
     msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
 fi
+#nginx_var_for_loc=$(get_namefrom_number ${LOCATION_ID})
 if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
     echo "limit_req_zone \$${REMOTE_IP_VAR} zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
-        >${NGIX_CONF_DIR}/rate_limits_${LOCATION_ID}.conf
+        >${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
     REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID};"
 fi
 if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
     msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
     echo "limit_conn_zone \$${REMOTE_IP_VAR} zone=connbuffer${LOCATION_ID}:10m;" \
-        >>${NGIX_CONF_DIR}/rate_limits_${LOCATION_ID}.conf
-    CONN_LIMITS="limit_conn connbuffer ${CONCURRENT_CONNS_PER_IP};"
+        >>${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
+    CONN_LIMITS="limit_conn connbuffer${LOCATION_ID};"
 fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF

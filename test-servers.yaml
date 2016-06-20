@@ -32,3 +32,12 @@
      body: '{"message": "Oh dear!"}'
      headers:
        content-type: text/json
+ - name: Long Req
+   request:
+     uri: /three-seconds
+     method: GET
+   response:
+     code: 200
+     body: "SLOW"
+     delay: 3000
+     frequency: 1.0
