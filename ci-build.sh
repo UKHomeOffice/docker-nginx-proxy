@@ -79,7 +79,7 @@ ${SUDO_CMD} docker build -t ${TAG} .
 echo "Running mocking-server..."
 ${STD_CMD} -d -p 8080:8080 \
            -v ${PWD}/test-servers.yaml:/test-servers.yaml \
-           --name=mockserver quay.io/ukhomeofficedigital/mockingj-server:v0.1.0 \
+           --name=mockserver quii/mockingjay-server:1.5.10 \
            -config=/test-servers.yaml \
            -port=8080
 echo "sleep 5..."
@@ -106,6 +106,41 @@ if [ $? -ne 1 ]; then
   exit 2 
 fi
 set -e
+
+start_test "Test rate limits 1 per second" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"REQS_PER_MIN_PER_IP=60\" \
+           -e \"CONCURRENT_CONNS_PER_IP=1\" \
+           --link mockserver:mockserver "
+echo "Test two connections in the same second get blocked..."
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/
+if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+   | grep '503 Service Temporarily Unavailable' ; then
+    echo "Passed return text on error with REQS_PER_MIN_PER_IP"
+else
+    echo "Failed return text on error with REQS_PER_MIN_PER_IP"
+    exit 1
+fi
+echo "Wait a second to clear condition above..."
+sleep 1
+echo "Test multiple concurrent connections in the same second get blocked..."
+echo "First background some requests..."
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+echo "Now test we get blocked with second concurrent request..."
+if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+   | grep '503 Service Temporarily Unavailable' ; then
+    echo "Passed return text on error with CONCURRENT_CONNS_PER_IP"
+else
+    echo "Failed return text on error with CONCURRENT_CONNS_PER_IP"
+    exit 1
+fi
+
 
 HTTPS_LISTEN_PORT=$((PORT + 1))
 start_test "Start with listen for HTTPS port 4430" "${STD_CMD} \

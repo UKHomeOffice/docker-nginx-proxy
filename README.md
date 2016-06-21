@@ -43,6 +43,8 @@ rules to be specified without downloading or mounting in a rule file.
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
 * `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
+* `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
+* `CONCURRENT_CONNS_PER_IP` - Will limit concurrent connections based on IP e.g. set to 10 to allow max of 10 connections per browser or proxy!
 
 #### Single set Variables
 

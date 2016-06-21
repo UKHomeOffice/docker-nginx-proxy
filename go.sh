@@ -27,6 +27,27 @@ if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
 
+if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
+    msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
+    export REMOTE_IP_VAR="proxy_protocol_addr"
+    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN-PP
+		listen ${HTTP_LISTEN_PORT} proxy_protocol;
+		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
+		real_ip_recursive on;
+		real_ip_header proxy_protocol;
+		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
+		set_real_ip_from ${LOAD_BALANCER_CIDR};
+	EOF-LISTEN-PP
+else
+    msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
+    export REMOTE_IP_VAR="remote_addr"
+    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
+		listen ${HTTP_LISTEN_PORT} ;
+		listen ${HTTPS_LISTEN_PORT} ssl;
+		set \$real_client_ip_if_set '';
+	EOF-LISTEN
+fi
+
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
     /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
@@ -44,24 +65,6 @@ fi
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
 
-if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
-    msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
-    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN-PP
-		listen ${HTTP_LISTEN_PORT} proxy_protocol;
-		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
-		real_ip_recursive on;
-		real_ip_header proxy_protocol;
-		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
-		set_real_ip_from ${LOAD_BALANCER_CIDR};
-	EOF-LISTEN-PP
-else
-    msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
-    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
-		listen ${HTTP_LISTEN_PORT} ;
-		listen ${HTTPS_LISTEN_PORT} ssl;
-		set \$real_client_ip_if_set '';
-	EOF-LISTEN
-fi
 echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 
 if [ -f ${UUID_FILE} ]; then
