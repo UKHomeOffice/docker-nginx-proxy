@@ -64,6 +64,7 @@ managed by Docker or Kubernetes.
 * `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use. 
 This is useful when testing or for development instances or when a load-balancer mandates a non-standard port.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
+* `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL

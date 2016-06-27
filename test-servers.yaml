@@ -6,6 +6,13 @@
    response:
      code: 200
      body: '200 is OK :)'
+ - name: All OK with params
+   request:
+     uri: /?animal=cow
+     method: GET
+   response:
+     code: 200
+     body: '200 is OK :)'
  - name: Big Doc
    request:
      uri: /uploads/doc
