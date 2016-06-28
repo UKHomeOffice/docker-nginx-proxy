@@ -30,6 +30,7 @@ ADD ./defaults.sh /
 ADD ./go.sh /
 ADD ./enable_location.sh /
 ADD ./location_template.conf /
+ADD ./logging.conf /usr/local/openresty/nginx/conf/
 ADD ./readyness.sh /
 ADD ./helper.sh /
 

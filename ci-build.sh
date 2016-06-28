@@ -302,9 +302,24 @@ start_test "Test json logging format..." "${STD_CMD} \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing json logs format..."
 ${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+${SUDO_CMD} docker logs ${INSTANCE}  | grep 'animal=cow'
+
+
+start_test "Test param logging off option works..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"LOG_FORMAT_NAME=json\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"NO_LOGGING_URL_PARAMS=TRUE\" \
+           --link mockserver:mockserver "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
+echo "Testing no logging of url params option works..."
+${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+${SUDO_CMD} docker logs ${INSTANCE}  | grep 'animal=cow' | wc -l | grep --regexp=^0$
 
 start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
