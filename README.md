@@ -71,6 +71,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
+* `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 
 ### Ports
 
