@@ -173,5 +173,7 @@ location ${LOCATION} {
     $(cat /location_template.conf)
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
+    proxy_set_header X-Real-IP \$${REMOTE_IP_VAR};
+
 }
 EOF_LOCATION_CONF
