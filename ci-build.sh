@@ -113,6 +113,7 @@ start_test "Test rate limits 1 per second" "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"REQS_PER_MIN_PER_IP=60\" \
+           -e \"REQS_PER_PAGE=0\" \
            -e \"CONCURRENT_CONNS_PER_IP=1\" \
            --link mockserver:mockserver "
 echo "Test two connections in the same second get blocked..."
