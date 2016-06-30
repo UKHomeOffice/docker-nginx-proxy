@@ -26,6 +26,7 @@ ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
+REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 CONCURRENT_CONNS_PER_IP=$(get_id_var ${LOCATION_ID} CONCURRENT_CONNS_PER_IP)
 
 # Backwards compatability
@@ -142,10 +143,17 @@ if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
 fi
 #nginx_var_for_loc=$(get_namefrom_number ${LOCATION_ID})
 if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
+    REQS_PER_PAGE=${REQS_PER_PAGE:-20}
     msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
+    msg "Enabling REQS_PER_PAGE:${REQS_PER_PAGE}"
+    if [ "${REQS_PER_PAGE}" != "0" ]; then
+      burst_setting="burst=${REQS_PER_PAGE}"
+    else
+      unset burst_setting
+    fi
     echo "limit_req_zone \$${REMOTE_IP_VAR} zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
         >${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
-    REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID};"
+    REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting};"
 fi
 if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
     msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
