@@ -97,15 +97,38 @@ start_test "Start with minimal settings" "${STD_CMD} \
 echo "Test it's up and working..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
-echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT}
+echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null
 echo "Test sslv2 not excepted...."
-set +e
-echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT}
-if [ $? -ne 1 ]; then 
+if echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null ; then
   echo "FAIL SSL defaults settings allow ssl2 ......" 
   exit 2 
 fi
-set -e
+
+start_test "Test enabling GEODB settings" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"ALLOW_COUNTRY_CSV=GB,FR,O1\" \
+           --link mockserver:mockserver "
+echo "Test GeoIP config isn't rejected..."
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/
+
+start_test "Test GEODB settings can reject..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"ALLOW_COUNTRY_CSV=CG\" \
+           -e \"DENY_COUNTRY_ON=TRUE\" \
+           --link mockserver:mockserver "
+echo "Test GeoIP config IS rejected..."
+if curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/ ; then
+  echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
+  exit 2
+else
+  echo "Rejected as expected - we are not in the Congo!"
+fi
 
 start_test "Test rate limits 1 per second" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \

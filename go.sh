@@ -6,7 +6,6 @@ export LOG_UUID=FALSE
 
 . /defaults.sh
 
-
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     ${SERVER_CERT};
     ssl_certificate_key ${SERVER_KEY};
@@ -118,4 +117,28 @@ if [ "${ADD_NGINX_SERVER_CFG}" != "" ]; then
     echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras*.conf
 fi
 
-eval "/usr/local/openresty/nginx/sbin/nginx -g \"daemon off;\""
+GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
+if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
+    msg "Enabling Country codes detection:${ALLOW_COUNTRY_CSV}..."
+    IFS=',' read -a ALLOW_COUNTRY_ARRAY <<< "$ALLOW_COUNTRY_CSV"
+    cat > ${GEO_CFG} <<-EOF-GEOIP
+		geoip_country /usr/share/GeoIP/GeoLiteCountry.dat;
+		map \$geoip_country_code \$allow_visit {
+		    default no;
+	EOF-GEOIP
+
+    for i in "${!ALLOW_COUNTRY_ARRAY[@]}"; do
+        echo "    ${ALLOW_COUNTRY_ARRAY[$i]} yes;">>${GEO_CFG}
+    done
+    echo "}">>${GEO_CFG}
+
+    # Set up base data as that from yum package...
+    ln -s /usr/share/GeoIP/GeoIP.dat /usr/share/GeoIP/GeoLiteCountry.dat
+
+    # Refresh in background...
+    /refresh_GeoIP.sh &
+else
+    touch ${GEO_CFG}
+fi
+
+eval "${NGINX_BIN} -g \"daemon off;\""
