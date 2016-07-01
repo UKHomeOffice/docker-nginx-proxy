@@ -22,6 +22,7 @@ RUN yum install -y bind-utils && \
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
 
 ADD ./nginx*.conf /usr/local/openresty/nginx/conf/
+ADD ./html/* /usr/local/openresty/nginx/html/
 RUN mkdir /usr/local/openresty/nginx/conf/locations
 RUN mkdir -p /usr/local/openresty/nginx/lua
 ADD ./lua/* /usr/local/openresty/nginx/lua/
