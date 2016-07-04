@@ -11,6 +11,8 @@ LUAROCKS_VER=2.2.1
 yum -y install \
     gcc-c++ \
     gcc \
+    geoip \
+    geoip-devel \
     make \
     openssl-devel \
     openssl \
@@ -37,7 +39,9 @@ rm naxsi.zip
 
 # Build!
 cd openresty-${OPEN_RESTRY_VER}
-./configure --add-module=../naxsi-master/naxsi_src --with-http_realip_module
+./configure --add-module=../naxsi-master/naxsi_src \
+            --with-http_realip_module \
+            --with-http_geoip_module
 make
 make install
 cd ..
@@ -66,6 +70,7 @@ rm -fr naxsi-master
 yum -y remove \
     gcc-c++ \
     gcc \
+    geoip-devel \
     make \
     openssl-devel \
     perl \

@@ -31,7 +31,6 @@ function clean_up() {
 }
 
 function wait_until_started() {
-    sleep 1
     ${SUDO_CMD} docker exec -it ${INSTANCE} /readyness.sh POLL
 }
 
@@ -97,15 +96,47 @@ start_test "Start with minimal settings" "${STD_CMD} \
 echo "Test it's up and working..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
-echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT}
+echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null
 echo "Test sslv2 not excepted...."
-set +e
-echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT}
-if [ $? -ne 1 ]; then 
+if echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null ; then
   echo "FAIL SSL defaults settings allow ssl2 ......" 
   exit 2 
 fi
-set -e
+
+start_test "Test enabling GEODB settings" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"ALLOW_COUNTRY_CSV=GB,FR,O1\" \
+           --link mockserver:mockserver "
+echo "Test GeoIP config isn't rejected..."
+curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/
+
+start_test "Test GEODB settings can reject..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"ALLOW_COUNTRY_CSV=CG\" \
+           -e \"DENY_COUNTRY_ON=TRUE\" \
+           -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /50x.html;\" \
+           --link mockserver:mockserver "
+echo "Test GeoIP config IS rejected..."
+if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+  | grep '403 Forbidden' ; then
+  echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
+  exit 2
+else
+  echo "Rejected as expected - we are not in the Congo!"
+fi
+if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+  | grep 'An error occurred' ; then
+  echo "We were expecting to be rejected specific content for invalid country - we are not in the Congo!"
+  exit 2
+else
+  echo "Rejected with correct content as expected."
+fi
 
 start_test "Test rate limits 1 per second" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -125,14 +156,14 @@ else
     echo "Failed return text on error with REQS_PER_MIN_PER_IP"
     exit 1
 fi
-echo "Wait a second to clear condition above..."
-sleep 1
+echo "Wait two seconds to clear condition above..."
+sleep 2
 echo "Test multiple concurrent connections in the same second get blocked..."
 echo "First background some requests..."
-curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
-curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
-curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
-curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &
+curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &>/dev/null &
+curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &>/dev/null &
+curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &>/dev/null &
+curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/three-seconds &>/dev/null &
 echo "Now test we get blocked with second concurrent request..."
 if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
    | grep '503 Service Temporarily Unavailable' ; then

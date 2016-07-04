@@ -45,7 +45,8 @@ rules to be specified without downloading or mounting in a rule file.
 * `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `CONCURRENT_CONNS_PER_IP` - Will limit concurrent connections based on IP e.g. set to 10 to allow max of 10 connections per browser or proxy!
-* `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20) 
+* `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
+* `DENY_COUNTRY_ON` - Set to `TRUE` to deny access to countries not listed in ALLOW_COUNTRY_CSV with 403 status for a location (set location for 403 with ADD_NGINX_LOCATION_CFG).
 
 #### Single set Variables
 
@@ -73,6 +74,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
+* `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 
 ### Ports
 
@@ -282,6 +284,7 @@ this will setup basic-auth for the the `/about` location or simply swap the 2 fo
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
 * [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
   rules maintenance WAF for NGINX 
+* [GeoLite data](http://www.maxmind.com">http://www.maxmind.com) This product includes GeoLite data created by MaxMind.
 
 ## Find Us
 
