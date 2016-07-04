@@ -121,13 +121,22 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"ALLOW_COUNTRY_CSV=CG\" \
            -e \"DENY_COUNTRY_ON=TRUE\" \
+           -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /50x.html;\" \
            --link mockserver:mockserver "
 echo "Test GeoIP config IS rejected..."
-if curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/ ; then
+if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+  | grep '403 Forbidden' ; then
   echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
   exit 2
 else
   echo "Rejected as expected - we are not in the Congo!"
+fi
+if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
+  | grep 'An error occurred' ; then
+  echo "We were expecting to be rejected specific content for invalid country - we are not in the Congo!"
+  exit 2
+else
+  echo "Rejected with correct content as expected."
 fi
 
 start_test "Test rate limits 1 per second" "${STD_CMD} \

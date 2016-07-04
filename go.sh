@@ -114,7 +114,7 @@ esac
 
 if [ "${ADD_NGINX_SERVER_CFG}" != "" ]; then
     msg "Adding extra config for server context."
-    echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras*.conf
+    echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
 fi
 
 GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
