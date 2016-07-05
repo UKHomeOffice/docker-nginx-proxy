@@ -171,7 +171,7 @@ fi
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
     ${REQ_LIMITS}
-    ${CON_LIMITS}
+    ${CONN_LIMITS}
     ${UUID_ARGS}
     ${CERT_TXT}
     ${ADD_NGINX_LOCATION_CFG}
