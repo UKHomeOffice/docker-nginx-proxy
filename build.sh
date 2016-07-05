@@ -59,6 +59,7 @@ make install
 cd ..
 luarocks install uuid
 luarocks install luasocket
+luarocks install lua-geoip
 cd -
 
 # Cleaning up source...
