@@ -103,6 +103,10 @@ case "${LOG_FORMAT_NAME}" in
             sed -i -e 's/\$request_uri/\$uri/g' ${NGIX_CONF_DIR}/logging.conf
         fi
 
+        if [ "${NO_LOGGING_BODY}" ]; then
+            sed --in-place '/\$request_body/d' ${NGIX_CONF_DIR}/logging.conf
+        fi
+
         echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
 
         echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
