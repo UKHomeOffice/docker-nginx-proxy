@@ -160,7 +160,7 @@ if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
     msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
     echo "limit_conn_zone \$${REMOTE_IP_VAR} zone=connbuffer${LOCATION_ID}:10m;" \
         >>${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
-    CONN_LIMITS="limit_conn connbuffer${LOCATION_ID};"
+    CONN_LIMITS="limit_conn connbuffer${LOCATION_ID} ${CONCURRENT_CONNS_PER_IP};"
 fi
 if [ "${DENY_COUNTRY_ON}" == "TRUE" ]; then
     msg "Enabling GeoIP denies, unless IP is one of ${ALLOW_COUNTRY_CSV}, for location ${LOCATION_ID}."
