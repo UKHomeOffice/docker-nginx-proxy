@@ -123,7 +123,7 @@ if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     if [ "${LOAD_BALANCER_CIDR}" == "" ]; then
         get_country_code='geoip_country /usr/share/GeoIP/GeoLiteCountry.dat;'
     else
-        get_country_code="set_by_lua_file \$geoip_country_code /usr/local/openresty/nginx/lua/get_country.lua \$real_client_ip_if_set"
+        get_country_code="set_by_lua_file \$geoip_country_code /usr/local/openresty/nginx/lua/get_country.lua \$real_client_ip_if_set;"
     fi
     IFS=',' read -a ALLOW_COUNTRY_ARRAY <<< "$ALLOW_COUNTRY_CSV"
     cat > ${GEO_CFG} <<-EOF-GEOIP
