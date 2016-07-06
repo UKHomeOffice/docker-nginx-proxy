@@ -59,11 +59,9 @@ make install
 cd ..
 luarocks install uuid
 luarocks install luasocket
-#luarocks --from=http://geoip.luaforge.net/rocks install geoip
-#http://files.luaforge.net/releases/geoip/geoip/0.1-1
+luarocks install lua-geoip
 cd -
 
-exit 0
 # Cleaning up source...
 rm -fr openresty-${OPEN_RESTRY_VER}
 rm -fr luarocks-${LUAROCKS_VER}
