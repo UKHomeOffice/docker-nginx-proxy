@@ -120,7 +120,7 @@ fi
 GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     msg "Enabling Country codes detection:${ALLOW_COUNTRY_CSV}..."
-    echo "set_by_lua_file \$country_code /usr/local/openresty/nginx/lua/get_country.lua \$${REMOTE_IP_VAR};">>${GEO_CFG}
+    echo "set_by_lua_file \$country_code /usr/local/openresty/nginx/lua/get_country.lua \"\$${REMOTE_IP_VAR}\";">>${GEO_CFG}
 
     # Set up base data as that from yum package...
     ln -s /usr/share/GeoIP/GeoIP.dat /usr/share/GeoIP/GeoLiteCountry.dat

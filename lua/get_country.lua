@@ -1,3 +1,5 @@
+#!/usr/bin/env lua
+
 -- Compatibility: Lua-5.1
 function split(str, pat)
     local t = {}  -- NOTE: use {n = 0} in Lua-5.0
@@ -18,24 +20,26 @@ function split(str, pat)
     return t
 end
 
-local geoip_country_filename = '/usr/share/GeoIP/GeoLiteCountry.dat'
-local geoip = require('geoip')
-local geoip_country = require('geoip.country')
-geoip_country.open(geoip_country_filename)
+local geoip = require "geoip";
+local geoip_country = require "geoip.country";
+local geoip_file = "/usr/share/GeoIP/GeoIP.dat"
+local geoip_country_filename = geoip_file
+local geodb = geoip_country.open(geoip_country_filename)
 
--- Lookup country code:
-local country_record = geoip_country:query_by_addr(ngx.arg[1])
+local ip = ngx.arg[1]
+local country_id = geodb:query_by_addr(ip, "id")
+local country_code = geoip.code_by_id(country_id)
 
 -- Work out if country is allowed:
 local allow_country_csv = os.getenv("ALLOW_COUNTRY_CSV")
 if not allow_country_csv == "" then
     ngx.var.allowed_country = "no"
     for country in split(allow_country_csv, ",") do
-        if country == country_record.code then
+        if country == country_code then
             ngx.var.allowed_country = "yes"
             break
         end
     end
 end
 
-return country_record.code
+return country_code
