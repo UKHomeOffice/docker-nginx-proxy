@@ -68,6 +68,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
 * `NO_LOGGING_BODY` - Defaults to true `TRUE`.  Set otherwise and nginx should log the request_body.
+* `NO_LOGGING_RESPONSE` - Defaults to true `TRUE`.  Set otherwise and nginx should log the response_body
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
