@@ -18,23 +18,24 @@ function split(str, pat)
     return t
 end
 
-geoip = require("geoip")
-g = geoip.open_type("country")
-g = geoip.open("/usr/share/GeoIP/GeoLiteCountry.dat")
+local geoip_country_filename = '/usr/share/GeoIP/GeoLiteCountry.dat'
+local geoip = require('geoip')
+local geoip_country = require('geoip.country')
+geoip_country.open(geoip_country_filename)
 
 -- Lookup country code:
-r = g:lookup(ngx.arg[1])
+local country_record = geoip_country:query_by_addr(ngx.arg[1])
 
 -- Work out if country is allowed:
 local allow_country_csv = os.getenv("ALLOW_COUNTRY_CSV")
 if not allow_country_csv == "" then
     ngx.var.allowed_country = "no"
     for country in split(allow_country_csv, ",") do
-        if country == r.country_code then
+        if country == country_record.code then
             ngx.var.allowed_country = "yes"
             break
         end
     end
 end
 
-return r.country_code
+return country_record.code
