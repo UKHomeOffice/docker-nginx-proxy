@@ -142,17 +142,13 @@ fi
 GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     msg "Enabling Country codes detection:${ALLOW_COUNTRY_CSV}..."
-    IFS=',' read -a ALLOW_COUNTRY_ARRAY <<< "$ALLOW_COUNTRY_CSV"
-    cat > ${GEO_CFG} <<-EOF-GEOIP
-		geoip_country /usr/share/GeoIP/GeoLiteCountry.dat;
-		map \$geoip_country_code \$allow_visit {
-		    default no;
-	EOF-GEOIP
-
-    for i in "${!ALLOW_COUNTRY_ARRAY[@]}"; do
-        echo "    ${ALLOW_COUNTRY_ARRAY[$i]} yes;">>${GEO_CFG}
-    done
-    echo "}">>${GEO_CFG}
+	cat > ${NGIX_CONF_DIR}/nginx_geoip_init.conf <<-EOF-GEO-INIT
+	init_by_lua '
+		country = require "country"
+		country:init()
+	';
+	EOF-GEO-INIT
+    echo "set_by_lua_file \$country_code /usr/local/openresty/nginx/lua/get_country.lua \"\$${REMOTE_IP_VAR}\";">>${GEO_CFG}
 
     # Set up base data as that from yum package...
     ln -s /usr/share/GeoIP/GeoIP.dat /usr/share/GeoIP/GeoLiteCountry.dat
@@ -161,6 +157,7 @@ if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     /refresh_GeoIP.sh &
 else
     touch ${GEO_CFG}
+    touch ${NGIX_CONF_DIR}/nginx_geoip_init.conf
 fi
 
 eval "${NGINX_BIN} -g \"daemon off;\""
