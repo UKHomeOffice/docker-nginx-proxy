@@ -37,7 +37,7 @@ ADD ./refresh_GeoIP.sh /
 
 RUN yum remove -y kernel-headers && \
     yum clean all
-    
+
 WORKDIR /usr/local/openresty
 
 ENTRYPOINT ["/go.sh"]
