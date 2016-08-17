@@ -160,4 +160,11 @@ else
     touch ${NGIX_CONF_DIR}/nginx_geoip_init.conf
 fi
 
+if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
+    msg "Setting up statsd configuration with server ${STATSD_SERVER}"
+    echo "statsd_server ${STATSD_SERVER};" > ${NGIX_CONF_DIR}/nginx_statsd_server.conf
+    echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf
+fi
+
+
 eval "${NGINX_BIN} -g \"daemon off;\""

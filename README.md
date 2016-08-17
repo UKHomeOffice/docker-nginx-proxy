@@ -77,6 +77,8 @@ This is useful when testing or for development instances or when a load-balancer
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. 
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
+* `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
+* `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
 
 ### Ports
 
