@@ -139,6 +139,11 @@ if [ "${ADD_NGINX_SERVER_CFG}" != "" ]; then
     echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
 fi
 
+if [ "${ADD_NGINX_HTTP_CFG}" != "" ]; then
+    msg "Adding extra config for http context."
+    echo ${ADD_NGINX_HTTP_CFG}>${NGIX_CONF_DIR}/nginx_http_extras.conf
+fi
+
 GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     msg "Enabling Country codes detection:${ALLOW_COUNTRY_CSV}..."
