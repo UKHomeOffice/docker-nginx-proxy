@@ -52,7 +52,9 @@ STD_CMD="${START_INSTANCE}"
 echo "========"
 echo "BUILD..."
 echo "========"
+echo "travis_fold:start:BUILD"
 docker build -t ${TAG} .
+echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
 ${STD_CMD} -d -p 8080:8080 \
