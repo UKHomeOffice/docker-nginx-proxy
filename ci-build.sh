@@ -3,7 +3,6 @@
 set -e
 
 TAG=ngx
-COUNT=0
 PORT=8443
 START_INSTANCE="docker run --privileged=true "
 DOCKER_HOST_NAME=127.0.0.1
@@ -28,12 +27,9 @@ function clean_up() {
 }
 
 function start_test() {
-    COUNT=$((COUNT + 1))
-    PORT=$((PORT + 1))
-    INSTANCE=${TAG}_$COUNT
-    HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-443}
-
+    INSTANCE=${TAG}
     tear_down
+    HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-443}
     echo ""
     echo ""
     echo "_____________"
