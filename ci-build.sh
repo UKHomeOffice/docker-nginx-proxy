@@ -154,19 +154,6 @@ else
     exit 1
 fi
 
-
-HTTPS_LISTEN_PORT=$((PORT + 1))
-start_test "Start with listen for HTTPS port 4430" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
-           -e \"PROXY_SERVICE_PORT=8080\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}\" \
-           --link mockserver:mockserver "
-echo "Test ok..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-unset HTTPS_LISTEN_PORT
-
 start_test "Test response has gzip" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
