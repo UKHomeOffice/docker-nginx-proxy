@@ -13,9 +13,9 @@ function tear_down_container() {
     container=$1
     if docker ps -a | grep "${container}" &>/dev/null ; then
         if docker ps | grep "${container}" &>/dev/null ; then
-            ${SUDO_CMD} docker stop "${container}"
+            docker stop "${container}"
         fi
-        ${SUDO_CMD} docker rm "${container}"
+        docker rm "${container}"
     fi
 }
 
@@ -29,7 +29,7 @@ function clean_up() {
 }
 
 function wait_until_started() {
-    ${SUDO_CMD} docker exec -it ${INSTANCE} /readyness.sh POLL
+    docker exec -it ${INSTANCE} /readyness.sh POLL
 }
 
 function start_test() {
@@ -49,20 +49,19 @@ function start_test() {
     bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     if ! wait_until_started ; then
         echo "Error, not started in time..."
-        ${SUDO_CMD} docker logs ${INSTANCE}
+        docker logs ${INSTANCE}
         exit 1
     fi
 }
 
-SUDO_CMD=""
 clean_up
 
-STD_CMD="${SUDO_CMD} ${START_INSTANCE}"
+STD_CMD="${START_INSTANCE}"
 
 echo "========"
 echo "BUILD..."
 echo "========"
-${SUDO_CMD} docker build -t ${TAG} .
+docker build -t ${TAG} .
 
 echo "Running mocking-server..."
 ${STD_CMD} -d -p 8080:8080 \
@@ -71,9 +70,8 @@ ${STD_CMD} -d -p 8080:8080 \
            -config=/test-servers.yaml \
            -debug \
            -port=8080
-echo "sleep 5..."
-sleep 5
-${SUDO_CMD} docker ps
+docker run --rm --link mockserver:mockserver martin/wait
+docker ps
 
 echo "=========="
 echo "TESTING..."
@@ -315,7 +313,7 @@ start_test "Test text logging format..." "${STD_CMD} \
 echo "Test request (with logging as text)..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing text logs format..."
-${SUDO_CMD} docker logs ${INSTANCE} | grep '127.0.0.1 - -'
+docker logs ${INSTANCE} | grep '127.0.0.1 - -'
 
 start_test "Test json logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -326,8 +324,8 @@ start_test "Test json logging format..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing json logs format..."
-${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
-${SUDO_CMD} docker logs ${INSTANCE}  | grep 'animal=cow'
+docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+docker logs ${INSTANCE}  | grep 'animal=cow'
 
 
 start_test "Test param logging off option works..." "${STD_CMD} \
@@ -340,8 +338,8 @@ start_test "Test param logging off option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing no logging of url params option works..."
-${SUDO_CMD} docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
-${SUDO_CMD} docker logs ${INSTANCE}  | grep 'animal=cow' | wc -l | grep --regexp=^0$
+docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+docker logs ${INSTANCE}  | grep 'animal=cow' | wc -l | grep --regexp=^0$
 
 start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -372,8 +370,8 @@ start_test "Test UUID GET param logging option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
-${SUDO_CMD} docker logs mockserver | grep '?nginxId='
-${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep '?nginxId='
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 start_test "Test UUID GET param logging option works with other params..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -383,8 +381,8 @@ start_test "Test UUID GET param logging option works with other params..." "${ST
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?foo=bar
 echo "Testing no logging of url params option works..."
-${SUDO_CMD} docker logs mockserver | grep '?foo=bar&nginxId='
-${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep '?foo=bar&nginxId='
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 start_test "Test UUID header logging option works..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -394,8 +392,8 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
-${SUDO_CMD} docker logs mockserver | grep 'Nginxid:'
-${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep 'Nginxid:'
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"
