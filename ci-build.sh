@@ -11,13 +11,11 @@ source ./helper.sh
 
 function tear_down_container() {
     container=$1
-    if [ "${TEAR_DOWN}" == "true" ]; then
-        if docker ps -a | grep "${container}" &>/dev/null ; then
-            if docker ps | grep "${container}" &>/dev/null ; then
-                ${SUDO_CMD} docker stop "${container}"
-            fi
-            ${SUDO_CMD} docker rm "${container}"
+    if docker ps -a | grep "${container}" &>/dev/null ; then
+        if docker ps | grep "${container}" &>/dev/null ; then
+            ${SUDO_CMD} docker stop "${container}"
         fi
+        ${SUDO_CMD} docker rm "${container}"
     fi
 }
 
@@ -56,18 +54,9 @@ function start_test() {
     fi
 }
 
-# Cope with local builds with docker machine...
-if [ "${DOCKER_MACHINE_NAME}" == "" ]; then
-    DOCKER_HOST_NAME=localhost
-    SUDO_CMD=sudo
-    # On travis... need to do this for it to work!
-    ${SUDO_CMD} service docker restart ; sleep 10
-else
-    DOCKER_HOST_NAME=$(docker-machine ip ${DOCKER_MACHINE_NAME})
-    TEAR_DOWN=true
-    SUDO_CMD=""
-    clean_up
-fi
+SUDO_CMD=""
+clean_up
+
 STD_CMD="${SUDO_CMD} ${START_INSTANCE}"
 
 echo "========"

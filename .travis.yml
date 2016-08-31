@@ -4,4 +4,4 @@ services:
   - docker
 
 script:
-  - ./ci-build.sh
+  - travis_retry ./ci-build.sh
