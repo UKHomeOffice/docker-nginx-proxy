@@ -82,7 +82,7 @@ start_test "Start with minimal settings" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test it's up and working..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
 docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${TAG}:443" &> /dev/null;
 echo "Test sslv2 not accepted...."
@@ -172,9 +172,10 @@ start_test "Test response has gzip" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
 echo "Test gzip ok..."
-curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT} | grep -q 'Content-Encoding: gzip'
+curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | grep -q 'Content-Encoding: gzip'
 
 start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
@@ -191,7 +192,7 @@ start_test "Start we auto add a protocol " "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test It works if we do not define the protocol.."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
 
 start_test "Start with multi locations settings" "${STD_CMD} \
@@ -203,9 +204,9 @@ start_test "Start with multi locations settings" "${STD_CMD} \
 
 
 echo "Test for location 1 @ /..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test for news..."
-wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
+wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
 
 
 
@@ -217,7 +218,7 @@ start_test "Start with Multiple locations, single proxy and NAXSI download." "${
            -e \"NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432\""
 
 echo "Test for all OK..."
-wget -O /dev/null --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
 
 
 
@@ -236,17 +237,17 @@ start_test "Start with Client CA, and single proxy. Block unauth for /standards"
            -v ${PWD}/client_certs/ca.crt:/etc/keys/client-ca "
 
 echo "Test access OK for basic area..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
 echo "Test access denied for /standards/..."
-if wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ ; then
+if wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ ; then
     echo "Error - expecting auth fail!"
     exit 1
 else
     echo "Passed auth fail"
 fi
 echo "Test access OK for /standards/... with client cert..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
 
@@ -259,8 +260,8 @@ start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
 echo "Test All ok..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
 if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/api/dead | grep "Oh dear" ; then
     echo "Passed return text on error with ERROR_REDIRECT_CODES"
 else
@@ -353,7 +354,7 @@ start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link mockserver:mockserver "
 echo "Test extra param works"
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
+wget  -O - -o /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
 
 
 start_test "Test UUID GET param logging option works..." "${STD_CMD} \
@@ -362,7 +363,7 @@ start_test "Test UUID GET param logging option works..." "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
            --link mockserver:mockserver "
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
+curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
 docker logs mockserver | grep '?nginxId='
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
@@ -373,7 +374,7 @@ start_test "Test UUID GET param logging option works with other params..." "${ST
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
            --link mockserver:mockserver "
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?foo=bar
+curl -sk https://${DOCKER_HOST_NAME}:${PORT}/?foo=bar
 echo "Testing no logging of url params option works..."
 docker logs mockserver | grep '?foo=bar&nginxId='
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
@@ -384,7 +385,7 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            --link mockserver:mockserver "
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
+curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
 docker logs mockserver | grep 'Nginxid:'
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
