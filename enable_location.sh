@@ -130,7 +130,7 @@ elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}
 else
-    UUID_ARGS='set $args $args&nginxId=$uuidopt;'
+    UUID_ARGS='if ($is_args) {set $args $args&nginxId=$uuidopt;} if ($is_args = "") { set $args nginxId=$uuidopt;}'
     # Ensure nginx enables this globaly
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}

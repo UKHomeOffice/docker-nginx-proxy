@@ -13,6 +13,22 @@
    response:
      code: 200
      body: '200 is OK :)'
+ - name: All OK with nginxID
+   request:
+     uri: /?nginxId=foo
+     regexuri: \/?nginxId=[a-z]+
+     method: GET
+   response:
+     code: 200
+     body: '200 is OK :)'
+ - name: All OK with nginxID and other get params
+   request:
+     uri: /?foo=bar&nginxId=foo
+     regexuri: \/?foo=bar&nginxId=[a-z]+
+     method: GET
+   response:
+     code: 200
+     body: '200 is OK :)'
  - name: Big Doc
    request:
      uri: /uploads/doc

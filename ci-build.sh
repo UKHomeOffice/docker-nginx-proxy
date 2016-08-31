@@ -78,8 +78,9 @@ ${SUDO_CMD} docker build -t ${TAG} .
 echo "Running mocking-server..."
 ${STD_CMD} -d -p 8080:8080 \
            -v ${PWD}/test-servers.yaml:/test-servers.yaml \
-           --name=mockserver quii/mockingjay-server:1.5.10 \
+           --name=mockserver quii/mockingjay-server:1.9.0 \
            -config=/test-servers.yaml \
+           -debug \
            -port=8080
 echo "sleep 5..."
 sleep 5
@@ -374,6 +375,38 @@ echo "Test extra param works"
 wget -O- --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
 
 
+start_test "Test UUID GET param logging option works..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=TRUE\" \
+           --link mockserver:mockserver "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
+echo "Testing no logging of url params option works..."
+${SUDO_CMD} docker logs mockserver | grep '?nginxId='
+${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+
+start_test "Test UUID GET param logging option works with other params..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=TRUE\" \
+           --link mockserver:mockserver "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?foo=bar
+echo "Testing no logging of url params option works..."
+${SUDO_CMD} docker logs mockserver | grep '?foo=bar&nginxId='
+${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+
+start_test "Test UUID header logging option works..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=HEADER\" \
+           --link mockserver:mockserver "
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}
+echo "Testing no logging of url params option works..."
+${SUDO_CMD} docker logs mockserver | grep 'Nginxid:'
+${SUDO_CMD} docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 echo "__________________________________"
 echo "We got here, ALL tests successfull"
