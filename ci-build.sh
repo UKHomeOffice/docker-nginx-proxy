@@ -73,9 +73,9 @@ start_test "Start with minimal settings" "${STD_CMD} \
 echo "Test it's up and working..."
 wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
-echo "GET /" | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null
-echo "Test sslv2 not excepted...."
-if echo "GET /" | openssl s_client -ssl2 -connect ${DOCKER_HOST_NAME}:${PORT} &> /dev/null ; then
+docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${TAG}:443" &> /dev/null;
+echo "Test sslv2 not accepted...."
+if docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect ${TAG}:443" &> /dev/null; then
   echo "FAIL SSL defaults settings allow ssl2 ......" 
   exit 2 
 fi
@@ -164,7 +164,9 @@ start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"SSL_CIPHERS=RC4-MD5\" \
            -e \"SSL_PROTOCOLS=TLSv1.1\""
 echo "Test excepts defined protocol and cipher....."
-echo "GET /" | openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${DOCKER_HOST_NAME}:${PORT}
+docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${TAG}:443" &> /dev/null;
+
+
 
 start_test "Start we auto add a protocol " "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
