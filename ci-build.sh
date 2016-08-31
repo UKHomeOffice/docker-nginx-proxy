@@ -13,7 +13,7 @@ function tear_down_container() {
         if docker ps | grep "${container}" &>/dev/null ; then
             docker kill "${container}" &>/dev/null
         fi
-        docker rm "${container}"
+        docker rm "${container}" &>/dev/null
     fi
 }
 
