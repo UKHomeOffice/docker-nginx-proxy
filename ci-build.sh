@@ -76,8 +76,8 @@ echo "Test limited protcol and SSL cipher... "
 docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${TAG}:443" &> /dev/null;
 echo "Test sslv2 not accepted...."
 if docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect ${TAG}:443" &> /dev/null; then
-  echo "FAIL SSL defaults settings allow ssl2 ......" 
-  exit 2 
+  echo "FAIL SSL defaults settings allow ssl2 ......"
+  exit 2
 fi
 
 start_test "Test enabling GEODB settings" "${STD_CMD} \
