@@ -6,8 +6,7 @@ TAG=ngx
 COUNT=0
 PORT=8443
 START_INSTANCE="docker run --privileged=true "
-
-source ./helper.sh
+DOCKER_HOST_NAME=127.0.0.1
 
 function tear_down_container() {
     container=$1
@@ -28,10 +27,6 @@ function clean_up() {
     tear_down_container mockserver
 }
 
-function wait_until_started() {
-    docker exec -it ${INSTANCE} /readyness.sh POLL
-}
-
 function start_test() {
     COUNT=$((COUNT + 1))
     PORT=$((PORT + 1))
@@ -47,11 +42,7 @@ function start_test() {
     shift
     echo "Running:$@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
-    if ! wait_until_started ; then
-        echo "Error, not started in time..."
-        docker logs ${INSTANCE}
-        exit 1
-    fi
+    docker run --rm --link ${INSTANCE}:${INSTANCE} martin/wait
 }
 
 clean_up
