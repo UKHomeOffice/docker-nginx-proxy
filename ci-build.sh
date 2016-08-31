@@ -275,7 +275,7 @@ start_test "Start with listen for port 80" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"HTTPS_REDIRECT_PORT=$((PORT + 1))\" \
+           -e \"HTTPS_REDIRECT_PORT=${PORT}\" \
            --link mockserver:mockserver "
 echo "Test Redirect ok..."
 wget -O /dev/null --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
