@@ -7,6 +7,5 @@ else
     local uuid_str = uuid()
     ngx.var.uuid = uuid_str
     ngx.var.uuid_log_opt = " nginxId=" .. uuid_str
-    local uuid_opt = "&nginxId=" .. uuid_str
-    return uuid_opt
+    return uuid_str
 end

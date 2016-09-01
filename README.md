@@ -36,6 +36,7 @@ rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
+ If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to the error page. Defaults to 
 "`500 501 502 503 504`"
