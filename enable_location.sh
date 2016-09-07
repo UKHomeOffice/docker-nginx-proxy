@@ -19,6 +19,7 @@ NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
 CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
+USE_UPSTREAM_CLIENT_CERT=$(get_id_var ${LOCATION_ID} USE_UPSTREAM_CLIENT_CERT)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
@@ -113,6 +114,17 @@ if [ "${CLIENT_CERT_REQUIRED}" == "TRUE" ]; then
 else
     CERT_TXT=""
 fi
+if [ "${USE_UPSTREAM_CLIENT_CERT}" == "TRUE" ]; then
+    if [ ! -f /etc/keys/upstream-client-crt ]; then
+        exit_error_msg "Missing client public cert, for upstream server, at location:/etc/keys/upstream-client-crt"
+    elif [ ! -f /etc/keys/upstream-client-key ]; then
+        exit_error_msg "Missing client private key, for upstream server, at location:/etc/keys/upstream-client-key"
+    fi
+    msg "Will use upstream client certs for '${LOCATION}'."
+    SSL_CERTIFICATE="proxy_ssl_certificate /etc/keys/upstream-client-crt; proxy_ssl_certificate_key /etc/keys/upstream-client-key;"
+else
+    SSL_CERTIFICATE=""
+fi
 
 if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
     msg "Setting host only proxy header"
@@ -199,6 +211,7 @@ location ${LOCATION} {
 
     ${WEB_SOCKETS}
     $(cat /location_template.conf)
+    ${SSL_CERTIFICATE}
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
     proxy_set_header X-Real-IP \$${REMOTE_IP_VAR};

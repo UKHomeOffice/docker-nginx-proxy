@@ -38,6 +38,7 @@ rules to be specified without downloading or mounting in a rule file.
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
  If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
+* `USE_UPSTREAM_CLIENT_CERT` - if set to `TRUE`, will use the set of upstream client certs when connecting upstream, see [Upstream Client Certs](#upstream-client-certs).
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to its own error page. Defaults to
 "`500 501 502 503 504`". To support a new code, say `505`, an error page must be provided at
 `/usr/local/openresty/nginx/html/505.shtml`, see [Useful File Locations](#useful-file-locations).
@@ -227,6 +228,23 @@ docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
+
+#### Upstream Client Certs
+
+If the environment variable `USE_UPSTREAM_CLIENT_CERT` is set to `TRUE`
+then the client certs at `/etc/keys/upstream-client-crt` and
+`/etc/keys/upstream-client-key` will be used to authenticate with the
+upstream HTTPS service.
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=https://stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=443' \
+           -e 'USE_UPSTREAM_CLIENT_CERT=TRUE' \
+           -v "/path/to/client-public.crt:/etc/keys/upstream-client-crt" \
+           -v "/path/to/client-private.key:/etc/keys/upstream-client-key" \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/nginx-proxy:v1.8.0
+```
 
 #### Arbitrary Config
 
