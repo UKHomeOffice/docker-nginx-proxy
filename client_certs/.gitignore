@@ -1,2 +1,3 @@
-ca.*
-client.*
+*.crt
+*.csr
+*.key

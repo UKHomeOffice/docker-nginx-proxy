@@ -6,12 +6,14 @@ TAG=ngx
 PORT=8443
 START_INSTANCE="docker run --privileged=true "
 DOCKER_HOST_NAME=127.0.0.1
+MUTUAL_TLS="mutual-tls"
+STANDARD_TLS="standard-tls"
 
 function tear_down_container() {
     container=$1
     if docker ps -a | grep "${container}" &>/dev/null ; then
         if docker ps | grep "${container}" &>/dev/null ; then
-            docker kill "${container}" &>/dev/null
+            docker kill "${container}" &>/dev/null || true
         fi
         docker rm "${container}" &>/dev/null || true
     fi
@@ -25,6 +27,8 @@ function clean_up() {
     rm -f /tmp/file.txt
     tear_down_container mockserver
     tear_down_container slowmockserver
+    tear_down_container ${MUTUAL_TLS}
+    tear_down_container ${STANDARD_TLS}
     tear_down_container ${TAG}
 }
 
@@ -253,7 +257,6 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
      --private-key=./client_certs/client.key
 
 echo "Test upstream client certs..."
-MUTUAL_TLS="mutual-tls"
 ${STD_CMD} -d \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
@@ -272,6 +275,51 @@ start_test "Start with upstream client certs" "${STD_CMD} \
 echo "Test it's up and working..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 tear_down_container "${MUTUAL_TLS}"
+
+echo "Test failure to verify upstream server cert..."
+${STD_CMD} -d \
+           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
+           -e "PROXY_SERVICE_PORT=80" \
+           --name="${STANDARD_TLS}" ${TAG}
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
+start_test "Start with failing upstream server verification" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
+           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"VERIFY_SERVER_CERT=TRUE\" \
+           -v \"${PWD}/client_certs/ca.crt:/etc/keys/upstream-server-ca\" \
+           --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
+echo "Test it blocks the request, returning a 502..."
+if curl -ki https://${DOCKER_HOST_NAME}:${PORT}/ | grep "502 Bad Gateway" ; then
+    echo "Passed failure to verify upstream server cert"
+else
+    echo "Failed failure to verify upstream server cert"
+    exit 1
+fi
+tear_down_container "${STANDARD_TLS}"
+
+echo "Test successfully verifying upstream server cert..."
+cd ./client_certs/
+./create_server_csr_and_key.sh
+./sign_server_key_with_ca.sh
+cd ..
+${STD_CMD} -d \
+           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
+           -e "PROXY_SERVICE_PORT=80" \
+           -v "${PWD}/client_certs/server.crt:/etc/keys/crt" \
+           -v "${PWD}/client_certs/server.key:/etc/keys/key" \
+           --name="${STANDARD_TLS}" ${TAG}
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
+start_test "Start with succeeding upstream server verification" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
+           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"VERIFY_SERVER_CERT=TRUE\" \
+           -v \"${PWD}/client_certs/ca.crt:/etc/keys/upstream-server-ca\" \
+           --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
+echo "Test it allows the request through..."
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+tear_down_container "${STANDARD_TLS}"
 
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
