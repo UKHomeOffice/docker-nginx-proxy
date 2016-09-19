@@ -1,0 +1,3 @@
+<!--#set var="title" value="404 Not found" -->
+<!--#set var="partial" value="404" -->
+<!--#include file="template.shtml" -->

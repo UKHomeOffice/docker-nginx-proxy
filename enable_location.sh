@@ -183,7 +183,7 @@ location ${LOCATION} {
     ${BASIC_AUTH_CONFIG}
     ${DENY_COUNTRY}
 
-    error_page ${ERROR_REDIRECT_CODES} /50x.html;
+    error_page ${ERROR_REDIRECT_CODES} /nginx-proxy/50x.shtml;
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 

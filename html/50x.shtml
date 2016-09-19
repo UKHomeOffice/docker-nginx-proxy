@@ -1,0 +1,3 @@
+<!--#set var="title" value="An error occurred" -->
+<!--#set var="partial" value="50x" -->
+<!--#include file="template.shtml" -->

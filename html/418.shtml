@@ -1,0 +1,3 @@
+<!--#set var="title" value="I am a teapot!" -->
+<!--#set var="partial" value="418" -->
+<!--#include file="template.shtml" -->
