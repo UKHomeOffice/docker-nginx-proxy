@@ -108,7 +108,7 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"ALLOW_COUNTRY_CSV=CG\" \
            -e \"DENY_COUNTRY_ON=TRUE\" \
-           -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /50x.html;\" \
+           -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /nginx-proxy/50x.shtml;\" \
            --link mockserver:mockserver "
 echo "Test GeoIP config IS rejected..."
 if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
