@@ -44,6 +44,8 @@ else
 		listen ${HTTP_LISTEN_PORT} ;
 		listen ${HTTPS_LISTEN_PORT} ssl;
 		set \$real_client_ip_if_set '';
+		set \$http_listen_port '${HTTP_LISTEN_PORT}';
+		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
 	EOF-LISTEN
 fi
 
