@@ -38,8 +38,9 @@ rules to be specified without downloading or mounting in a rule file.
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
  If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
-* `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to the error page. Defaults to 
-"`500 501 502 503 504`"
+* `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to its own error page. Defaults to
+"`500 501 502 503 504`". To support a new code, say `505`, an error page must be provided at
+`/usr/local/openresty/nginx/html/505.shtml`, see [Useful File Locations](#useful-file-locations).
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see 
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
@@ -101,9 +102,11 @@ N.B. see HTTP(S)_LISTEN_PORT above
 See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
-* `/usr/local/openresty/nginx/html/50x.html` - HTML displayed when a 500 error occurs. See ERROR_REDIRECT_CODES to 
-change this.
-  
+* `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
+is encountered upstream and the proxy is configured to intercept. See ERROR_REDIRECT_CODES to change this.
+* `/usr/local/openresty/nginx/html/418-request-denied.shtml` - HTML (with SSI support) displayed when NAXSI
+blocks a request.
+
 ### Examples
 
 #### Self signed SSL Certificate

@@ -269,6 +269,24 @@ else
     exit 1
 fi
 
+start_test "Test custom error pages..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"ERROR_REDIRECT_CODES=502 404 500\" \
+           --link mockserver:mockserver "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/not-found | grep "404 Not Found" ; then
+    if curl -k https://${DOCKER_HOST_NAME}:${PORT}/api/dead | grep "An error occurred" ; then
+        echo "Passed custom error pages with ERROR_REDIRECT_CODES"
+    else
+        echo "Failed custom error pages with ERROR_REDIRECT_CODES on code 500"
+        exit 1
+    fi
+else
+    echo "Failed custom error pages with ERROR_REDIRECT_CODES on code 404"
+    exit 1
+fi
 
 start_test "Start with Custom upload size" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -390,5 +408,5 @@ echo "Testing no logging of url params option works..."
 docker logs mockserver | grep 'Nginxid:'
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
-echo "__________________________________"
-echo "We got here, ALL tests successfull"
+echo "_________________________________"
+echo "We got here, ALL tests successful"

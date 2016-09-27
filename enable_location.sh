@@ -135,9 +135,17 @@ else
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}
 fi
+
 if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
     ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
 fi
+ERROR_PAGES=""
+for code in ${ERROR_REDIRECT_CODES}; do
+  # Set up an individual error page for each code
+  msg "Enabling redirect on status code: ${code}"
+  ERROR_PAGES="${ERROR_PAGES} error_page ${code} /nginx-proxy/${code}.shtml;"
+done
+
 if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
     msg "Enable web socket support"
     WEB_SOCKETS="include ${NGIX_CONF_DIR}/nginx_web_sockets_proxy.conf;"
@@ -183,7 +191,7 @@ location ${LOCATION} {
     ${BASIC_AUTH_CONFIG}
     ${DENY_COUNTRY}
 
-    error_page ${ERROR_REDIRECT_CODES} /nginx-proxy/50x.shtml;
+    ${ERROR_PAGES}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 
