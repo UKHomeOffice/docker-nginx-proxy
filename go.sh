@@ -36,6 +36,8 @@ if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
 		real_ip_header proxy_protocol;
 		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
 		set_real_ip_from ${LOAD_BALANCER_CIDR};
+		set \$http_listen_port '${HTTP_LISTEN_PORT}';
+		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
 	EOF-LISTEN-PP
 else
     msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
