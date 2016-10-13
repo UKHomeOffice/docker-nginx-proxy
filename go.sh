@@ -47,11 +47,11 @@ else
     cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
 		listen ${HTTP_LISTEN_PORT} ;
 		listen ${HTTPS_LISTEN_PORT} ssl;
-    listen ${SYSDIG_LISTEN_PORT};
+		listen ${SYSDIG_LISTEN_PORT};
 		set \$real_client_ip_if_set '';
 		set \$http_listen_port '${HTTP_LISTEN_PORT}';
 		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-    set \$http_listen_port '${SYSDIG_LISTEN_PORT};
+		set \$http_listen_port '${SYSDIG_LISTEN_PORT};
 	EOF-LISTEN
 fi
 
