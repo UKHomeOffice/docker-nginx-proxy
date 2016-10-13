@@ -44,4 +44,5 @@ WORKDIR /usr/local/openresty
 ENTRYPOINT ["/go.sh"]
 
 EXPOSE 80
+EXPOSE 88
 EXPOSE 443
