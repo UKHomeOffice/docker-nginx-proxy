@@ -77,8 +77,9 @@ This is useful when testing or for development instances or when a load-balancer
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
-* `HTTP_LISTEN_PORT` - Change the default inside the container from 80. Note: Port 10418 is reserved for internal processing.
-* `HTTPS_LISTEN_PORT` - Change the default inside the container from 443. Note: Port 10418 is reserved for internal processing.
+* `HTTP_LISTEN_PORT` - Change the default inside the container from 80.
+* `HTTPS_LISTEN_PORT` - Change the default inside the container from 443.
+* `INTERNAL_LISTEN_PORT` - Change the default inside the container from 10418. Note: This is used for internal processing and is not available externally.
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)

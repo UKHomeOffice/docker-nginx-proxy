@@ -26,14 +26,14 @@ if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
 
-NAXSI_LISTEN_PORT="10418"
+INTERNAL_LISTEN_PORT="${INTERNAL_LISTEN_PORT:-10418}"
 NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
 
 cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		set \$http_listen_port '${HTTP_LISTEN_PORT}';
 		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-		set \$naxsi_listen_port '${NAXSI_LISTEN_PORT}';
-		listen localhost:${NAXSI_LISTEN_PORT} ssl;
+		set \$internal_listen_port '${INTERNAL_LISTEN_PORT}';
+		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
