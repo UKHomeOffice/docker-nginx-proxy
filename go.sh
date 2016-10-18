@@ -26,29 +26,35 @@ if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
 
+INTERNAL_LISTEN_PORT="${INTERNAL_LISTEN_PORT:-10418}"
+NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
+
+cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
+		set \$http_listen_port '${HTTP_LISTEN_PORT}';
+		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
+		set \$internal_listen_port '${INTERNAL_LISTEN_PORT}';
+		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
+EOF-LISTEN
+
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     export REMOTE_IP_VAR="proxy_protocol_addr"
-    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN-PP
+    cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-PP
 		listen ${HTTP_LISTEN_PORT} proxy_protocol;
 		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
 		real_ip_recursive on;
 		real_ip_header proxy_protocol;
 		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
 		set_real_ip_from ${LOAD_BALANCER_CIDR};
-		set \$http_listen_port '${HTTP_LISTEN_PORT}';
-		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
 	EOF-LISTEN-PP
 else
     msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
     export REMOTE_IP_VAR="remote_addr"
-    cat > ${NGIX_CONF_DIR}/nginx_listen.conf <<-EOF-LISTEN
-		listen ${HTTP_LISTEN_PORT} ;
+    cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
+		listen ${HTTP_LISTEN_PORT};
 		listen ${HTTPS_LISTEN_PORT} ssl;
 		set \$real_client_ip_if_set '';
-		set \$http_listen_port '${HTTP_LISTEN_PORT}';
-		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-	EOF-LISTEN
+	EOF-LISTEN-NONPP
 fi
 
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
