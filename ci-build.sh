@@ -13,7 +13,7 @@ function tear_down_container() {
         if docker ps | grep "${container}" &>/dev/null ; then
             docker kill "${container}" &>/dev/null
         fi
-        docker rm "${container}" &>/dev/null
+        docker rm "${container}" &>/dev/null || true
     fi
 }
 
@@ -25,6 +25,7 @@ function clean_up() {
     rm -f /tmp/file.txt
     tear_down_container mockserver
     tear_down_container slowmockserver
+    tear_down_container ${TAG}
 }
 
 function start_test() {
@@ -431,3 +432,4 @@ docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 echo "_________________________________"
 echo "We got here, ALL tests successful"
+clean_up
