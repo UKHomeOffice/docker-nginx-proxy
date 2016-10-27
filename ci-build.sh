@@ -251,6 +251,27 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
      --certificate=./client_certs/client.crt \
      --private-key=./client_certs/client.key
 
+echo "Test upstream client certs..."
+MUTUAL_TLS="mutual-tls"
+${STD_CMD} -d \
+           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
+           -e "PROXY_SERVICE_PORT=80" \
+           -e "CLIENT_CERT_REQUIRED=TRUE" \
+           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
+           --name="${MUTUAL_TLS}" ${TAG}
+docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait
+start_test "Start with upstream client certs" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=https://${MUTUAL_TLS}\" \
+           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"USE_UPSTREAM_CLIENT_CERT=TRUE\" \
+           -v \"${PWD}/client_certs/client.crt:/etc/keys/upstream-client-crt\" \
+           -v \"${PWD}/client_certs/client.key:/etc/keys/upstream-client-key\" \
+           --link \"${MUTUAL_TLS}:${MUTUAL_TLS}\" "
+echo "Test it's up and working..."
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+tear_down_container "${MUTUAL_TLS}"
+
 start_test "Start with Custom error pages redirect off" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
