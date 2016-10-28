@@ -38,6 +38,7 @@ rules to be specified without downloading or mounting in a rule file.
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
  If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
+* `VERIFY_SERVER_CERT` - if set to `TRUE`, will verify the upstream server's TLS certificate is valid and signed by the CA, see [Verifying Upstream Server](#verifying-upstream-server).
 * `USE_UPSTREAM_CLIENT_CERT` - if set to `TRUE`, will use the set of upstream client certs when connecting upstream, see [Upstream Client Certs](#upstream-client-certs).
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to its own error page. Defaults to
 "`500 501 502 503 504`". To support a new code, say `505`, an error page must be provided at
@@ -102,6 +103,12 @@ N.B. see HTTP(S)_LISTEN_PORT above
   signed one is provided if they have not been mounted.
 * `/etc/keys/client-ca` If a client CA is mounted here, it will be loaded and configured. 
 See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
+* `/etc/keys/upstream-server-ca` A CA public cert must be mounted here when verifying the upstream server's certificate is required.
+See `VERIFY_SERVER_CERT` above in [Environment Variables](#environment-variables).
+* `/etc/keys/upstream-client-crt` A public client cert must be mounted here when when the upstream server requires client cert authentication.
+See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
+* `/etc/keys/upstream-client-key` A private client key must be mounted here when when the upstream server requires client cert authentication.
+See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
 nginx.conf.
 * `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
@@ -243,7 +250,22 @@ docker run -e 'PROXY_SERVICE_HOST=https://stackexchange.com' \
            -v "/path/to/client-public.crt:/etc/keys/upstream-client-crt" \
            -v "/path/to/client-private.key:/etc/keys/upstream-client-key" \
            -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.8.0
+           quay.io/ukhomeofficedigital/nginx-proxy:v2.1.0
+```
+
+#### Verifying Upstream Server
+
+If the environment variable `VERIFY_SERVER_CERT` is set to `TRUE` then
+the upstream server's certificate will be validated against the CA
+public cert at `/etc/keys/upstream-server-ca`.
+
+```shell
+docker run -e 'PROXY_SERVICE_HOST=https://stackexchange.com' \
+           -e 'PROXY_SERVICE_PORT=443' \
+           -e 'VERIFY_SERVER_CERT=TRUE' \
+           -v "/path/to/ca.crt:/etc/keys/upstream-server-ca" \
+           -p 8443:443 \
+           quay.io/ukhomeofficedigital/nginx-proxy:v2.1.0
 ```
 
 #### Arbitrary Config

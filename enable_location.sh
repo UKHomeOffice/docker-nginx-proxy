@@ -20,6 +20,7 @@ NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
 CLIENT_CERT_REQUIRED=$(get_id_var ${LOCATION_ID} CLIENT_CERT_REQUIRED)
 USE_UPSTREAM_CLIENT_CERT=$(get_id_var ${LOCATION_ID} USE_UPSTREAM_CLIENT_CERT)
+VERIFY_SERVER_CERT=$(get_id_var ${LOCATION_ID} VERIFY_SERVER_CERT)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
@@ -125,6 +126,15 @@ if [ "${USE_UPSTREAM_CLIENT_CERT}" == "TRUE" ]; then
 else
     SSL_CERTIFICATE=""
 fi
+if [ "${VERIFY_SERVER_CERT}" == "TRUE" ]; then
+    if [ ! -f /etc/keys/upstream-server-ca ]; then
+        exit_error_msg "Missing server CA cert at location:/etc/keys/upstream-server-ca"
+    fi
+    msg "Will require '${LOCATION}'s certificate to be verified."
+    SSL_VERIFY="proxy_ssl_trusted_certificate /etc/keys/upstream-server-ca; proxy_ssl_verify on;"
+else
+    SSL_VERIFY=""
+fi
 
 if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
     msg "Setting host only proxy header"
@@ -212,6 +222,7 @@ location ${LOCATION} {
     ${WEB_SOCKETS}
     $(cat /location_template.conf)
     ${SSL_CERTIFICATE}
+    ${SSL_VERIFY}
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
     proxy_set_header X-Real-IP \$${REMOTE_IP_VAR};
