@@ -4,7 +4,7 @@ set -e
 
 TAG=ngx
 PORT=8443
-START_INSTANCE="docker run --privileged=true "
+START_INSTANCE="docker run "
 DOCKER_HOST_NAME=127.0.0.1
 MUTUAL_TLS="mutual-tls"
 STANDARD_TLS="standard-tls"
@@ -35,7 +35,7 @@ function clean_up() {
 function start_test() {
     INSTANCE=${TAG}
     tear_down
-    HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-443}
+    HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
     echo ""
     echo ""
     echo "_____________"
@@ -89,9 +89,9 @@ start_test "Start with minimal settings" "${STD_CMD} \
 echo "Test it's up and working..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
-docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${TAG}:443" &> /dev/null;
+docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${TAG}:10443" &> /dev/null;
 echo "Test sslv2 not accepted...."
-if docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect ${TAG}:443" &> /dev/null; then
+if docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect ${TAG}:10443" &> /dev/null; then
   echo "FAIL SSL defaults settings allow ssl2 ......"
   exit 2
 fi
@@ -116,8 +116,7 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /nginx-proxy/50x.shtml;\" \
            --link mockserver:mockserver "
 echo "Test GeoIP config IS rejected..."
-if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
-  | grep '403 Forbidden' ; then
+if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
   echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
   exit 2
 else
@@ -188,7 +187,7 @@ start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"SSL_CIPHERS=RC4-MD5\" \
            -e \"SSL_PROTOCOLS=TLSv1.1\""
 echo "Test excepts defined protocol and cipher....."
-docker run --link ${TAG}:${TAG}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${TAG}:443" &> /dev/null;
+docker run --link ${TAG}:${TAG} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${TAG}:10443" &> /dev/null;
 
 
 
@@ -266,7 +265,7 @@ ${STD_CMD} -d \
 docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait
 start_test "Start with upstream client certs" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${MUTUAL_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"PROXY_SERVICE_PORT=10443\" \
            -e \"DNSMASK=TRUE\" \
            -e \"USE_UPSTREAM_CLIENT_CERT=TRUE\" \
            -v \"${PWD}/client_certs/client.crt:/etc/keys/upstream-client-crt\" \
@@ -284,7 +283,7 @@ ${STD_CMD} -d \
 docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
 start_test "Start with failing upstream server verification" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"PROXY_SERVICE_PORT=10443\" \
            -e \"DNSMASK=TRUE\" \
            -e \"VERIFY_SERVER_CERT=TRUE\" \
            -v \"${PWD}/client_certs/ca.crt:/etc/keys/upstream-server-ca\" \
@@ -312,7 +311,7 @@ ${STD_CMD} -d \
 docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
 start_test "Start with succeeding upstream server verification" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"PROXY_SERVICE_PORT=10443\" \
            -e \"DNSMASK=TRUE\" \
            -e \"VERIFY_SERVER_CERT=TRUE\" \
            -v \"${PWD}/client_certs/ca.crt:/etc/keys/upstream-server-ca\" \
@@ -375,7 +374,7 @@ grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
 
 start_test "Start with listen for port 80" "${STD_CMD} \
-           -p 8888:80 \
+           -p 8888:10080 \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
