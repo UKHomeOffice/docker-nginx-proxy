@@ -39,9 +39,16 @@ ADD ./refresh_GeoIP.sh /
 RUN yum remove -y kernel-headers && \
     yum clean all
 
+RUN useradd nginx && \
+    chown -R nginx:nginx . && \
+    chown -R nginx:nginx /usr/local/openresty/ && \
+    chown -R nginx:nginx /etc/ && \
+    chown -R nginx:nginx /usr/
+
 WORKDIR /usr/local/openresty
 
 ENTRYPOINT ["/go.sh"]
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 10080
+EXPOSE 10443
+USER nginx

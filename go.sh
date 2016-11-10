@@ -64,8 +64,8 @@ done
 
 if [ "${NAME_RESOLVER}" == "" ]; then
     if [ "${DNSMASK}" == "TRUE" ]; then
-        dnsmasq
-        export NAME_RESOLVER=127.0.0.1
+        dnsmasq -p 5462
+        export NAME_RESOLVER=127.0.0.1:5462
     else
         export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
     fi
