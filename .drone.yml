@@ -30,7 +30,7 @@ pipeline:
 
 services:
   dind:
-    image: docker:1.11-dind
+    image: docker:1.13-dind
     privileged: true
     command:
       - "-s"
