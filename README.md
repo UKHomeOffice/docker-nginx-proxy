@@ -91,8 +91,8 @@ This is useful when testing or for development instances or when a load-balancer
 
 This container exposes
 
-* `80` - HTTP
-* `443` - HTTPS
+* `10080` - HTTP
+* `10443` - HTTPS
 
 N.B. see HTTP(S)_LISTEN_PORT above
 
