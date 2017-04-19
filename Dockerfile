@@ -6,7 +6,8 @@ WORKDIR /root
 ADD ./build.sh /root/
 RUN ./build.sh
 
-RUN yum install -y openssl && \
+RUN yum update -y && \
+    yum install -y openssl && \
     yum clean all && \
     mkdir -p /etc/keys && \
     cd /etc/keys && \
