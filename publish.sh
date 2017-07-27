@@ -6,6 +6,10 @@ NAME="nginx-proxy"
 FULL_NAME="${REPO}${BASE}${NAME}"
 DOCKER_USERNAME="lev-web-robot"
 
+PATCH="${DRONE_TAG}"
+MINOR=`echo ${PATCH} | awk -F '.' '{print $1"."$2}'`
+MAJOR=`echo ${MINOR} | awk -F '.' '{print $1}'`
+
 docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" "${REPO}"
 
 tag_n_push() {
@@ -15,5 +19,7 @@ tag_n_push() {
   echo "published ${1}"
 }
 
-tag_n_push "${DRONE_TAG}"
+tag_n_push "${PATCH}"
+tag_n_push "${MINOR}"
+tag_n_push "${MAJOR}"
 tag_n_push "latest"
