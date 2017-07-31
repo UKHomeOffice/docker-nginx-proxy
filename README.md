@@ -86,6 +86,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
+* `DISABLE_SYSDIG_METRICS` - Set to any non-empty string to disable support for Sysdig's metric collection
 
 ### Ports
 
