@@ -8,13 +8,12 @@ OPEN_RESTY_VER=1.9.15.1
 LUAROCKS_VER=2.2.1
 NAXSI_VER=0.54
 STATSD_VER=0.0.1
+GEOIP_API_C_VER=1.6.11
 
-# Install all dependacies to build from source
+# Install dependencies to build from source
 yum -y install \
     gcc-c++ \
     gcc \
-    geoip \
-    geoip-devel \
     make \
     openssl-devel \
     openssl \
@@ -25,6 +24,16 @@ yum -y install \
     tar \
     unzip \
     wget
+
+# build and install the missing geoip stuff
+wget -O geoip-api-c.tar.gz "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_API_C_VER}/GeoIP-${GEOIP_API_C_VER}.tar.gz"
+tar -xzvf geoip-api-c.tar.gz
+rm geoip-api-c.tar.gz
+cd "GeoIP-${GEOIP_API_C_VER}"
+./configure
+make
+make check
+make install
 
 # Prepare
 wget -O ngx_openresty-${OPEN_RESTY_VER}.tar.gz ${OPEN_RESTY_URL}/openresty-${OPEN_RESTY_VER}.tar.gz
