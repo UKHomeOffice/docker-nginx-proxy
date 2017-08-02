@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-function usage {
+usage() {
     cat <<EOL
 USAGE: ${0} SRC DEST VERSION
 
@@ -19,7 +19,7 @@ SRC="${1}"
 DEST="${2}"
 VERSION="${3}"
 
-function check_arg {
+check_arg() {
     if [ -z "${1}" ]; then
         echo "Error: Missing ${2} in arguments";
         echo
@@ -36,7 +36,7 @@ PATCH="${VERSION}"
 MINOR=`echo ${PATCH} | awk -F '.' '{print $1"."$2}'`
 MAJOR=`echo ${MINOR} | awk -F '.' '{print $1}'`
 
-function tag_n_push {
+tag_n_push() {
     FULL_NAME="${DEST}:${1}"
     echo -n "Publishing '${SRC}' as '${FULL_NAME}'..."
     docker tag ngx "${FULL_NAME}"
