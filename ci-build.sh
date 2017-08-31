@@ -477,6 +477,33 @@ echo "Testing no logging of url params option works..."
 docker logs mockserver | grep 'Nginxid:'
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
+start_test "Test VERBOSE_ERROR_PAGES=TRUE displays debug info" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"VERBOSE_ERROR_PAGES=TRUE\" \
+           --link mockserver:mockserver "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Sorry, we are refusing to process your request." ; then
+  echo "Testing VERBOSE_ERROR_PAGES works..."
+else
+  echo "Testing VERBOSE_ERROR_PAGES failed..."
+  exit 1
+fi
+
+start_test "Test VERBOSE_ERROR_PAGES is not set does not display debug info" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link mockserver:mockserver "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Sorry, we are refusing to process your request." ; then
+  echo "Testing VERBOSE_ERROR_PAGES failed..."
+  exit 1
+else
+  echo "Testing VERBOSE_ERROR_PAGES works..."
+fi
+
 echo "_________________________________"
 echo "We got here, ALL tests successful"
 clean_up
