@@ -39,7 +39,7 @@ MAJOR=`echo ${MINOR} | awk -F '.' '{print $1}'`
 tag_n_push() {
     FULL_NAME="${DEST}:${1}"
     echo -n "Publishing '${SRC}' as '${FULL_NAME}'..."
-    docker tag ngx "${FULL_NAME}"
+    docker tag "${SRC}" "${FULL_NAME}"
     docker push "${FULL_NAME}"
     echo " done."
 }
