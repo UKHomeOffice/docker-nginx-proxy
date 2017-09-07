@@ -56,6 +56,8 @@ RUN useradd nginx && \
     chown -R nginx:nginx /usr/local/openresty/nginx/scgi_temp && \
     chown -R nginx:nginx /usr/share/GeoIP
 
+RUN setfacl -d -R -m u:nginx:r-X /etc/keys
+
 WORKDIR /usr/local/openresty
 
 ENTRYPOINT ["/go.sh"]
