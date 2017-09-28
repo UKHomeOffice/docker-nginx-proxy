@@ -411,7 +411,7 @@ echo "Testing json logs format..."
 
 start_test "Test custom logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
-           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=custom\" \
            -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
@@ -517,7 +517,7 @@ fi
 
 start_test "Test setting UUID name works..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
-           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            -e \"UUID_VAR_NAME=custom_uuid_name\" \
