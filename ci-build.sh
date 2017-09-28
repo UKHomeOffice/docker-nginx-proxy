@@ -422,7 +422,7 @@ start_test "Test custom logging format..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing custom logs format..."
-docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/1\.\d\s200.*\s\}$'
+docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
 
 start_test "Test param logging off option works..." "${STD_CMD} \
            --log-driver json-file \
