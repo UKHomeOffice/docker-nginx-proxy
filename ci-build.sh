@@ -59,7 +59,7 @@ docker build -t ${TAG} .
 echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
-${STD_CMD} -d -p 6000:6000 \
+${STD_CMD} --log-driver json-file -d -p 6000:6000 \
            -v ${PWD}/test-servers.yaml:/test-servers.yaml \
            --name=mockserver quii/mockingjay-server:1.9.0 \
            -config=/test-servers.yaml \
@@ -68,7 +68,7 @@ ${STD_CMD} -d -p 6000:6000 \
 docker run --rm --link mockserver:mockserver martin/wait
 
 echo "Running slow-mocking-server..."
-${STD_CMD} -d -p 6001:6001 \
+${STD_CMD} --log-driver json-file -d -p 6001:6001 \
            -v ${PWD}/test-servers.yaml:/test-servers.yaml \
            -v ${PWD}/monkey-business.yaml:/monkey-business.yaml \
            --name=slowmockserver quii/mockingjay-server:1.9.0 \
@@ -386,6 +386,7 @@ wget -O /dev/null --quiet --no-check-certificate http://${DOCKER_HOST_NAME}:8888
 
 
 start_test "Test text logging format..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -395,9 +396,10 @@ start_test "Test text logging format..." "${STD_CMD} \
 echo "Test request (with logging as text)..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing text logs format..."
-#docker logs ${INSTANCE} | grep "\"GET / HTTP/1.1\" 200"
+docker logs ${INSTANCE} | grep "\"GET / HTTP/1.1\" 200"
 
 start_test "Test json logging format..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -406,12 +408,13 @@ start_test "Test json logging format..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing json logs format..."
-#docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
-#docker logs ${INSTANCE}  | grep 'animal=cow'
+docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
+docker logs ${INSTANCE}  | grep 'animal=cow'
 
 start_test "Test custom logging format..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
-           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=custom\" \
            -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
@@ -419,9 +422,10 @@ start_test "Test custom logging format..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing custom logs format..."
-docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/1\.\d\s200.*\s\}$'
+docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
 
 start_test "Test param logging off option works..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -431,8 +435,8 @@ start_test "Test param logging off option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing no logging of url params option works..."
-#docker logs ${INSTANCE} 2>/dev/null | grep '{"proxy_proto_address":'
-#docker logs ${INSTANCE} 2>/dev/null | grep 'animal=cow' | wc -l | grep 0
+docker logs ${INSTANCE} 2>/dev/null | grep '{"proxy_proto_address":'
+docker logs ${INSTANCE} 2>/dev/null | grep 'animal=cow' | wc -l | grep 0
 
 start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -456,6 +460,7 @@ wget  -O - -o /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAM
 
 
 start_test "Test UUID GET param logging option works..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -463,10 +468,11 @@ start_test "Test UUID GET param logging option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
-#docker logs mockserver | grep '?nginxId='
-#docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep '?nginxId='
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 start_test "Test UUID GET param logging option works with other params..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -474,10 +480,11 @@ start_test "Test UUID GET param logging option works with other params..." "${ST
            --link mockserver:mockserver "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}/?foo=bar
 echo "Testing no logging of url params option works..."
-#docker logs mockserver | grep '?foo=bar&nginxId='
-#docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep '?foo=bar&nginxId='
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 start_test "Test UUID header logging option works..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
@@ -485,8 +492,8 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            --link mockserver:mockserver "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
-#docker logs mockserver | grep 'Nginxid:'
-#docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+docker logs mockserver | grep 'Nginxid:'
+docker logs ${INSTANCE} | grep '"nginx_uuid": "'
 
 start_test "Test VERBOSE_ERROR_PAGES=TRUE displays debug info" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
@@ -516,8 +523,9 @@ else
 fi
 
 start_test "Test setting UUID name works..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
-           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"PROXY_SERVICE_PORT=6000\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            -e \"UUID_VAR_NAME=custom_uuid_name\" \
@@ -527,6 +535,7 @@ docker logs mockserver 2>/dev/null | grep "custom_uuid_name"
 echo "Testing setting UUID_VAR_NAME works"
 
 start_test "Test setting empty UUID name defaults correctly..." "${STD_CMD} \
+           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://mockserver\" \
            -e \"PROXY_SERVICE_PORT=8080\" \
            -e \"DNSMASK=TRUE\" \
