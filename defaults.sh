@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export DOWNLOAD_VIA_S3_VPC_ENDPOINT=${DOWNLOAD_VIA_S3_VPC_ENDPOINT:-'FALSE'}
 export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
 export NGINX_BIN=/usr/local/openresty/nginx/sbin/nginx
 export UUID_FILE=/tmp/uuid_on
@@ -39,7 +40,11 @@ function download() {
             msg "About to retry download for ${file_url}..."
             sleep 1
         fi
-        if curl --max-time 30 --fail -s -o ${file_path} ${file_url} ; then
+        if [ "${DOWNLOAD_VIA_S3_VPC_ENDPOINT}" == "TRUE" ]; then
+            REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
+            aws s3 cp --region "${REGION}" --endpoint-url https://s3-"${REGION}".amazonaws.com "${NAXSI_RULES_URL_CSV}" ${file_path}
+            error=$?
+        elif curl --max-time 30 --fail -s -o ${file_path} ${file_url} ; then
             error=0
         fi
         if [ -n ${file_md5} ]; then
