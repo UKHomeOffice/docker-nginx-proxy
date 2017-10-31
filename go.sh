@@ -211,5 +211,4 @@ if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
     echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf
 fi
 
-
 eval "${NGINX_BIN} -g \"daemon off;\""
