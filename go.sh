@@ -67,6 +67,7 @@ if [ ! -z "${DISABLE_SYSDIG_METRICS}" ]; then
         stub_status on;
         access_log   off;
         allow 127.0.0.1;
+        allow 172.17.0.1;
         deny all;
       }
     }
