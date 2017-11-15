@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Script to install the openresty from source and to tidy up after...
 
-set -e
+set -eu
+set -o pipefail
 
 OPEN_RESTY_VER="1.11.2.4"
 LUAROCKS_VER="2.4.2"
@@ -25,25 +26,11 @@ yum -y install \
     wget
 
 # Prepare
-wget -O "ngx_openresty-${OPEN_RESTY_VER}.tar.gz" "http://openresty.org/download/openresty-${OPEN_RESTY_VER}.tar.gz"
-tar -xzvf "ngx_openresty-${OPEN_RESTY_VER}.tar.gz"
-rm "ngx_openresty-${OPEN_RESTY_VER}.tar.gz"
-
-wget -O "luarocks-${LUAROCKS_VER}.tar.gz" "http://luarocks.org/releases/luarocks-${LUAROCKS_VER}.tar.gz"
-tar -xzvf "luarocks-${LUAROCKS_VER}.tar.gz"
-rm "luarocks-${LUAROCKS_VER}.tar.gz"
-
-wget -O "naxsi-${NAXSI_VER}.tar.gz" "https://github.com/nbs-system/naxsi/archive/${NAXSI_VER}.tar.gz"
-tar -xzvf "naxsi-${NAXSI_VER}.tar.gz"
-rm "naxsi-${NAXSI_VER}.tar.gz"
-
-wget -O "nginx_statsd-${STATSD_VER}.tar.gz" "https://github.com/UKHomeOffice/nginx-statsd/archive/${STATSD_VER}.tar.gz"
-tar -xvzf "nginx_statsd-${STATSD_VER}.tar.gz"
-rm "nginx_statsd-${STATSD_VER}.tar.gz"
-
-wget -O "geoip-api-c-${GEOIP_VER}.tar.gz" "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VER}/GeoIP-${GEOIP_VER}.tar.gz"
-tar -xzvf "geoip-api-c-${GEOIP_VER}.tar.gz"
-rm "geoip-api-c-${GEOIP_VER}.tar.gz"
+wget -O - "http://openresty.org/download/openresty-${OPEN_RESTY_VER}.tar.gz" | tar xzv
+wget -O - "http://luarocks.org/releases/luarocks-${LUAROCKS_VER}.tar.gz" | tar xzv
+wget -O - "https://github.com/nbs-system/naxsi/archive/${NAXSI_VER}.tar.gz" | tar xzv
+wget -O - "https://github.com/UKHomeOffice/nginx-statsd/archive/${STATSD_VER}.tar.gz" | tar xzv
+wget -O - "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VER}/GeoIP-${GEOIP_VER}.tar.gz" | tar xzv
 
 # Build!
 pushd "GeoIP-${GEOIP_VER}"
