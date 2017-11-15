@@ -46,14 +46,13 @@ tar -xzvf "geoip-api-c-${GEOIP_VER}.tar.gz"
 rm "geoip-api-c-${GEOIP_VER}.tar.gz"
 
 # Build!
-cd "GeoIP-${GEOIP_VER}"
+pushd "GeoIP-${GEOIP_VER}"
 ./configure
 make
-make check
-make install
-cd ..
+make check install
+popd
 
-cd "openresty-${OPEN_RESTY_VER}"
+pushd "openresty-${OPEN_RESTY_VER}"
 ./configure --add-module="../naxsi-${NAXSI_VER}/naxsi_src" \
             --add-module="../nginx-statsd-${STATSD_VER}" \
             --with-http_realip_module \
@@ -61,19 +60,19 @@ cd "openresty-${OPEN_RESTY_VER}"
             --with-http_stub_status_module
 make
 make install
-cd ..
+popd
 
 # Install NAXSI default rules...
 mkdir -p /usr/local/openresty/naxsi/
 cp "./naxsi-${NAXSI_VER}/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
 
-cd "luarocks-${LUAROCKS_VER}"
+pushd "luarocks-${LUAROCKS_VER}"
 ./configure --with-lua=/usr/local/openresty/luajit \
     --lua-suffix=jit-2.1.0-beta2 \
     --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
-make build
-make install
-cd ..
+make build install
+popd
+
 luarocks install uuid
 luarocks install luasocket
 luarocks install lua-geoip
