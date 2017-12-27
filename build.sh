@@ -77,7 +77,6 @@ cd ..
 luarocks install uuid
 luarocks install luasocket
 luarocks install lua-geoip
-cd -
 
 # Cleaning up source...
 rm -fr "openresty-${OPEN_RESTY_VER}"
