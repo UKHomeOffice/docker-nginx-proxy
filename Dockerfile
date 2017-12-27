@@ -40,21 +40,10 @@ RUN yum remove -y kernel-headers && \
     yum clean all
 
 RUN useradd nginx && \
-    mkdir /usr/local/openresty/naxsi/locations && \
-    mkdir /usr/local/openresty/nginx/client_body_temp && \
-    mkdir /usr/local/openresty/nginx/proxy_temp && \
-    mkdir /usr/local/openresty/nginx/fastcgi_temp && \
-    mkdir /usr/local/openresty/nginx/uwsgi_temp && \
-    mkdir /usr/local/openresty/nginx/scgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/naxsi/locations && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/conf && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/logs && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/client_body_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/proxy_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/fastcgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/uwsgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/scgi_temp && \
-    chown -R nginx:nginx /usr/share/GeoIP
+    install -o nginx -g nginx -d /usr/local/openresty/naxsi/locations \
+                                 /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
+    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} \
+                         /usr/share/GeoIP
 
 WORKDIR /usr/local/openresty
 
