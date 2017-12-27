@@ -25,23 +25,26 @@ yum -y install \
     unzip \
     wget
 
+mkdir -p openresty luarocks naxsi nginx-statsd geoip
+
 # Prepare
-wget -O - "http://openresty.org/download/openresty-${OPEN_RESTY_VER}.tar.gz" | tar xzv
-wget -O - "http://luarocks.org/releases/luarocks-${LUAROCKS_VER}.tar.gz" | tar xzv
-wget -O - "https://github.com/nbs-system/naxsi/archive/${NAXSI_VER}.tar.gz" | tar xzv
-wget -O - "https://github.com/UKHomeOffice/nginx-statsd/archive/${STATSD_VER}.tar.gz" | tar xzv
-wget -O - "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VER}/GeoIP-${GEOIP_VER}.tar.gz" | tar xzv
+wget -qO - "http://openresty.org/download/openresty-${OPEN_RESTY_VER}.tar.gz" | tar xzv --strip-components 1 -C openresty/
+wget -qO - "http://luarocks.org/releases/luarocks-${LUAROCKS_VER}.tar.gz" | tar xzv --strip-components 1 -C luarocks/
+wget -qO - "https://github.com/nbs-system/naxsi/archive/${NAXSI_VER}.tar.gz" | tar xzv --strip-components 1 -C naxsi/
+wget -qO - "https://github.com/UKHomeOffice/nginx-statsd/archive/${STATSD_VER}.tar.gz" | tar xzv --strip-components 1 -C nginx-statsd/
+wget -qO - "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VER}/GeoIP-${GEOIP_VER}.tar.gz" | tar xzv --strip-components 1 -C geoip/
 
 # Build!
-pushd "GeoIP-${GEOIP_VER}"
+pushd geoip
 ./configure
 make
 make check install
 popd
+rm -fr geoip
 
-pushd "openresty-${OPEN_RESTY_VER}"
-./configure --add-module="../naxsi-${NAXSI_VER}/naxsi_src" \
-            --add-module="../nginx-statsd-${STATSD_VER}" \
+pushd openresty
+./configure --add-module="../naxsi/naxsi_src" \
+            --add-module="../nginx-statsd" \
             --with-http_realip_module \
             --with-http_geoip_module \
             --with-http_stub_status_module
@@ -51,25 +54,21 @@ popd
 
 # Install NAXSI default rules...
 mkdir -p /usr/local/openresty/naxsi/
-cp "./naxsi-${NAXSI_VER}/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
+cp "./naxsi/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
 
-pushd "luarocks-${LUAROCKS_VER}"
+rm -fr openresty naxsi nginx-statsd
+
+pushd luarocks
 ./configure --with-lua=/usr/local/openresty/luajit \
     --lua-suffix=jit-2.1.0-beta2 \
     --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
 make build install
 popd
+rm -fr luarocks
 
 luarocks install uuid
 luarocks install luasocket
 luarocks install lua-geoip
-
-# Cleaning up source...
-rm -fr "openresty-${OPEN_RESTY_VER}"
-rm -fr "luarocks-${LUAROCKS_VER}"
-rm -fr "naxsi-${NAXSI_VER}"
-rm -fr "nginx-statsd-${STATSD_VER}"
-rm -fr "geoip-api-c-${GEOIP_VER}"
 
 # Remove the developer tooling
 yum -y remove \
