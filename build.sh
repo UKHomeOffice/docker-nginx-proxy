@@ -4,11 +4,11 @@
 set -eu
 set -o pipefail
 
-OPEN_RESTY_VER="1.11.2.4"
-LUAROCKS_VER="2.4.2"
-NAXSI_VER="0.55.3"
-STATSD_VER="0.0.1"
-GEOIP_VER="1.6.11"
+OPEN_RESTY_URL='http://openresty.org/download/openresty-1.11.2.4.tar.gz'
+LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.2.tar.gz'
+NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.55.3.tar.gz'
+STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
+GEOIP_URL='https://github.com/maxmind/geoip-api-c/releases/download/v1.6.11/GeoIP-1.6.11.tar.gz'
 
 # Install dependencies to build from source
 yum -y install \
@@ -28,11 +28,11 @@ yum -y install \
 mkdir -p openresty luarocks naxsi nginx-statsd geoip
 
 # Prepare
-wget -qO - "http://openresty.org/download/openresty-${OPEN_RESTY_VER}.tar.gz" | tar xzv --strip-components 1 -C openresty/
-wget -qO - "http://luarocks.org/releases/luarocks-${LUAROCKS_VER}.tar.gz" | tar xzv --strip-components 1 -C luarocks/
-wget -qO - "https://github.com/nbs-system/naxsi/archive/${NAXSI_VER}.tar.gz" | tar xzv --strip-components 1 -C naxsi/
-wget -qO - "https://github.com/UKHomeOffice/nginx-statsd/archive/${STATSD_VER}.tar.gz" | tar xzv --strip-components 1 -C nginx-statsd/
-wget -qO - "https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VER}/GeoIP-${GEOIP_VER}.tar.gz" | tar xzv --strip-components 1 -C geoip/
+wget -qO - "$OPEN_RESTY_URL" | tar xzv --strip-components 1 -C openresty/
+wget -qO - "$LUAROCKS_URL"   | tar xzv --strip-components 1 -C luarocks/
+wget -qO - "$NAXSI_URL"      | tar xzv --strip-components 1 -C naxsi/
+wget -qO - "$STATSD_URL"     | tar xzv --strip-components 1 -C nginx-statsd/
+wget -qO - "$GEOIP_URL"      | tar xzv --strip-components 1 -C geoip/
 
 # Build!
 pushd geoip
