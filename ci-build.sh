@@ -64,7 +64,7 @@ ${STD_CMD} -d -p 8080:8080 \
            -debug \
            -port=8080
 
-docker cp /workdir/test-servers.yaml mockserver:/test-servers.yaml
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/test-servers.yaml mockserver:/test-servers.yaml
 
 echo "Running slow-mocking-server..."
 ${STD_CMD} -d -p 8081:8081 \
@@ -72,8 +72,8 @@ ${STD_CMD} -d -p 8081:8081 \
            -debug \
            -port=8081
 
-docker cp /workdir/test-servers.yaml mockserver:/test-servers.yaml
-docker cp /workdir/monkey-business.yaml mockserver:/monkey-business.yaml
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/test-servers.yaml mockserver:/test-servers.yaml
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/monkey-business.yaml mockserver:/monkey-business.yaml
 
 echo "=========="
 echo "TESTING..."
