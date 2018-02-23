@@ -8,7 +8,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - ls -alh /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/
+      - ./ci-build.sh
     when:
       event: [pull_request, push, tag]
 
