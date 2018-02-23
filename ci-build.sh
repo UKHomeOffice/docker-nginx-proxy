@@ -5,7 +5,7 @@ set -x
 TAG=ngx
 PORT=8443
 START_INSTANCE="docker run "
-DOCKER_HOST_NAME=127.0.0.1
+DOCKER_HOST_NAME=172.17.0.1
 MUTUAL_TLS="mutual-tls"
 STANDARD_TLS="standard-tls"
 
