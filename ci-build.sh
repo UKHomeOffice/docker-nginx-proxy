@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-set -x
+set -e
 
 TAG=ngx
 PORT=8443
