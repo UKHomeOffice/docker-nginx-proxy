@@ -1,23 +1,28 @@
-pipeline:
+workspace:
+  base: /workdir
 
-  build_image:
-    image: quay.io/ukhomeofficedigital/centos-base:latest
+pipeline:
+  build_and_test_image:
+    image: quay.io/ukhomeofficedigital/centos-base:v0.5.7
     environment:
-      - DOCKER_HOST=tcp://127.0.0.1:2375
+      - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
+      - yum update -y
       - yum install -y -q docker openssl wget
       - ./ci-build.sh
     when:
       event: [pull_request, push, tag]
 
-  push_image:
-    image: docker:1.11
+  push_image_to_artifactory:
+    image: docker:17.12.0
+    secrets:
+      - docker_password
     environment:
-      - DOCKER_HOST=tcp://127.0.0.1:2375
+      - DOCKER_HOST=tcp://172.17.0.1:2375
       - DOCKER_IMAGE=nginx-proxy
       - DOCKER_REPO=artifactory-internal.digital.homeoffice.gov.uk
       - DOCKER_BASEDIR=/
-      - DOCKER_USERNAME=lev-web-robot
+      - DOCKER_USERNAME=docker-nginx-proxy-robot
     commands:
       - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" "${DOCKER_REPO}"
       - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
@@ -25,9 +30,11 @@ pipeline:
       event: tag
 
   push_image_to_quay:
-    image: docker:1.11
+    image: docker:17.12.0
+    secrets:
+      - docker_quay_password 
     environment:
-      - DOCKER_HOST=tcp://127.0.0.1:2375
+      - DOCKER_HOST=tcp://172.17.0.1:2375
       - DOCKER_IMAGE=nginx-proxy
       - DOCKER_REPO=quay.io
       - DOCKER_BASEDIR=/ukhomeofficedigital/
@@ -37,11 +44,3 @@ pipeline:
       - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
     when:
       event: tag
-
-services:
-  dind:
-    image: docker:1.13-dind
-    privileged: true
-    command:
-      - "-s"
-      - "overlay"
