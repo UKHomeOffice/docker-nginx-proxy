@@ -37,6 +37,10 @@ ADD ./refresh_GeoIP.sh /
 RUN yum remove -y kernel-headers && \
     yum clean all
 
+RUN yum --enablerepo=extras install epel-release -y && \
+      yum install python-pip -y && \
+      pip install awscli
+
 RUN useradd nginx && \
     install -o nginx -g nginx -d /usr/local/openresty/naxsi/locations \
                                  /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
