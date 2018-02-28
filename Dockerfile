@@ -9,14 +9,12 @@ RUN ./build.sh
 RUN yum install -y openssl && \
     yum clean all && \
     mkdir -p /etc/keys && \
-    cd /etc/keys && \
-    openssl req -x509 -newkey rsa:2048 -keyout key -out crt -days 360 -nodes -subj '/CN=test'
+    openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test'
 
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
 
-RUN yum install -y bind-utils && \
-    yum install -y dnsmasq && \
+RUN yum install -y bind-utils dnsmasq && \
     yum clean all
 
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
@@ -44,21 +42,10 @@ RUN yum --enablerepo=extras install epel-release -y && \
       pip install awscli
 
 RUN useradd nginx && \
-    mkdir /usr/local/openresty/naxsi/locations && \
-    mkdir /usr/local/openresty/nginx/client_body_temp && \
-    mkdir /usr/local/openresty/nginx/proxy_temp && \
-    mkdir /usr/local/openresty/nginx/fastcgi_temp && \
-    mkdir /usr/local/openresty/nginx/uwsgi_temp && \
-    mkdir /usr/local/openresty/nginx/scgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/naxsi/locations && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/conf && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/logs && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/client_body_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/proxy_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/fastcgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/uwsgi_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/scgi_temp && \
-    chown -R nginx:nginx /usr/share/GeoIP
+    install -o nginx -g nginx -d /usr/local/openresty/naxsi/locations \
+                                 /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
+    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} \
+                         /usr/share/GeoIP
 
 WORKDIR /usr/local/openresty
 
