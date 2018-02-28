@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
 TAG=ngx
 PORT=8443
 START_INSTANCE="docker run "
-DOCKER_HOST_NAME=127.0.0.1
+DOCKER_HOST_NAME=172.17.0.1
 MUTUAL_TLS="mutual-tls"
 STANDARD_TLS="standard-tls"
 
@@ -60,23 +60,20 @@ echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
 ${STD_CMD} -d -p 8080:8080 \
-           -v ${PWD}/test-servers.yaml:/test-servers.yaml \
            --name=mockserver quii/mockingjay-server:1.9.0 \
-           -config=/test-servers.yaml \
            -debug \
            -port=8080
-docker run --rm --link mockserver:mockserver martin/wait
+
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/test-servers.yaml mockserver:/test-servers.yaml
 
 echo "Running slow-mocking-server..."
 ${STD_CMD} -d -p 8081:8081 \
-           -v ${PWD}/test-servers.yaml:/test-servers.yaml \
-           -v ${PWD}/monkey-business.yaml:/monkey-business.yaml \
            --name=slowmockserver quii/mockingjay-server:1.9.0 \
-           -config=/test-servers.yaml \
-           -monkeyConfig=/monkey-business.yaml \
            -debug \
            -port=8081
-docker run --rm --link slowmockserver:slowmockserver martin/wait
+
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/test-servers.yaml mockserver:/test-servers.yaml
+docker cp /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy/monkey-business.yaml mockserver:/monkey-business.yaml
 
 echo "=========="
 echo "TESTING..."
