@@ -26,6 +26,7 @@ ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
+PROXY_REDIRECT=$(get_id_var ${LOCATION_ID} PROXY_REDIRECT)
 BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
@@ -177,6 +178,11 @@ fi
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
     msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
 fi
+
+if [ "${PROXY_REDIRECT}" == "" ]; then
+    PROXY_REDIRECT=off
+fi
+
 #nginx_var_for_loc=$(get_namefrom_number ${LOCATION_ID})
 if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     REQS_PER_PAGE=${REQS_PER_PAGE:-20}
@@ -223,6 +229,7 @@ location ${LOCATION} {
     $(cat /location_template.conf)
     ${SSL_CERTIFICATE}
     ${SSL_VERIFY}
+    proxy_redirect ${PROXY_REDIRECT};
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
     proxy_set_header X-Real-IP \$${REMOTE_IP_VAR};

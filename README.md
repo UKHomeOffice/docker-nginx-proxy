@@ -52,6 +52,8 @@ rules to be specified without downloading or mounting in a rule file.
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
 * `DENY_COUNTRY_ON` - Set to `TRUE` to deny access to countries not listed in ALLOW_COUNTRY_CSV with 403 status for a location (set location for 403 with ADD_NGINX_LOCATION_CFG).
 * `VERBOSE_ERROR_PAGES` - Set to TRUE to display debug info in 418 error pages.
+* `PROXY_REDIRECT` - set the value of the [proxy_redirect](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_redirect) in the location, defaults to `off`.
+
 
 #### Single set Variables
 
