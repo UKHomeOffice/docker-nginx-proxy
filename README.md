@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy)
 
-This container aims to be a generic proxy layer for your web services. It includes OpenResty with 
+This container aims to be a generic proxy layer for your web services. It includes OpenResty with
 Lua and NAXSI filtering compiled in.
 
 ## Getting Started
@@ -23,15 +23,15 @@ In order to run this container you'll need docker installed.
 
 #### Multi-location Variables
 
-Variables to control how to configure the proxy (can be set per location, see 
+Variables to control how to configure the proxy (can be set per location, see
 [Using Multiple Locations](#using-multiple-locations)).
 
 * `PROXY_SERVICE_HOST` - The upstream host you want this service to proxy.
 * `PROXY_SERVICE_PORT` - The port of the upstream host you want this service to proxy.
-* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use. 
+* `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use.
 (Files must end in .rules to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
-* `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra  
+* `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra
 rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
@@ -43,7 +43,7 @@ rules to be specified without downloading or mounting in a rule file.
 * `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to its own error page. Defaults to
 "`500 501 502 503 504`". To support a new code, say `505`, an error page must be provided at
 `/usr/local/openresty/nginx/html/505.shtml`, see [Useful File Locations](#useful-file-locations).
-* `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see 
+* `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
 * `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
@@ -51,25 +51,26 @@ rules to be specified without downloading or mounting in a rule file.
 * `CONCURRENT_CONNS_PER_IP` - Will limit concurrent connections based on IP e.g. set to 10 to allow max of 10 connections per browser or proxy!
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
 * `DENY_COUNTRY_ON` - Set to `TRUE` to deny access to countries not listed in ALLOW_COUNTRY_CSV with 403 status for a location (set location for 403 with ADD_NGINX_LOCATION_CFG).
+* `VERBOSE_ERROR_PAGES` - Set to TRUE to display debug info in 418 error pages.
 
 #### Single set Variables
 
 Note the following variables can only be set once:
 
-* `ADD_NGINX_SERVER_CFG` - Arbitrary extra NGINX configuration to be added to the server context, see 
+* `ADD_NGINX_SERVER_CFG` - Arbitrary extra NGINX configuration to be added to the server context, see
 [Arbitrary Config](#arbitrary-config)
 * `ADD_NGINX_HTTP_CFG` - Arbitrary extra NGINX configuration to be added to the http context, see
 [Arbitrary Config](#arbitrary-config)
-* `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example 
-[Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default 
+* `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example
+[Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
-* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see 
+* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see
 [Preserve Client IP](#preserve-client-ip).
-* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL). 
-The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and 
-managed by Docker or Kubernetes.  
+* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
+The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and
+managed by Docker or Kubernetes.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
-* `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use. 
+* `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use.
 This is useful when testing or for development instances or when a load-balancer mandates a non-standard port.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
@@ -86,6 +87,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
+* `DISABLE_SYSDIG_METRICS` - Set to any non-empty string to disable support for Sysdig's metric collection
 
 ### Ports
 
@@ -99,9 +101,9 @@ N.B. see HTTP(S)_LISTEN_PORT above
 ### Useful File Locations
 
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
-* `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self 
+* `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self
   signed one is provided if they have not been mounted.
-* `/etc/keys/client-ca` If a client CA is mounted here, it will be loaded and configured. 
+* `/etc/keys/client-ca` If a client CA is mounted here, it will be loaded and configured.
 See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
 * `/etc/keys/upstream-server-ca` A CA public cert must be mounted here when verifying the upstream server's certificate is required.
 See `VERIFY_SERVER_CERT` above in [Environment Variables](#environment-variables).
@@ -109,7 +111,7 @@ See `VERIFY_SERVER_CERT` above in [Environment Variables](#environment-variables
 See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
 * `/etc/keys/upstream-client-key` A private client key must be mounted here when when the upstream server requires client cert authentication.
 See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
-* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default 
+* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default
 nginx.conf.
 * `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
 is encountered upstream and the proxy is configured to intercept. See ERROR_REDIRECT_CODES to change this.
@@ -144,13 +146,13 @@ This proxy supports [Proxy Protocol](http://www.haproxy.org/download/1.5/doc/pro
 
 To use this feature you will need:
 
-* To enable [proxy protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) on your load balancer.  
+* To enable [proxy protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) on your load balancer.
   For AWS, see [Enabling Proxy Protocol for AWS](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-proxy-protocol.html).
-* Find the private address range of your load balancer.  
+* Find the private address range of your load balancer.
   For AWS, this could be any address in the destination network. E.g.
   if you have three compute subnets defined as 10.50.0.0/24, 10.50.1.0/24 and 10.50.2.0/24,
   then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
-  
+
 ```shell
 docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
@@ -175,11 +177,11 @@ docker run -e 'PROXY_SERVICE_HOST=http://myapp.svc.cluster.local' \
 
 #### Using Multiple Locations
 
-When the LOCATIONS_CSV option is set, multiple locations can be proxied. The settings for each proxy location can be 
+When the LOCATIONS_CSV option is set, multiple locations can be proxied. The settings for each proxy location can be
 controlled with the use of any [Multi-location Variables](#multi-location-variables) by suffixing the variable name with
- both a number, and the '_' character, as listed in the LOCATIONS_CSV variable. 
- 
-##### Two servers 
+ both a number, and the '_' character, as listed in the LOCATIONS_CSV variable.
+
+##### Two servers
 
 The example below configures a simple proxy with two locations '/' (location 1) and '/api' (location 2):
 
@@ -191,7 +193,7 @@ docker run -e 'PROXY_SERVICE_HOST_1=http://stackexchange.com' \
            -e 'LOCATIONS_CSV=/,/api' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```           
+```
 
 For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separate-proxied-servers).
 
@@ -234,7 +236,7 @@ docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
-See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.  
+See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.
 
 #### Upstream Client Certs
 
@@ -331,19 +333,19 @@ docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
-this will setup basic-auth for the the `/about` location or simply swap the 2 for a 1 to setup basic auth for the root location. 
+this will setup basic-auth for the the `/about` location or simply swap the 2 for a 1 to setup basic auth for the root location.
 
 
 
 ## Built With
 
 * [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web
-  application server by bundling the standard Nginx core, lots of 3rd-party Nginx modules, as well 
+  application server by bundling the standard Nginx core, lots of 3rd-party Nginx modules, as well
   as most of their external dependencies.
 * [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
 * [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
-* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low 
-  rules maintenance WAF for NGINX 
+* [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low
+  rules maintenance WAF for NGINX
 * [GeoLite data](http://www.maxmind.com">http://www.maxmind.com) This product includes GeoLite data created by MaxMind.
 
 ## Find Us
@@ -353,22 +355,22 @@ this will setup basic-auth for the the `/about` location or simply swap the 2 fo
 
 ## Contributing
 
-Feel free to submit pull requests and issues. If it's a particularly large PR, you may wish to 
+Feel free to submit pull requests and issues. If it's a particularly large PR, you may wish to
 discuss it in an issue first.
 
-Please note that this project is released with a [Contributor Code of Conduct](code_of_conduct.md). 
+Please note that this project is released with a [Contributor Code of Conduct](code_of_conduct.md).
 By participating in this project you agree to abide by its terms.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for the version tags available See the tags on this repository. 
+We use [SemVer](http://semver.org/) for the version tags available See the tags on this repository.
 
 ## Authors
 
 * **Lewis Marshal** - *Initial work* - [lewismarshall](https://github.com/lewismarshall)
 
-See also the list of 
-[contributors](https://github.com/UKHomeOffice/docker-nginx-proxy/graphs/contributors) who 
+See also the list of
+[contributors](https://github.com/UKHomeOffice/docker-nginx-proxy/graphs/contributors) who
 participated in this project.
 
 ## License

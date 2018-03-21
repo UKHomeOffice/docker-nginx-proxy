@@ -57,6 +57,22 @@ else
 	EOF-LISTEN-NONPP
 fi
 
+NGIX_SYSDIG_SERVER_CONF="${NGIX_CONF_DIR}/nginx_sysdig_server.conf"
+touch ${NGIX_SYSDIG_SERVER_CONF}
+if [ ! -z "${DISABLE_SYSDIG_METRICS}" ]; then
+    cat > ${NGIX_SYSDIG_SERVER_CONF} <<-EOF-SYSDIG-SERVER
+    server {
+      listen 10088;
+      location /nginx_status {
+        stub_status on;
+        access_log   off;
+        allow 127.0.0.1;
+        deny all;
+      }
+    }
+EOF-SYSDIG-SERVER
+fi
+
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
     /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
