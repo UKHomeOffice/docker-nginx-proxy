@@ -4,11 +4,11 @@
 set -eu
 set -o pipefail
 
-OPEN_RESTY_URL='http://openresty.org/download/openresty-1.11.2.4.tar.gz'
-LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.2.tar.gz'
+OPEN_RESTY_URL='http://openresty.org/download/openresty-1.13.6.1.tar.gz'
+LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.4.tar.gz'
 NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.55.3.tar.gz'
 STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
-GEOIP_URL='https://github.com/maxmind/geoip-api-c/releases/download/v1.6.11/GeoIP-1.6.11.tar.gz'
+GEOIP_URL='https://github.com/maxmind/geoip-api-c/releases/download/v1.6.12/GeoIP-1.6.12.tar.gz'
 
 # Install dependencies to build from source
 yum -y install \
