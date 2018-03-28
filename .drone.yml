@@ -13,34 +13,26 @@ pipeline:
     when:
       event: [pull_request, push, tag]
 
-  push_image_to_artifactory:
-    image: docker:17.12.0
-    secrets:
-      - docker_password
+  build_tag:
     environment:
-      - DOCKER_HOST=tcp://172.17.0.1:2375
-      - DOCKER_IMAGE=nginx-proxy
-      - DOCKER_REPO=artifactory-internal.digital.homeoffice.gov.uk
-      - DOCKER_BASEDIR=/
       - DOCKER_USERNAME=docker-nginx-proxy-robot
-    commands:
-      - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" "${DOCKER_REPO}"
-      - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
+    image: ukhomeoffice/drone-docker
+    registry: artifactory-internal.digital.homeoffice.gov.uk
+    repo: artifactory-internal.digital.homeoffice.gov.uk/nginx-proxy
+    secrets: [ docker_password ]
+    tags:
+      - ${DRONE_TAG}
     when:
       event: tag
 
-  push_image_to_quay:
-    image: docker:17.12.0
-    secrets:
-      - docker_quay_password 
+  build_tag:
     environment:
-      - DOCKER_HOST=tcp://172.17.0.1:2375
-      - DOCKER_IMAGE=nginx-proxy
-      - DOCKER_REPO=quay.io
-      - DOCKER_BASEDIR=/ukhomeofficedigital/
       - DOCKER_USERNAME=ukhomeofficedigital+nginx_proxy
-    commands:
-      - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_QUAY_PASSWORD}" "${DOCKER_REPO}"
-      - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
+    image: ukhomeoffice/drone-docker
+    registry: quay.io
+    repo: quay.io/ukhomeofficedigital/nginx-proxy
+    secrets: [ docker_quay_password ]
+    tags:
+      - ${DRONE_TAG}
     when:
       event: tag
