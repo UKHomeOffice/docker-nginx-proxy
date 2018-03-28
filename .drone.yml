@@ -2,7 +2,16 @@ workspace:
   base: /workdir
 
 pipeline:
-  build_and_test_image:
+  build_image:
+    image: docker:17.07.0-ce
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker build -t ngx:$${DRONE_COMMIT_SHA} .
+    when:
+      event: tag
+
+  test_image:
     image: quay.io/ukhomeofficedigital/centos-base:v0.5.7
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
@@ -11,28 +20,30 @@ pipeline:
       - yum install -y -q docker openssl wget
       - ./ci-build.sh
     when:
-      event: [pull_request, push, tag]
+      event: [pull_request, push]
 
-  build_tag:
+  artifactory_build_tag:
+    image: docker:17.07.0-ce
+    secrets:
+      - docker_password
     environment:
-      - DOCKER_USERNAME=docker-nginx-proxy-robot
-    image: ukhomeoffice/drone-docker
-    registry: artifactory-internal.digital.homeoffice.gov.uk
-    repo: artifactory-internal.digital.homeoffice.gov.uk/nginx-proxy
-    secrets: [ docker_password ]
-    tags:
-      - ${DRONE_TAG}
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker login -u="docker-nginx-proxy-robot" -p=$${DOCKER_PASSWORD} artifactory-internal.digital.homeoffice.gov.uk
+      - docker tag ngx:$${DRONE_COMMIT_SHA} artifactory-internal.digital.homeoffice.gov.uk/nginx-proxy:$${DRONE_TAG}
+      - docker push artifactory-internal.digital.homeoffice.gov.uk/nginx-proxy:$${DRONE_TAG}
     when:
       event: tag
 
-  build_tag:
+  quay_build_tag:
+    image: docker:17.07.0-ce
+    secrets:
+      - docker_quay_password
     environment:
-      - DOCKER_USERNAME=ukhomeofficedigital+nginx_proxy
-    image: ukhomeoffice/drone-docker
-    registry: quay.io
-    repo: quay.io/ukhomeofficedigital/nginx-proxy
-    secrets: [ docker_quay_password ]
-    tags:
-      - ${DRONE_TAG}
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker login -u="ukhomeofficedigital+nginx_proxy" -p=$${DOCKER_QUAY_PASSWORD} quay.io
+      - docker tag ngx:$${DRONE_COMMIT_SHA} quay.io/ukhomeofficedigital/nginx-proxy:$${DRONE_TAG}
+      - docker push quay.io/ukhomeofficedigital/nginx-proxy:$${DRONE_TAG}
     when:
       event: tag
