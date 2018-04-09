@@ -24,15 +24,15 @@ pipeline:
       - DOCKER_BASEDIR=/
       - DOCKER_USERNAME=docker-nginx-proxy-robot
     commands:
-      - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}" "${DOCKER_REPO}"
-      - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
+      - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
+      - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
     when:
       event: tag
 
   push_image_to_quay:
     image: docker:17.12.0
     secrets:
-      - docker_quay_password 
+      - docker_quay_password
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
       - DOCKER_IMAGE=nginx-proxy
@@ -40,7 +40,7 @@ pipeline:
       - DOCKER_BASEDIR=/ukhomeofficedigital/
       - DOCKER_USERNAME=ukhomeofficedigital+nginx_proxy
     commands:
-      - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_QUAY_PASSWORD}" "${DOCKER_REPO}"
-      - ./publish.sh "ngx" "${DOCKER_REPO}${DOCKER_BASEDIR}${DOCKER_IMAGE}" "${DRONE_TAG}"
+      - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
+      - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
     when:
       event: tag
