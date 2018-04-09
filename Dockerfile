@@ -37,7 +37,7 @@ ADD ./refresh_GeoIP.sh /
 RUN yum remove -y kernel-headers && \
     yum clean all
 
-RUN useradd nginx && \
+RUN useradd -u 1000 nginx && \
     install -o nginx -g nginx -d /usr/local/openresty/naxsi/locations \
                                  /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} \
@@ -49,4 +49,4 @@ ENTRYPOINT ["/go.sh"]
 
 EXPOSE 10080
 EXPOSE 10443
-USER nginx
+USER 1000
