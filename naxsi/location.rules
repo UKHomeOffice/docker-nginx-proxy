@@ -1,5 +1,5 @@
 SecRulesEnabled;
-DeniedUrl "/RequestDenied";
+DeniedUrl "/request-denied";
 ## check rules
 CheckRule "$SQL >= 8" BLOCK;
 CheckRule "$RFI >= 8" BLOCK;
