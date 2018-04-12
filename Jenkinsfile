@@ -22,7 +22,7 @@ pipeline {
     stage('Docker Build') {
       steps {
         script {
-          buildApp{
+          buildAppWithMetrics { 
             app = "docker-nginx-proxy"
           }
         }
@@ -31,7 +31,7 @@ pipeline {
     stage('Docker Tag') {
       steps {
         script {
-          dockerTag {
+          dockerTagWithMetrics {
             app = "docker-nginx-proxy"
           }
         }
