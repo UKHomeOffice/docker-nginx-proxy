@@ -59,7 +59,7 @@ fi
 
 NGIX_SYSDIG_SERVER_CONF="${NGIX_CONF_DIR}/nginx_sysdig_server.conf"
 touch ${NGIX_SYSDIG_SERVER_CONF}
-if [ ! -z "${DISABLE_SYSDIG_METRICS}" ]; then
+if [ -z ${DISABLE_SYSDIG_METRICS+x} ]; then
     cat > ${NGIX_SYSDIG_SERVER_CONF} <<-EOF-SYSDIG-SERVER
     server {
       listen 10088;
@@ -94,7 +94,7 @@ if [ "${HTTPS_REDIRECT}" == "TRUE" ]; then
 	}
 	EOF-REDIRECT-TRUE
 else
-    touch ${NGIX_CONF_DIR}/ssl_redirect.conf 
+    touch ${NGIX_CONF_DIR}/ssl_redirect.conf
 fi
 
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
