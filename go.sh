@@ -155,16 +155,13 @@ case "${LOG_FORMAT_NAME}" in
         echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
 
         if [ "${LOG_FORMAT_NAME}" = "custom" ]; then
-            if [ -z "${CUSTOM_LOG_FORMAT}" ]; then
-                exit_error_msg "Custom log format specified, but no 'CUSTOM_LOG_FORMAT' given"
-            else
-                cat >> ${NGIX_CONF_DIR}/logging.conf <<- EOF_LOGGING
+            : "${CUSTOM_LOG_FORMAT?ERROR:Custom log format specified, but no 'CUSTOM_LOG_FORMAT' given}"
+
+            cat >> ${NGIX_CONF_DIR}/logging.conf <<- EOF_LOGGING
 log_format extended_${LOG_FORMAT_NAME} '{'
 ${CUSTOM_LOG_FORMAT}
 '}';
 EOF_LOGGING
-
-            fi
         fi
         echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
         ;;
