@@ -171,7 +171,7 @@ EOF_LOGGING
         fi
         ;;
     *)
-        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting json or text."
+        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting custom, json or text."
     ;;
 esac
 
