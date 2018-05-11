@@ -163,12 +163,10 @@ log_format extended_${LOG_FORMAT_NAME} '{'
 ${CUSTOM_LOG_FORMAT}
 '}';
 EOF_LOGGING
-                echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
 
             fi
-        else
-            echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
         fi
+        echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
         ;;
     *)
         exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting custom, json or text."
