@@ -3,12 +3,10 @@ workspace:
 
 pipeline:
   build_and_test_image:
-    image: quay.io/ukhomeofficedigital/centos-base:v0.5.7
+    image: quay.io/ukhomeofficedigital/lev-ci:latest
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - yum update -y
-      - yum install -y -q docker openssl wget
       - ./ci-build.sh
     when:
       event: [pull_request, push, tag]
