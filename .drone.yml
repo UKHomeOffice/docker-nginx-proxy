@@ -3,7 +3,7 @@ workspace:
 
 pipeline:
   build_and_test_image:
-    image: quay.io/ukhomeofficedigital/centos-base:v0.5.7
+    image: quay.io/ukhomeofficedigital/centos-base:latest
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
