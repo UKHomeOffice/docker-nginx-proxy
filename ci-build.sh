@@ -91,22 +91,22 @@ echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
 docker build -t mockserver:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.mockserver
-${STD_CMD} -d -p ${MOCKSERVER_PORT}:${MOCKSERVER_PORT} \
+${STD_CMD} -d \
            --name="${MOCKSERVER}" mockserver:latest \
            -config=/test-servers.yaml \
            -debug \
            -port=${MOCKSERVER_PORT}
-docker run --rm --link "${MOCKSERVER}:${MOCKSERVER}" martin/wait
+docker run --rm --link "${MOCKSERVER}:${MOCKSERVER}" martin/wait -c "${MOCKSERVER}:${MOCKSERVER_PORT}"
 
 echo "Running slow-mocking-server..."
 docker build -t slowmockserver:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.slowmockserver
-${STD_CMD} -d -p ${SLOWMOCKSERVER_PORT}:${SLOWMOCKSERVER_PORT} \
+${STD_CMD} -d \
            --name="${SLOWMOCKSERVER}" slowmockserver:latest \
            -config=/test-servers.yaml \
            -monkeyConfig=/monkey-business.yaml \
            -debug \
            -port=${SLOWMOCKSERVER_PORT}
-docker run --rm --link "${SLOWMOCKSERVER}:${SLOWMOCKSERVER}" martin/wait
+docker run --rm --link "${SLOWMOCKSERVER}:${SLOWMOCKSERVER}" martin/wait -c "${SLOWMOCKSERVER}:${SLOWMOCKSERVER_PORT}"
 
 echo "=========="
 echo "TESTING..."
