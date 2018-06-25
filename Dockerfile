@@ -39,6 +39,8 @@ ADD ./refresh_GeoIP.sh /
 RUN yum remove -y kernel-headers && \
     yum clean all
 
+RUN rm -rf /var/cache/yum
+
 RUN yum --enablerepo=extras install epel-release -y && \
       yum install python-pip -y && \
       pip install awscli
