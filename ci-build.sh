@@ -447,6 +447,17 @@ echo "Testing json logs format..."
 docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
 docker logs ${INSTANCE}  | grep 'animal=cow'
 
+start_test "Test custom logging format..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"LOG_FORMAT_NAME=custom\" \
+           -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
+echo "Testing custom logs format..."
+docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
 
 start_test "Test param logging off option works..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
