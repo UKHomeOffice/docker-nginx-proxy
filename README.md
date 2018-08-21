@@ -72,10 +72,11 @@ managed by Docker or Kubernetes.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 * `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use.
 This is useful when testing or for development instances or when a load-balancer mandates a non-standard port.
-* `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
+* `LOG_FORMAT_NAME` - Can be set to `text`, `json` (default) or `custom`.
 * `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
 * `NO_LOGGING_BODY` - Defaults to true `TRUE`.  Set otherwise and nginx should log the request_body.
 * `NO_LOGGING_RESPONSE` - Defaults to true `TRUE`.  Set otherwise and nginx should log the response_body
+* `CUSTOM_LOG_FORMAT` - When `LOG_FORMAT_NAME` is set to `custom`, the log format to use
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL

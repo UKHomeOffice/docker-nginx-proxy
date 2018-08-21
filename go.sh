@@ -119,8 +119,18 @@ else
 fi
 
 case "${LOG_FORMAT_NAME}" in
-    json|text)
+    json|text|custom)
         msg "Logging set to ${LOG_FORMAT_NAME}"
+
+        if [ "${LOG_FORMAT_NAME}" = "custom" ]; then
+            : "${CUSTOM_LOG_FORMAT?ERROR:Custom log format specified, but no 'CUSTOM_LOG_FORMAT' given}"
+
+            cat >> ${NGIX_CONF_DIR}/logging.conf <<- EOF_LOGGING
+log_format extended_${LOG_FORMAT_NAME} '{'
+${CUSTOM_LOG_FORMAT}
+'}';
+EOF_LOGGING
+        fi
 
         if [ "${NO_LOGGING_URL_PARAMS:-}" == TRUE ]; then
             sed -i -e 's/\$request_uri/\$uri/g' ${NGIX_CONF_DIR}/logging.conf
@@ -149,11 +159,10 @@ case "${LOG_FORMAT_NAME}" in
         fi
 
         echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
-
         echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
         ;;
     *)
-        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting json or text."
+        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting json, text or custom."
     ;;
 esac
 
@@ -193,6 +202,5 @@ if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
     echo "statsd_server ${STATSD_SERVER};" > ${NGIX_CONF_DIR}/nginx_statsd_server.conf
     echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf
 fi
-
 
 eval "${NGINX_BIN} -g \"daemon off;\""
