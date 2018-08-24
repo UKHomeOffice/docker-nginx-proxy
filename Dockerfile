@@ -3,6 +3,9 @@ FROM quay.io/ukhomeofficedigital/centos-base:latest
 MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
 WORKDIR /root
+
+RUN yum -y update && yum -y upgrade && yum clean all
+
 ADD ./build.sh /root/
 RUN ./build.sh
 
