@@ -34,9 +34,10 @@ Variables to control how to configure the proxy (can be set per location, see
 * `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra
 rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
-* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
- for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
- If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
+* `ENABLE_UUID_PARAM` - By default, a unique request ID will be generated and added to all requests as a query parameter to aid in tracing requests.
+ If set to `HEADER` it will add a HTTP header to all requests instead. The name of the parameter or header is taken from `UUID_VAR_NAME`.
+ Set to `FALSE` to disable this behaviour.
+* `UUID_VAR_NAME` - The name of the query parameter or header (see `ENABLE_UUID_PARAM`) to use for the unique request ID. Defaults to `nginxId`.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 * `VERIFY_SERVER_CERT` - if set to `TRUE`, will verify the upstream server's TLS certificate is valid and signed by the CA, see [Verifying Upstream Server](#verifying-upstream-server).
 * `USE_UPSTREAM_CLIENT_CERT` - if set to `TRUE`, will use the set of upstream client certs when connecting upstream, see [Upstream Client Certs](#upstream-client-certs).

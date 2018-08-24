@@ -147,12 +147,12 @@ if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
     UUID_ARGS=''
     msg "Auto UUID request parameter disabled for location ${LOCATION_ID}."
 elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
-    UUID_ARGS='proxy_set_header nginxId $uuidopt;'
+    UUID_ARGS="proxy_set_header ${UUID_VAR_NAME} \$uuidopt;"
     # Ensure nginx enables this globaly
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}
 else
-    UUID_ARGS='if ($is_args) {set $args $args&nginxId=$uuidopt;} if ($is_args = "") { set $args nginxId=$uuidopt;}'
+    UUID_ARGS="if (\$is_args) {set \$args \$args&${UUID_VAR_NAME}=\$uuidopt;} if (\$is_args = \"\") { set \$args ${UUID_VAR_NAME}=\$uuidopt;}"
     # Ensure nginx enables this globaly
     msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}

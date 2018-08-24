@@ -553,6 +553,28 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
+start_test "Test setting UUID name works..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=HEADER\" \
+           -e \"UUID_VAR_NAME=custom_uuid_name\" \
+           --link mockserver:mockserver "
+curl -sk https://${DOCKER_HOST_NAME}:${PORT}
+docker logs mockserver 2>/dev/null | grep "custom_uuid_name"
+echo "Testing setting UUID_VAR_NAME works"
+
+start_test "Test setting empty UUID name defaults correctly..." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://mockserver\" \
+           -e \"PROXY_SERVICE_PORT=8080\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=HEADER\" \
+           -e \"UUID_VAR_NAME=\" \
+           --link mockserver:mockserver "
+curl -sk https://${DOCKER_HOST_NAME}:${PORT}
+docker logs mockserver 2>/dev/null | grep "nginxId"
+echo "Testing UUID_VAR_NAME default if empty works"
+
 echo "_________________________________"
 echo "We got here, ALL tests successful"
 clean_up
