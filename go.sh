@@ -181,8 +181,9 @@ if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
 	EOF-GEO-INIT
     echo "set_by_lua_file \$country_code /usr/local/openresty/nginx/lua/get_country.lua \"\$${REMOTE_IP_VAR}\";">>${GEO_CFG}
 
-    # Set up base data as that from yum package...
-    ln -s /usr/share/GeoIP/GeoIP.dat /usr/share/GeoIP/GeoLiteCountry.dat
+    # Set up base data 
+    ln -s /usr/share/GeoIP/GeoLite2-Country.mmdb /usr/share/GeoIP/GeoLiteCountry.dat 
+    ln -s /usr/share/GeoIP/GeoLite2-City.mmdb /usr/share/GeoIP/GeoLiteCity.dat 
 
     # Refresh in background...
     /refresh_GeoIP.sh &
