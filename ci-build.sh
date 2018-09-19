@@ -14,7 +14,7 @@ MUTUAL_TLS="mutual-tls-${BUILD_NUMBER}"
 STANDARD_TLS="standard-tls-${BUILD_NUMBER}"
 MOCKSERVER_PORT=9000
 SLOWMOCKSERVER_PORT=9001
-WORKDIR="${WORKDIR:-/workdir/src/github.com/UKHomeOffice/docker-nginx-proxy}"
+WORKDIR="${PWD}"
 
 function tear_down_container() {
     container=$1
