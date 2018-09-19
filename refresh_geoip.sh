@@ -16,21 +16,6 @@ source /defaults.sh
 #EditionIDs GeoLite2-Country
 
 while true; do
-    # Now download data if we can...
-    # This always reports exit code 1!
-    hash=$(md5sum /usr/share/GeoIP/GeoLite2-Country.mmdb)
-
-    geoipupdate || true
-
-    newhash=$(md5sum /usr/share/GeoIP/GeoLite2-Country.mmdb)
-
-    if [ "${hash}" == "${newhash}" ]; then
-      msg "GeoIP database not updated."
-    else
-      msg "Reloading conf (GeoIP database updated)..."
-      ${NGINX_BIN} -s reload
-    fi
-
-    # Check once a day...
+    /usr/local/bin/geoipupdate -d /usr/share/GeoIP || true
     sleep 86400
 done

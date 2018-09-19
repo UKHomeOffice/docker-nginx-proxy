@@ -21,7 +21,6 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_dhparam ${NGIX_CONF_DIR}/dhparam.pem;
 EOF_CERT_CONF
 
-
 if [ "${LOCATIONS_CSV}" == "" ]; then
     LOCATIONS_CSV=/
 fi
@@ -113,10 +112,10 @@ fi
 
 if [ -f /etc/keys/client-ca ]; then
     msg "Loading client certs."
-	cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
-		ssl_client_certificate /etc/keys/client-ca;
-		ssl_verify_client optional;
-	EOF_CLIENT_CONF
+    cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
+      ssl_client_certificate /etc/keys/client-ca;
+      ssl_verify_client optional;
+EOF_CLIENT_CONF
 else
     msg "No client certs mounted - not loading..."
 fi
@@ -148,7 +147,7 @@ case "${LOG_FORMAT_NAME}" in
 					ngx.var.response_body = ngx.ctx.buffered
 				end
 			';
-		EOF-LOGGING-BODY-TRUE
+EOF-LOGGING-BODY-TRUE
         fi
 
         echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
@@ -171,25 +170,55 @@ if [ "${ADD_NGINX_HTTP_CFG}" != "" ]; then
 fi
 
 GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
+GEO_CFG_INIT="${NGIX_CONF_DIR}/nginx_geoip_init.conf"
+GEO_CFG_CONFIG="${NGIX_CONF_DIR}/nginx_geoip.conf"
+
 if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
-    msg "Enabling Country codes detection:${ALLOW_COUNTRY_CSV}..."
-	cat > ${NGIX_CONF_DIR}/nginx_geoip_init.conf <<-EOF-GEO-INIT
-	init_by_lua '
-		country = require "country"
-		country:init()
-	';
-	EOF-GEO-INIT
-    echo "set_by_lua_file \$country_code /usr/local/openresty/nginx/lua/get_country.lua \"\$${REMOTE_IP_VAR}\";">>${GEO_CFG}
+    msg "Enabling Country codes detection: ${ALLOW_COUNTRY_CSV}"
+    GEO_POLICY="no"
+    GEO_DECISION="yes"
 
-    # Set up base data 
-    ln -s /usr/share/GeoIP/GeoLite2-Country.mmdb /usr/share/GeoIP/GeoLiteCountry.dat 
-    ln -s /usr/share/GeoIP/GeoLite2-City.mmdb /usr/share/GeoIP/GeoLiteCity.dat 
+    # check: if the policy is reverse, i.e we are denying the listed and allowed the rest, reverse decisions
+    if [[ "${DENY_COUNTRY_ON}" == "TRUE" || "${DENY_COUNTRY_ON}" == "true" ]]; then
+        GEO_POLICY="yes"
+        GEO_DECISION="no"
+    fi
 
-    # Refresh in background...
-    /refresh_GeoIP.sh &
+    cat > $GEO_CFG_INIT <<-EOF
+geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
+  auto_reload 21600;
+  \$geoip2_metadata_country_build metadata build_epoch;
+  \$geoip2_data_country_code default=NA source=\$realip country iso_code;
+  \$geoip2_data_country_name country names en;
+}
+
+geoip2 /usr/share/GeoIP/GeoLite2-City.mmdb {
+  \$geoip2_data_city_name default=NA city names en;
+}
+
+map \$geoip2_data_country_code \$allowed_country {
+  default ${GEO_POLICY};
+  $(echo -n "${ALLOW_COUNTRY_CSV}" | awk -F',' "{ for (i=1; i<=NF; i++) { printf \"%s ${GEO_DECISION};\n\", \$i; }}")
+}
+EOF
+    cat > $GEO_CFG_CONFIG <<EOF
+set \$realip \$remote_addr;
+if (\$http_x_forwarded_for ~ "^(\d+\.\d+\.\d+\.\d+)") {
+  set \$realip \$1;
+}
+
+if (\$allowed_country = no) {
+  return 403;
+}
+
+set \$country_code \$geoip2_data_country_code;
+EOF
+    /refresh_geoip.sh&
+    msg "Enabling the geoip refresh background job"
 else
+    touch ${GEO_CFG_CONFIG}
+    touch ${GEO_CFG_INIT}
     touch ${GEO_CFG}
-    touch ${NGIX_CONF_DIR}/nginx_geoip_init.conf
 fi
 
 if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
@@ -197,6 +226,5 @@ if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
     echo "statsd_server ${STATSD_SERVER};" > ${NGIX_CONF_DIR}/nginx_statsd_server.conf
     echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf
 fi
-
 
 eval "${NGINX_BIN} -g \"daemon off;\""
