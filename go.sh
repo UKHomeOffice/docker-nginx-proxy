@@ -204,13 +204,13 @@ set \$realip \$remote_addr;
 if (\$http_x_forwarded_for ~ "^(\d+\.\d+\.\d+\.\d+)") {
   set \$realip \$1;
 }
+set \$country_code \$geoip2_data_country_code;
 
 # check if the country is allowed and deny
 if (\$allowed_country = no) {
   return 403;
 }
 
-set \$country_code \$geoip2_data_country_code;
 EOF
     /refresh_geoip.sh&
     msg "Enabling the geoip refresh background job"
