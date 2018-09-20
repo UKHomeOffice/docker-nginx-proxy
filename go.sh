@@ -175,14 +175,6 @@ GEO_CFG_CONFIG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 
 if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
     msg "Enabling Country codes detection: ${ALLOW_COUNTRY_CSV}"
-    GEO_POLICY="no"
-    GEO_DECISION="yes"
-
-    # check: if the policy is reverse, i.e we are denying the listed and allowed the rest, reverse decisions
-    if [[ "${DENY_COUNTRY_ON}" == "TRUE" || "${DENY_COUNTRY_ON}" == "true" ]]; then
-        GEO_POLICY="yes"
-        GEO_DECISION="no"
-    fi
 
     cat > $GEO_CFG_INIT <<-EOF
 geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
@@ -196,17 +188,24 @@ geoip2 /usr/share/GeoIP/GeoLite2-City.mmdb {
   \$geoip2_data_city_name default=NA city names en;
 }
 
+geoip2_proxy_recursive on;
+geoip2_proxy 0.0.0.0/0;
+
 map \$geoip2_data_country_code \$allowed_country {
-  default ${GEO_POLICY};
-  $(echo -n "${ALLOW_COUNTRY_CSV}" | awk -F',' "{ for (i=1; i<=NF; i++) { printf \"%s ${GEO_DECISION};\n\", \$i; }}")
+  default no;
+  NA yes;
+  $(echo -n "${ALLOW_COUNTRY_CSV}" | awk -F',' "{ for (i=1; i<=NF; i++) { printf \"%s yes;\n\", \$i; }}")
 }
+
 EOF
     cat > $GEO_CFG_CONFIG <<EOF
+# use either the remote addr or the x-forwarded-for header
 set \$realip \$remote_addr;
 if (\$http_x_forwarded_for ~ "^(\d+\.\d+\.\d+\.\d+)") {
   set \$realip \$1;
 }
 
+# check if the country is allowed and deny
 if (\$allowed_country = no) {
   return 403;
 }
