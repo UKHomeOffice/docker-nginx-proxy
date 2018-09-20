@@ -14,7 +14,7 @@ MUTUAL_TLS="mutual-tls-${BUILD_NUMBER}"
 STANDARD_TLS="standard-tls-${BUILD_NUMBER}"
 MOCKSERVER_PORT=9000
 SLOWMOCKSERVER_PORT=9001
-WORKDIR="/workdir/src/github.com/UKHomeOffice/docker-nginx-proxy"
+WORKDIR="${PWD}"
 
 function tear_down_container() {
     container=$1
@@ -91,7 +91,7 @@ docker build -t ${TAG} .
 echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
-docker build -t mockserver:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.mockserver
+docker build -t mockserver:latest ${WORKDIR} -f docker-config/Dockerfile.mockserver
 ${STD_CMD} -d \
            --name="${MOCKSERVER}" mockserver:latest \
            -config=/test-servers.yaml \
@@ -100,7 +100,7 @@ ${STD_CMD} -d \
 docker run --rm --link "${MOCKSERVER}:${MOCKSERVER}" martin/wait -c "${MOCKSERVER}:${MOCKSERVER_PORT}"
 
 echo "Running slow-mocking-server..."
-docker build -t slowmockserver:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.slowmockserver
+docker build -t slowmockserver:latest ${WORKDIR} -f docker-config/Dockerfile.slowmockserver
 ${STD_CMD} -d \
            --name="${SLOWMOCKSERVER}" slowmockserver:latest \
            -config=/test-servers.yaml \
@@ -147,18 +147,11 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /nginx-proxy/50x.shtml;\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test GeoIP config IS rejected..."
-if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
+if ! curl -v -k -H "X-Forwarded-For: 1.1.1.1" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
   echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
   exit 2
 else
   echo "Rejected as expected - we are not in the Congo!"
-fi
-if ! curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
-  | grep 'An error occurred' ; then
-  echo "We were expecting to be rejected specific content for invalid country - we are not in the Congo!"
-  exit 2
-else
-  echo "Rejected with correct content as expected."
 fi
 
 start_test "Test rate limits 1 per second" "${STD_CMD} \
@@ -283,7 +276,7 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
      --private-key=./client_certs/client.key
 
 echo "Test upstream client certs..."
-docker build -t mutual-tls:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.mutual-tls
+docker build -t mutual-tls:latest ${WORKDIR} -f docker-config/Dockerfile.mutual-tls
 ${STD_CMD} -d \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
@@ -306,7 +299,7 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
 tear_down_container "${MUTUAL_TLS}"
 
 echo "Test failure to verify upstream server cert..."
-docker build -t standard-tls:latest /workdir/src/github.com/UKHomeOffice/docker-nginx-proxy -f docker-config/Dockerfile.standard-tls
+docker build -t standard-tls:latest ${WORKDIR} -f docker-config/Dockerfile.standard-tls
 ${STD_CMD} -d \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
