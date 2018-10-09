@@ -72,10 +72,12 @@ if [ -z ${DISABLE_SYSDIG_METRICS+x} ]; then
 EOF-SYSDIG-SERVER
 fi
 
-IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
-for i in "${!LOCATIONS_ARRAY[@]}"; do
-    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
-done
+if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
+  IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
+  for i in "${!LOCATIONS_ARRAY[@]}"; do
+      /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+  done
+fi
 
 if [ "${NAME_RESOLVER}" == "" ]; then
     if [ "${DNSMASK}" == "TRUE" ]; then
