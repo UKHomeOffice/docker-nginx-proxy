@@ -35,6 +35,11 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
+if [ "${CUSTOM_SECURITY_DEFAULTS}" == "TRUE" ]; then
+    msg "Disabling inbuilt security headers add per location"
+    > /usr/local/openresty/nginx/conf/security_defaults.conf
+fi
+
 if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     export REMOTE_IP_VAR="proxy_protocol_addr"
@@ -72,10 +77,12 @@ if [ -z ${DISABLE_SYSDIG_METRICS+x} ]; then
 EOF-SYSDIG-SERVER
 fi
 
-IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
-for i in "${!LOCATIONS_ARRAY[@]}"; do
-    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
-done
+if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
+  IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
+  for i in "${!LOCATIONS_ARRAY[@]}"; do
+      /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+  done
+fi
 
 if [ "${NAME_RESOLVER}" == "" ]; then
     if [ "${DNSMASK}" == "TRUE" ]; then
