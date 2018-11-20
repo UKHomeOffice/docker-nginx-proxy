@@ -162,11 +162,13 @@ if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
     ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
 fi
 ERROR_PAGES=""
-for code in ${ERROR_REDIRECT_CODES}; do
-  # Set up an individual error page for each code
-  msg "Enabling redirect on status code: ${code}"
-  ERROR_PAGES="${ERROR_PAGES} error_page ${code} /nginx-proxy/${code}.shtml;"
-done
+if [ "${ERROR_REDIRECT_CODES}" != "FALSE" ]; then
+    for code in ${ERROR_REDIRECT_CODES}; do
+      # Set up an individual error page for each code
+      msg "Enabling redirect on status code: ${code}"
+      ERROR_PAGES="${ERROR_PAGES} error_page ${code} /nginx-proxy/${code}.shtml;"
+    done
+fi
 
 if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
     msg "Enable web socket support"
