@@ -4,16 +4,12 @@ MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
 WORKDIR /root
 
-RUN yum -y update && yum -y upgrade && yum clean all
+RUN yum -y install deltarpm && yum -y update && yum -y upgrade && yum clean all && yum -y erase deltarpm
 
 ADD ./build.sh /root/
 RUN ./build.sh
 
-RUN yum install -y openssl && \
-    yum clean all && \
-    mkdir -p /etc/keys && \
-    cd /etc/keys && \
-    openssl req -x509 -newkey rsa:2048 -keyout key -out crt -days 360 -nodes -subj '/CN=test'
+RUN yum install -y openssl && yum clean all
 
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
@@ -55,6 +51,7 @@ RUN useradd nginx && \
     mkdir /usr/local/openresty/nginx/fastcgi_temp && \
     mkdir /usr/local/openresty/nginx/uwsgi_temp && \
     mkdir /usr/local/openresty/nginx/scgi_temp && \
+    mkdir /etc/keys && \
     chown -R nginx:nginx /usr/local/openresty/naxsi/locations && \
     chown -R nginx:nginx /usr/local/openresty/nginx/conf && \
     chown -R nginx:nginx /usr/local/openresty/nginx/logs && \
@@ -63,7 +60,8 @@ RUN useradd nginx && \
     chown -R nginx:nginx /usr/local/openresty/nginx/fastcgi_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/uwsgi_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/scgi_temp && \
-    chown -R nginx:nginx /usr/share/GeoIP
+    chown -R nginx:nginx /usr/share/GeoIP && \
+    chown -R nginx:nginx /etc/keys
 
 WORKDIR /usr/local/openresty
 

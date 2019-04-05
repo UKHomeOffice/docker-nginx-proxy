@@ -6,6 +6,15 @@ export LOG_UUID=FALSE
 
 . /defaults.sh
 
+# Generate a selfsigned key and certificate if we don't have one
+if [ ! -f /etc/keys/crt ]; then
+  dir=`mktemp -d`
+  openssl req -x509 -days 1000 -newkey rsa:2048 -nodes -subj '/CN=waf' -keyout "$dir/key" -out "$dir/crt"
+  install -m 0600 -o nginx -g nginx "$dir/key" /etc/keys/key
+  install -m 0644 -o nginx -g nginx "$dir/crt" /etc/keys/crt
+  rm -rf "$dir"
+fi
+
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     ${SERVER_CERT};
     ssl_certificate_key ${SERVER_KEY};
