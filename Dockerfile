@@ -3,15 +3,12 @@ MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
 WORKDIR /root
 
-RUN yum -y update && yum -y upgrade && yum clean all
+RUN yum -y install deltarpm && yum -y update && yum -y upgrade && yum clean all && yum -y erase deltarpm
 
 ADD ./build.sh /root/
 RUN ./build.sh
 
-RUN yum install -y openssl && \
-    yum clean all && \
-    mkdir -p /etc/keys && \
-    openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test'
+RUN yum install -y openssl && yum clean all
 
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
@@ -46,9 +43,11 @@ RUN yum --enablerepo=extras install epel-release -y && \
 
 RUN useradd -u 1000 nginx && \
     install -o nginx -g nginx -d \
+      /etc/keys \
       /usr/local/openresty/naxsi/locations \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP
+
 
 WORKDIR /usr/local/openresty
 
