@@ -21,9 +21,7 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_dhparam ${NGIX_CONF_DIR}/dhparam.pem;
 EOF_CERT_CONF
 
-if [ "${LOCATIONS_CSV}" == "" ]; then
-    LOCATIONS_CSV=/
-fi
+: "${LOCATIONS_CSV:=/}"
 
 INTERNAL_LISTEN_PORT="${INTERNAL_LISTEN_PORT:-10418}"
 NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
@@ -35,12 +33,12 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
-if [ "${CUSTOM_SECURITY_DEFAULTS}" == "TRUE" ]; then
+if [ "${CUSTOM_SECURITY_DEFAULTS:-}" == "TRUE" ]; then
     msg "Disabling inbuilt security headers add per location"
     > /usr/local/openresty/nginx/conf/security_defaults.conf
 fi
 
-if [ "${LOAD_BALANCER_CIDR}" != "" ]; then
+if [ -n "${LOAD_BALANCER_CIDR:-}" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     export REMOTE_IP_VAR="proxy_protocol_addr"
     cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-PP
@@ -63,7 +61,7 @@ fi
 
 NGIX_SYSDIG_SERVER_CONF="${NGIX_CONF_DIR}/nginx_sysdig_server.conf"
 touch ${NGIX_SYSDIG_SERVER_CONF}
-if [ -z ${DISABLE_SYSDIG_METRICS+x} ]; then
+if [ -n "${DISABLE_SYSDIG_METRICS:-}" ]; then
     cat > ${NGIX_SYSDIG_SERVER_CONF} <<-EOF-SYSDIG-SERVER
     server {
       listen 10088;
@@ -84,7 +82,7 @@ if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
   done
 fi
 
-if [ "${NAME_RESOLVER}" == "" ]; then
+if [ -z "${NAME_RESOLVER:-}" ]; then
     if [ "${DNSMASK}" == "TRUE" ]; then
         dnsmasq -p 5462
         export NAME_RESOLVER=127.0.0.1:5462
@@ -111,7 +109,7 @@ echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 if [ -f ${UUID_FILE} ]; then
     export LOG_UUID=TRUE
 fi
-if [ "${CLIENT_MAX_BODY_SIZE}" != "" ]; then
+if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     UPLOAD_SETTING="client_max_body_size ${CLIENT_MAX_BODY_SIZE}m;"
     echo "${UPLOAD_SETTING}">${NGIX_CONF_DIR}/upload_size.conf
     msg "Setting '${UPLOAD_SETTING};'"
@@ -128,18 +126,18 @@ else
 fi
 
 case "${LOG_FORMAT_NAME}" in
-    "json" | "text")
+    json|text)
         msg "Logging set to ${LOG_FORMAT_NAME}"
 
-        if [ "${NO_LOGGING_URL_PARAMS}" ]; then
+        if [ "${NO_LOGGING_URL_PARAMS:-}" == TRUE ]; then
             sed -i -e 's/\$request_uri/\$uri/g' ${NGIX_CONF_DIR}/logging.conf
         fi
 
-        if [ "${NO_LOGGING_BODY}" == "TRUE" ]; then
+        if [ "${NO_LOGGING_BODY:-}" == TRUE ]; then
             sed --in-place '/\$request_body/d' ${NGIX_CONF_DIR}/logging.conf
         fi
 
-        if [ "${NO_LOGGING_RESPONSE}" == "TRUE" ]; then
+        if [ "${NO_LOGGING_RESPONSE:-}" == TRUE ]; then
             sed --in-place '/\$response_body/d' ${NGIX_CONF_DIR}/logging.conf
             touch ${NGIX_CONF_DIR}/response_body.conf
         else
@@ -166,12 +164,12 @@ EOF-LOGGING-BODY-TRUE
     ;;
 esac
 
-if [ "${ADD_NGINX_SERVER_CFG}" != "" ]; then
+if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     msg "Adding extra config for server context."
     echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
 fi
 
-if [ "${ADD_NGINX_HTTP_CFG}" != "" ]; then
+if [ -n "${ADD_NGINX_HTTP_CFG:-}" ]; then
     msg "Adding extra config for http context."
     echo ${ADD_NGINX_HTTP_CFG}>${NGIX_CONF_DIR}/nginx_http_extras.conf
 fi
@@ -180,7 +178,7 @@ GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 GEO_CFG_INIT="${NGIX_CONF_DIR}/nginx_geoip_init.conf"
 GEO_CFG_CONFIG="${NGIX_CONF_DIR}/nginx_geoip.conf"
 
-if [ "${ALLOW_COUNTRY_CSV}" != "" ]; then
+if [ -n "${ALLOW_COUNTRY_CSV:-}" ]; then
     msg "Enabling Country codes detection: ${ALLOW_COUNTRY_CSV}"
 
     cat > $GEO_CFG_INIT <<-EOF
