@@ -80,7 +80,8 @@ cp "./naxsi/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
 pushd luarocks
 ./configure --with-lua=/usr/local/openresty/luajit \
             --lua-suffix=jit-2.1.0-beta2 \
-            --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
+            --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1 \
+            --with-debug
 make build install
 popd
 
