@@ -43,5 +43,4 @@ pipeline:
       - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
       - ./publish-test-image.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
     when:
-      branch: EE-20118-test-image
       event: tag
