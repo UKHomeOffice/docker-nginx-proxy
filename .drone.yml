@@ -44,4 +44,4 @@ pipeline:
       - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
     when:
       branch: EE-20118-test-image
-      event: [tag, push]
+      event: tag
