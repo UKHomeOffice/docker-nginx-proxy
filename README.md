@@ -54,8 +54,6 @@ Note the following variables can only be set once:
 
 * `ADD_NGINX_SERVER_CFG` - Arbitrary extra NGINX configuration to be added to the server context, see
 [Arbitrary Config](#arbitrary-config)
-* `ADD_NGINX_HTTP_CFG` - Arbitrary extra NGINX configuration to be added to the http context, see
-[Arbitrary Config](#arbitrary-config)
 * `AWS_REGION` - Sets the AWS region this container is running in. Used to construct urls from which to download resources from. Defaults to 'eu-west-1' if not set.
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
@@ -253,15 +251,6 @@ The example below will return "404" for the URL /notfound.
 docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'ADD_NGINX_SERVER_CFG=location /notfound { return 404; };' \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-The example below enables proxy_cache_path directive.  Allows you to define where cached files are stored.
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'ADD_NGINX_HTTP_CFG=proxy_cache_path /data/nginx/cache levels=1:2 keys_zone=static:10m;' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```

@@ -149,9 +149,4 @@ if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
 fi
 
-if [ -n "${ADD_NGINX_HTTP_CFG:-}" ]; then
-    msg "Adding extra config for http context."
-    echo ${ADD_NGINX_HTTP_CFG}>${NGIX_CONF_DIR}/nginx_http_extras.conf
-fi
-
 eval "${NGINX_BIN} -g \"daemon off;\""
