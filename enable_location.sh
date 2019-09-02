@@ -22,13 +22,6 @@ ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 
-# Backwards compatability
-# This tests for the presence of :// which if missing means we do nt have 
-# a protocol so we default to http://
-if [ "`echo ${PROXY_SERVICE_HOST} | grep '://'`" = "" ]; then
-  PROXY_SERVICE_HOST="http://${PROXY_SERVICE_HOST}"
-fi
-
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
 
