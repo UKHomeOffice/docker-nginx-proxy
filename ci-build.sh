@@ -10,7 +10,6 @@ START_INSTANCE="docker run "
 DOCKER_HOST_NAME=172.17.0.1
 MOCKSERVER="mockserver-${BUILD_NUMBER}"
 SLOWMOCKSERVER="slowmockserver-${BUILD_NUMBER}"
-MUTUAL_TLS="mutual-tls-${BUILD_NUMBER}"
 STANDARD_TLS="standard-tls-${BUILD_NUMBER}"
 MOCKSERVER_PORT=9000
 SLOWMOCKSERVER_PORT=9001
@@ -34,7 +33,6 @@ function clean_up() {
     rm -f /tmp/file.txt
     tear_down_container "${MOCKSERVER}"
     tear_down_container "${SLOWMOCKSERVER}"
-    tear_down_container "${MUTUAL_TLS}"
     tear_down_container "${STANDARD_TLS}"
     tear_down_container "${TAG}-${BUILD_NUMBER}"
 }
@@ -228,125 +226,6 @@ start_test "Start with Multiple locations, single proxy and NAXSI download." "${
 
 echo "Test for all OK..."
 wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
-
-echo "Test client certs..."
-cd ./client_certs/
-./create_ca.sh
-./create_client_csr_and_key.sh
-./sign_client_key_with_ca.sh
-cd ..
-start_test "Start with Client CA, and single proxy. Block unauth for /standards" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/client-ca" \
-           "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://www.w3.org\" \
-           -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"LOCATIONS_CSV=/,/standards/\" \
-           -e \"CLIENT_CERT_REQUIRED_2=TRUE\" "
-
-echo "Test access OK for basic area..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-
-echo "Test access denied for /standards/..."
-if wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ ; then
-    echo "Error - expecting auth fail!"
-    exit 1
-else
-    echo "Passed auth fail"
-fi
-echo "Test access OK for /standards/... with client cert..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/standards/ \
-     --certificate=./client_certs/client.crt \
-     --private-key=./client_certs/client.key
-
-echo "Test upstream client certs..."
-docker build -t mutual-tls:latest ${WORKDIR} -f docker-config/Dockerfile.mutual-tls
-${STD_CMD} -d \
-           --log-driver json-file \
-           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
-           -e "PROXY_SERVICE_PORT=80" \
-           -e "CLIENT_CERT_REQUIRED=TRUE" \
-           --name="${MUTUAL_TLS}" mutual-tls:latest
-
-docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait
-start_test "Start with upstream client certs" \
-           "${WORKDIR}/client_certs/client.crt" "/etc/keys/upstream-client-crt" \
-           "${WORKDIR}/client_certs/client.key" "/etc/keys/upstream-client-key" \
-           "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=https://${MUTUAL_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"USE_UPSTREAM_CLIENT_CERT=TRUE\" \
-           --link \"${MUTUAL_TLS}:${MUTUAL_TLS}\" "
-
-echo "Test it's up and working..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-tear_down_container "${MUTUAL_TLS}"
-
-echo "Test failure to verify upstream server cert..."
-docker build -t standard-tls:latest ${WORKDIR} -f docker-config/Dockerfile.standard-tls
-${STD_CMD} -d \
-           --log-driver json-file \
-           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
-           -e "PROXY_SERVICE_PORT=80" \
-           --name="${STANDARD_TLS}" standard-tls:latest
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
-start_test "Start with failing upstream server verification" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/upstream-server-ca" \
-           "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"VERIFY_SERVER_CERT=TRUE\" \
-           --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
-
-echo "Test it blocks the request, returning a 502..."
-if curl -ki https://${DOCKER_HOST_NAME}:${PORT}/ | grep "502 Bad Gateway" ; then
-    echo "Passed failure to verify upstream server cert"
-else
-    echo "Failed failure to verify upstream server cert"
-    exit 1
-fi
-tear_down_container "${STANDARD_TLS}"
-
-cd ./client_certs/
-./create_server_csr_and_key.sh
-./sign_server_key_with_ca.sh
-cd ..
-${STD_CMD} -d \
-           --log-driver json-file \
-           -e "PROXY_SERVICE_HOST=http://www.w3.org" \
-           -e "PROXY_SERVICE_PORT=80" \
-           --name="${STANDARD_TLS}" ${TAG}
-
-docker start ${STANDARD_TLS}
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
-start_test "Start with succeeding upstream server verification" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/upstream-server-ca" \
-           "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"VERIFY_SERVER_CERT=TRUE\" \
-           --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
-
-tear_down_container "${STANDARD_TLS}"
-
-#--------------------------------------------------------------------------------------------------
-# currently fails here
-#wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-#docker ps -a --filter "status=running" | grep ${INSTANCE}
-#docker logs ${INSTANCE}
-#wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-#tear_down_container "${STANDARD_TLS}"
-
-# testing stuff
-#clean_up
-#exit
-# -------------
 
 start_test "Start with Custom upload size" "${STD_CMD} \
            --log-driver json-file \

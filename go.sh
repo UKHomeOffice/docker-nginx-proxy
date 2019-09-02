@@ -82,16 +82,6 @@ if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
-if [ -f /etc/keys/client-ca ]; then
-    msg "Loading client certs."
-    cat > ${NGIX_CONF_DIR}/client_certs.conf <<-EOF_CLIENT_CONF
-      ssl_client_certificate /etc/keys/client-ca;
-      ssl_verify_client optional;
-EOF_CLIENT_CONF
-else
-    msg "No client certs mounted - not loading..."
-fi
-
 cat >> ${NGIX_CONF_DIR}/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING

@@ -37,9 +37,6 @@ rules to be specified without downloading or mounting in a rule file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
  If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
-* `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
-* `VERIFY_SERVER_CERT` - if set to `TRUE`, will verify the upstream server's TLS certificate is valid and signed by the CA, see [Verifying Upstream Server](#verifying-upstream-server).
-* `USE_UPSTREAM_CLIENT_CERT` - if set to `TRUE`, will use the set of upstream client certs when connecting upstream, see [Upstream Client Certs](#upstream-client-certs).
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
@@ -89,14 +86,6 @@ N.B. see HTTP(S)_LISTEN_PORT above
 * `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
 * `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self
   signed one is provided if they have not been mounted.
-* `/etc/keys/client-ca` If a client CA is mounted here, it will be loaded and configured.
-See `CLIENT_CERT_REQUIRED` above in [Environment Variables](#environment-variables).
-* `/etc/keys/upstream-server-ca` A CA public cert must be mounted here when verifying the upstream server's certificate is required.
-See `VERIFY_SERVER_CERT` above in [Environment Variables](#environment-variables).
-* `/etc/keys/upstream-client-crt` A public client cert must be mounted here when when the upstream server requires client cert authentication.
-See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
-* `/etc/keys/upstream-client-key` A private client key must be mounted here when when the upstream server requires client cert authentication.
-See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-variables).
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default
 nginx.conf.
 * `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
@@ -178,63 +167,6 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
-#### Client Certs
-
-If a client CA certificate is mounted, the proxy will be configured to load it. If a client has the cert, the client CN
-will be set in the X-Username header and logged.
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-The following example will specifically deny access to clients without a cert:
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'LOCATIONS_CSV=/,/about' \
-           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
-           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-See [./client_certs](./client_certs) for scripts that can be used to generate a CA and client certs.
-
-#### Upstream Client Certs
-
-If the environment variable `USE_UPSTREAM_CLIENT_CERT` is set to `TRUE`
-then the client certs at `/etc/keys/upstream-client-crt` and
-`/etc/keys/upstream-client-key` will be used to authenticate with the
-upstream HTTPS service.
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=https://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=443' \
-           -e 'USE_UPSTREAM_CLIENT_CERT=TRUE' \
-           -v "/path/to/client-public.crt:/etc/keys/upstream-client-crt" \
-           -v "/path/to/client-private.key:/etc/keys/upstream-client-key" \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v2.1.0
-```
-
-#### Verifying Upstream Server
-
-If the environment variable `VERIFY_SERVER_CERT` is set to `TRUE` then
-the upstream server's certificate will be validated against the CA
-public cert at `/etc/keys/upstream-server-ca`.
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=https://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=443' \
-           -e 'VERIFY_SERVER_CERT=TRUE' \
-           -v "/path/to/ca.crt:/etc/keys/upstream-server-ca" \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v2.1.0
-```
-
 #### Arbitrary Config
 
 The example below will return "ping ok" for the URL /ping.
@@ -282,9 +214,7 @@ If you're using multiple locations then we need to define the location that basi
 docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
            -e 'PROXY_SERVICE_PORT=80' \
            -e 'LOCATIONS_CSV=/,/about' \
-           -e 'CLIENT_CERT_REQUIRED_2=TRUE' \
            -e BASIC_AUTH_2=/etc/secrets/basic-auth \
-           -v "${PWD}/client_certs/ca.crt:/etc/keys/client-ca" \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
