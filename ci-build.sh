@@ -141,8 +141,7 @@ start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"SSL_CIPHERS=RC4-MD5\" \
-           -e \"SSL_PROTOCOLS=TLSv1.1\""
+           -e \"SSL_CIPHERS=RC4-MD5\""
 echo "Test excepts defined protocol and cipher....."
 docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${INSTANCE}:10443" &> /dev/null;
 

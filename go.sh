@@ -19,7 +19,7 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     ${SERVER_CERT};
     ssl_certificate_key ${SERVER_KEY};
     # Can add SSLv3 for IE 6 but this opens up to poodle
-    ssl_protocols ${SSL_PROTOCOLS};
+    ssl_protocols TLSv1.2;
     # reduction to only the best ciphers
     # And make sure we prefer them
     ssl_ciphers ${SSL_CIPHERS};
