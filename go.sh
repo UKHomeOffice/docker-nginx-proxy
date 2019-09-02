@@ -55,7 +55,6 @@ done
 dnsmasq -p 5462
 
 msg "Resolving proxied names using resolver:127.0.0.1:5462"
-echo "resolver 127.0.0.1:5462;">${NGIX_CONF_DIR}/resolver.conf
 
 echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 
