@@ -53,9 +53,6 @@ Note the following variables can only be set once:
 location.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
-* `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
-* `NO_LOGGING_BODY` - Defaults to true `TRUE`.  Set otherwise and nginx should log the request_body.
-* `NO_LOGGING_RESPONSE` - Defaults to true `TRUE`.  Set otherwise and nginx should log the response_body
 * `SERVER_CERT` - Can override where to find the server's SSL cert.
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.

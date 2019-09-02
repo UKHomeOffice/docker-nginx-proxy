@@ -9,8 +9,6 @@ export SERVER_CERT=${SERVER_CERT:-/etc/keys/crt}
 export SERVER_KEY=${SERVER_KEY:-/etc/keys/key}
 export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-10080}
 export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
-export NO_LOGGING_BODY=${NO_LOGGING_BODY:-'TRUE'}
-export NO_LOGGING_RESPONSE=${NO_LOGGING_RESPONSE:-'TRUE'}
 export AWS_REGION=${AWS_REGION:-'eu-west-1'}
 
 function download() {

@@ -92,18 +92,9 @@ ${CUSTOM_LOG_FORMAT}
 EOF_LOGGING
         fi
 
-        if [ "${NO_LOGGING_URL_PARAMS:-}" == TRUE ]; then
-            sed -i -e 's/\$request_uri/\$uri/g' ${NGIX_CONF_DIR}/logging.conf
-        fi
-
-        if [ "${NO_LOGGING_BODY:-}" == TRUE ]; then
-            sed --in-place '/\$request_body/d' ${NGIX_CONF_DIR}/logging.conf
-        fi
-
-        if [ "${NO_LOGGING_RESPONSE:-}" == TRUE ]; then
-            sed --in-place '/\$response_body/d' ${NGIX_CONF_DIR}/logging.conf
-            touch ${NGIX_CONF_DIR}/response_body.conf
-        else
+      sed --in-place '/\$request_body/d' ${NGIX_CONF_DIR}/logging.conf
+      sed --in-place '/\$response_body/d' ${NGIX_CONF_DIR}/logging.conf
+      touch ${NGIX_CONF_DIR}/response_body.conf
 		cat > ${NGIX_CONF_DIR}/response_body.conf <<-EOF-LOGGING-BODY-TRUE
 
 			lua_need_request_body on;
@@ -116,7 +107,6 @@ EOF_LOGGING
 				end
 			';
 EOF-LOGGING-BODY-TRUE
-        fi
 
         echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
         echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
