@@ -19,7 +19,6 @@ NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
-ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
@@ -93,12 +92,6 @@ else
     touch ${UUID_FILE}
 fi
 
-if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
-    msg "Enable web socket support"
-    WEB_SOCKETS="include ${NGIX_CONF_DIR}/nginx_web_sockets_proxy.conf;"
-else
-    unset WEB_SOCKETS
-fi
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
     msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
 fi
@@ -128,7 +121,6 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
-    ${WEB_SOCKETS}
     $(cat /location_template.conf)
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Real-IP \$remote_addr;

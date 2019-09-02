@@ -213,14 +213,6 @@ wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" ht
 echo "Testing custom logs format..."
 docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
 
-start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_WEB_SOCKETS=TRUE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-
 start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
