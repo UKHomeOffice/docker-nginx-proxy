@@ -38,7 +38,6 @@ Variables to control how to configure the proxy (can be set per location, see
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
-* `BASIC_AUTH` - Define a path for username and password file (in `username:password` format), this will turn the file into a .htpasswd file.
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `CONCURRENT_CONNS_PER_IP` - Will limit concurrent connections based on IP e.g. set to 10 to allow max of 10 connections per browser or proxy!
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
@@ -166,42 +165,6 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
-
-#### Basic Auth
-
-To add basic auth to your server you need to define the username and password by mounting a file and defining that file in the `BASIC_AUTH` variable, then add the location config to you config.
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'ADD_NGINX_LOCATION_CFG='auth_basic "Restricted"; auth_basic_user_file /etc/secrets/.htpasswd;' \
-           -e BASIC_AUTH='/etc/secrets/basic-auth'
-           -p 8443:443 \
-           -v ~/Documents:/etc/secrets/
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-The basic auth file will look like this.
-```shell
-admin:testing
-username:password
-```
-##### Basic Auth on mutliple Locations
-
-If you're using multiple locations then we need to define the location that basic_auth will be set in relation to the `LOCATIONS_CSV`
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://serverfault.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'LOCATIONS_CSV=/,/about' \
-           -e BASIC_AUTH_2=/etc/secrets/basic-auth \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-this will setup basic-auth for the the `/about` location or simply swap the 2 for a 1 to setup basic auth for the root location.
-
-
 
 ## Built With
 

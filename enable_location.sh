@@ -21,7 +21,6 @@ PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
-BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 CONCURRENT_CONNS_PER_IP=$(get_id_var ${LOCATION_ID} CONCURRENT_CONNS_PER_IP)
@@ -71,28 +70,6 @@ else
     msg "Core NAXSI rules enabled @ /usr/local/openresty/naxsi/naxsi_core.rules"
     msg "NAXSI location rules enabled @ ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules"
     cp /usr/local/openresty/naxsi/location.template ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
-fi
-# creates .htpasswd file from file
-if [[ "${BASIC_AUTH}" == "" ]]; then
-  
-  echo "Basic Auth not set for Location $LOCATION_ID, skipping..."
-else
-  HTPASSWD=$(dirname ${BASIC_AUTH})
-  if [ -f "$HTPASSWD/.htpasswd_${LOCATION_ID}" ]; then #has the htpasswd file already been created.
-    echo "$HTPASSWD/.htpasswd_$LOCATION_ID already created, skipping"
-  else
-    echo "Creating .htpasswd file from ${BASIC_AUTH} in location ${LOCATION_ID}"
-    sed -i '/^$/d' ${BASIC_AUTH} #remove all empty lines.
-    while IFS= read line
-       do
-          #for every line in the file add user and password to .htpasswd
-          USER=$(echo $line | cut -d ":" -f 1 |  tr -d '[[:space:]]')
-          PASSWORD=$(echo $line | cut -d ":" -f 2 | tr -d '[[:space:]]') #remove whitespace from lines.
-          printf "$USER:$(openssl passwd -crypt $PASSWORD)\n" >> ${HTPASSWD}/.htpasswd_$LOCATION_ID
-       done < ${BASIC_AUTH}
-      rm ${BASIC_AUTH} #delete file now not needed
-  fi
-  BASIC_AUTH_CONFIG="auth_basic \"Restricted\"; auth_basic_user_file $HTPASSWD/.htpasswd_$LOCATION_ID;"
 fi
 
 if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
@@ -154,7 +131,6 @@ location ${LOCATION} {
     ${CONN_LIMITS}
     ${UUID_ARGS}
     ${ADD_NGINX_LOCATION_CFG}
-    ${BASIC_AUTH_CONFIG}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 
