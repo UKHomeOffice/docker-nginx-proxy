@@ -37,7 +37,6 @@ Variables to control how to configure the proxy (can be set per location, see
  If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
-* `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
 

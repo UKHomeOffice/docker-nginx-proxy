@@ -17,7 +17,6 @@ PROXY_SERVICE_PORT=$(get_id_var ${LOCATION_ID} PROXY_SERVICE_PORT)
 NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
 NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
-PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
@@ -70,13 +69,6 @@ else
     cp /usr/local/openresty/naxsi/location.template ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
 fi
 
-if [ "${PORT_IN_HOST_HEADER}" == "FALSE" ]; then
-    msg "Setting host only proxy header"
-    PROXY_HOST_SETTING='$host'
-else
-    msg "Setting host and port proxy header"
-    PROXY_HOST_SETTING='$host:$server_port'
-fi
 if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
     UUID_ARGS=''
     msg "Auto UUID request parameter disabled for location ${LOCATION_ID}."
@@ -122,7 +114,7 @@ location ${LOCATION} {
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
     $(cat /location_template.conf)
-    proxy_set_header Host ${PROXY_HOST_SETTING};
+    proxy_set_header Host \$host:\$server_port;
     proxy_set_header X-Real-IP \$remote_addr;
 
 }
