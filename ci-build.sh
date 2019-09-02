@@ -10,7 +10,6 @@ START_INSTANCE="docker run "
 DOCKER_HOST_NAME=172.17.0.1
 MOCKSERVER="mockserver-${BUILD_NUMBER}"
 SLOWMOCKSERVER="slowmockserver-${BUILD_NUMBER}"
-STANDARD_TLS="standard-tls-${BUILD_NUMBER}"
 MOCKSERVER_PORT=9000
 SLOWMOCKSERVER_PORT=9001
 WORKDIR="${PWD}"
@@ -33,7 +32,6 @@ function clean_up() {
     rm -f /tmp/file.txt
     tear_down_container "${MOCKSERVER}"
     tear_down_container "${SLOWMOCKSERVER}"
-    tear_down_container "${STANDARD_TLS}"
     tear_down_container "${TAG}-${BUILD_NUMBER}"
 }
 

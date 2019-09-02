@@ -52,8 +52,6 @@ Note the following variables can only be set once:
 location.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
-* `SERVER_CERT` - Can override where to find the server's SSL cert.
-* `SERVER_KEY` - Can override where to find the server's SSL key.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')
@@ -80,26 +78,6 @@ is encountered upstream and the proxy is configured to intercept.
 blocks a request.
 
 ### Examples
-
-#### Self signed SSL Certificate
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-#### Custom SSL Certificate
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -p 8443:443 \
-           -v /path/to/key:/etc/keys/key:ro \
-           -v /path/to/crt:/etc/keys/crt:ro \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
 
 #### Using Multiple Locations
 

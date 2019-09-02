@@ -16,8 +16,8 @@ if [ ! -f /etc/keys/crt ]; then
 fi
 
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
-    ssl_certificate     ${SERVER_CERT};
-    ssl_certificate_key ${SERVER_KEY};
+    ssl_certificate     /etc/keys/crt;
+    ssl_certificate_key /etc/keys/key;
     # Can add SSLv3 for IE 6 but this opens up to poodle
     ssl_protocols TLSv1.2;
     # reduction to only the best ciphers
