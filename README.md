@@ -55,9 +55,6 @@ Note the following variables can only be set once:
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
-* `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
-The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and
-managed by Docker or Kubernetes.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged

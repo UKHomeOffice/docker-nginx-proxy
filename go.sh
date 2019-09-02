@@ -53,23 +53,16 @@ for i in "${!LOCATIONS_ARRAY[@]}"; do
     /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
 done
 
-if [ -z "${NAME_RESOLVER:-}" ]; then
-    if [ "${DNSMASK}" == "TRUE" ]; then
-        dnsmasq -p 5462
-        export NAME_RESOLVER=127.0.0.1:5462
-    else
-        export NAME_RESOLVER=$(grep 'nameserver' /etc/resolv.conf | head -n1 | cut -d' ' -f2)
-    fi
-fi
-
 cat > ${NGIX_CONF_DIR}/ssl_redirect.conf <<-EOF-REDIRECT-TRUE
 if (\$ssl_protocol = "") {
   rewrite ^ https://\$host\$request_uri? permanent;
 }
 EOF-REDIRECT-TRUE
 
-msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
-echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf
+dnsmasq -p 5462
+
+msg "Resolving proxied names using resolver:127.0.0.1:5462"
+echo "resolver 127.0.0.1:5462;">${NGIX_CONF_DIR}/resolver.conf
 
 echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 

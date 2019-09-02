@@ -132,7 +132,6 @@ start_test "Test rate limits 1 per second" "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"REQS_PER_MIN_PER_IP=60\" \
            -e \"REQS_PER_PAGE=0\" \
@@ -152,7 +151,6 @@ start_test "Test multiple concurrent connections in the same second get blocked"
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${SLOWMOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${SLOWMOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"REQS_PER_MIN_PER_IP=60\" \
            -e \"REQS_PER_PAGE=0\" \
@@ -176,7 +174,6 @@ start_test "Test response has gzip" "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test gzip ok..."
@@ -234,7 +231,6 @@ start_test "Start with Custom upload size" "${STD_CMD} \
            -e \"CLIENT_MAX_BODY_SIZE=15\" \
            -e \"NAXSI_USE_DEFAULT_RULES=FALSE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"DNSMASK=TRUE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 dd if=/dev/urandom of=/tmp/file.txt bs=1048576 count=10
 
@@ -247,7 +243,6 @@ start_test "Test text logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=text\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -260,7 +255,6 @@ start_test "Test json logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -273,7 +267,6 @@ start_test "Test custom logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=custom\" \
            -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
@@ -286,7 +279,6 @@ start_test "Test param logging off option works..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"NO_LOGGING_URL_PARAMS=TRUE\" \
@@ -299,7 +291,6 @@ docker logs ${INSTANCE} 2>/dev/null | grep 'animal=cow' | wc -l | grep 0
 start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_WEB_SOCKETS=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -310,7 +301,6 @@ start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"LOCATIONS_CSV=/,/api/\" \
            -e \"ADD_NGINX_LOCATION_CFG=return 200 NICE;\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test extra param works"
@@ -321,7 +311,6 @@ start_test "Test UUID GET param logging option works..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
@@ -333,7 +322,6 @@ start_test "Test UUID GET param logging option works with other params..." "${ST
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}/?foo=bar
@@ -345,7 +333,6 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
@@ -357,7 +344,6 @@ start_test "Test setting UUID name works..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            -e \"UUID_VAR_NAME=custom_uuid_name\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -369,7 +355,6 @@ start_test "Test setting empty UUID name defaults correctly..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
