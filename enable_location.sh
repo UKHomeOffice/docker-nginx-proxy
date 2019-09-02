@@ -70,11 +70,6 @@ elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
     # Ensure nginx enables this globaly
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
     touch ${UUID_FILE}
-else
-    UUID_ARGS="if (\$is_args) {set \$args \$args&${UUID_VAR_NAME}=\$uuidopt;} if (\$is_args = \"\") { set \$args ${UUID_VAR_NAME}=\$uuidopt;}"
-    # Ensure nginx enables this globaly
-    msg "Auto UUID request parameter enabled for location ${LOCATION_ID}."
-    touch ${UUID_FILE}
 fi
 
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then

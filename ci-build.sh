@@ -222,28 +222,6 @@ echo "Test extra param works"
 wget  -O - -o /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
 
 
-start_test "Test UUID GET param logging option works..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-echo "Testing no logging of url params option works..."
-docker logs "${MOCKSERVER}" | grep '?nginxId='
-docker logs ${INSTANCE} | grep '"nginx_uuid": "'
-
-start_test "Test UUID GET param logging option works with other params..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-curl -sk https://${DOCKER_HOST_NAME}:${PORT}/?foo=bar
-echo "Testing no logging of url params option works..."
-docker logs "${MOCKSERVER}" | grep '?foo=bar&nginxId='
-docker logs ${INSTANCE} | grep '"nginx_uuid": "'
-
 start_test "Test UUID header logging option works..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
