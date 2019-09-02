@@ -48,23 +48,6 @@ cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
 	set \$real_client_ip_if_set '';
 EOF-LISTEN-NONPP
 
-NGIX_SYSDIG_SERVER_CONF="${NGIX_CONF_DIR}/nginx_sysdig_server.conf"
-touch ${NGIX_SYSDIG_SERVER_CONF}
-if [ -z ${DISABLE_SYSDIG_METRICS+x} ]; then
-    cat > ${NGIX_SYSDIG_SERVER_CONF} <<-EOF-SYSDIG-SERVER
-    server {
-      listen 10088;
-      location /nginx_status {
-        stub_status on;
-        access_log   off;
-        allow 127.0.0.1;
-        allow 172.17.0.1;
-        deny all;
-      }
-    }
-EOF-SYSDIG-SERVER
-fi
-
 if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
   IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
   for i in "${!LOCATIONS_ARRAY[@]}"; do
