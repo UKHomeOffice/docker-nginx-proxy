@@ -48,12 +48,10 @@ cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
 	set \$real_client_ip_if_set '';
 EOF-LISTEN-NONPP
 
-if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
-  IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
-  for i in "${!LOCATIONS_ARRAY[@]}"; do
-      /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
-  done
-fi
+IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
+for i in "${!LOCATIONS_ARRAY[@]}"; do
+    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+done
 
 if [ -z "${NAME_RESOLVER:-}" ]; then
     if [ "${DNSMASK}" == "TRUE" ]; then
