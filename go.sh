@@ -32,14 +32,13 @@ EOF_CERT_CONF
 
 : "${LOCATIONS_CSV:=/}"
 
-INTERNAL_LISTEN_PORT="${INTERNAL_LISTEN_PORT:-10418}"
 NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
 
 cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		set \$http_listen_port '${HTTP_LISTEN_PORT}';
 		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-		set \$internal_listen_port '${INTERNAL_LISTEN_PORT}';
-		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
+		set \$internal_listen_port '10418';
+		listen localhost:10418 ssl;
 EOF-LISTEN
 
 cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
