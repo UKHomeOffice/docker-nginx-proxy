@@ -7,7 +7,6 @@ set -o pipefail
 LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.2.tar.gz'
 NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.56.tar.gz'
 OPEN_RESTY_URL='http://openresty.org/download/openresty-1.11.2.4.tar.gz'
-STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
 
 # Install dependencies to build from source
 yum -y install \
@@ -26,18 +25,16 @@ yum -y install \
     unzip \
     wget
 
-mkdir -p openresty luarocks naxsi nginx-statsd
+mkdir -p openresty luarocks naxsi
 
 # Prepare
 wget -qO - "$OPEN_RESTY_URL"   | tar xzv --strip-components 1 -C openresty/
 wget -qO - "$LUAROCKS_URL"     | tar xzv --strip-components 1 -C luarocks/
 wget -qO - "$NAXSI_URL"        | tar xzv --strip-components 1 -C naxsi/
-wget -qO - "$STATSD_URL"       | tar xzv --strip-components 1 -C nginx-statsd/
 
 # Build
 pushd openresty
 ./configure --add-module="../naxsi/naxsi_src" \
-            --add-module="../nginx-statsd" \
             --with-http_realip_module \
             --with-http_stub_status_module
 make install
@@ -58,7 +55,7 @@ luarocks install uuid
 luarocks install luasocket
 
 # Remove the developer tooling
-rm -fr openresty naxsi nginx-statsd luarocks
+rm -fr openresty naxsi luarocks
 yum -y remove \
     gcc-c++ \
     gcc \

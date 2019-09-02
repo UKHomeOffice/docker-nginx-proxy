@@ -75,8 +75,6 @@ managed by Docker or Kubernetes.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `INTERNAL_LISTEN_PORT` - Change the default inside the container from 10418. Note: This is used for internal processing and is not available externally.
-* `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
-* `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')
 
 ### Ports
