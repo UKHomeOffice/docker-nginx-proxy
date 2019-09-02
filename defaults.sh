@@ -4,7 +4,6 @@ export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
 export NGINX_BIN=/usr/local/openresty/nginx/sbin/nginx
 export UUID_FILE=/tmp/uuid_on
 export UUID_VAR_NAME=${UUID_VAR_NAME:-'nginxId'}
-export DEFAULT_ERROR_CODES=""
 export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-json}
 export SERVER_CERT=${SERVER_CERT:-/etc/keys/crt}
 export SERVER_KEY=${SERVER_KEY:-/etc/keys/key}

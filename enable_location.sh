@@ -23,7 +23,6 @@ USE_UPSTREAM_CLIENT_CERT=$(get_id_var ${LOCATION_ID} USE_UPSTREAM_CLIENT_CERT)
 VERIFY_SERVER_CERT=$(get_id_var ${LOCATION_ID} VERIFY_SERVER_CERT)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
-ERROR_REDIRECT_CODES=$(get_id_var ${LOCATION_ID} ERROR_REDIRECT_CODES)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
@@ -158,18 +157,6 @@ else
     touch ${UUID_FILE}
 fi
 
-if [ "${ERROR_REDIRECT_CODES}" == "" ]; then
-    ERROR_REDIRECT_CODES="${DEFAULT_ERROR_CODES}"
-fi
-ERROR_PAGES=""
-if [ "${ERROR_REDIRECT_CODES}" != "FALSE" ]; then
-    for code in ${ERROR_REDIRECT_CODES}; do
-      # Set up an individual error page for each code
-      msg "Enabling redirect on status code: ${code}"
-      ERROR_PAGES="${ERROR_PAGES} error_page ${code} /nginx-proxy/${code}.shtml;"
-    done
-fi
-
 if [ "${ENABLE_WEB_SOCKETS}" == "TRUE" ]; then
     msg "Enable web socket support"
     WEB_SOCKETS="include ${NGIX_CONF_DIR}/nginx_web_sockets_proxy.conf;"
@@ -214,8 +201,6 @@ location ${LOCATION} {
     ${ADD_NGINX_LOCATION_CFG}
     ${BASIC_AUTH_CONFIG}
     ${DENY_COUNTRY}
-
-    ${ERROR_PAGES}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 

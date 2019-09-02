@@ -40,9 +40,6 @@ rules to be specified without downloading or mounting in a rule file.
 * `CLIENT_CERT_REQUIRED` - if set to `TRUE`, will deny access at this location, see [Client Certs](#client-certs).
 * `VERIFY_SERVER_CERT` - if set to `TRUE`, will verify the upstream server's TLS certificate is valid and signed by the CA, see [Verifying Upstream Server](#verifying-upstream-server).
 * `USE_UPSTREAM_CLIENT_CERT` - if set to `TRUE`, will use the set of upstream client certs when connecting upstream, see [Upstream Client Certs](#upstream-client-certs).
-* `ERROR_REDIRECT_CODES` - Can override when Nginx will redirect requests to its own error page. Defaults to
-"`500 501 502 503 504`". To support a new code, say `505`, an error page must be provided at
-`/usr/local/openresty/nginx/html/505.shtml`, see [Useful File Locations](#useful-file-locations). Set to `FALSE` to disable all error pages.
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
 * `PORT_IN_HOST_HEADER` - If FALSE will remove the port from the http `Host` header.
@@ -112,7 +109,7 @@ See `USE_UPSTREAM_CLIENT_CERT` above in [Environment Variables](#environment-var
 * `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default
 nginx.conf.
 * `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
-is encountered upstream and the proxy is configured to intercept. See ERROR_REDIRECT_CODES to change this.
+is encountered upstream and the proxy is configured to intercept.
 * `/usr/local/openresty/nginx/html/418-request-denied.shtml` - HTML (with SSI support) displayed when NAXSI
 blocks a request.
 

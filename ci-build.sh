@@ -364,25 +364,6 @@ start_test "Start with succeeding upstream server verification" \
 
 tear_down_container "${STANDARD_TLS}"
 
-start_test "Start with Custom error pages redirect off" "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"LOCATIONS_CSV=/,/api/\" \
-           -e \"ERROR_REDIRECT_CODES_2=502\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo "Test All ok..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/api/
-if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/api/dead | grep "Oh dear" ; then
-    echo "Passed return text on error with ERROR_REDIRECT_CODES"
-else
-    echo "Failed return text on error with ERROR_REDIRECT_CODES"
-    exit 1
-fi
-
 #--------------------------------------------------------------------------------------------------
 # currently fails here
 #wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
@@ -395,26 +376,6 @@ fi
 #clean_up
 #exit
 # -------------
-
-start_test "Test custom error pages..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"ERROR_REDIRECT_CODES=502 404 500\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-if curl -k https://${DOCKER_HOST_NAME}:${PORT}/not-found | grep "404 Not Found" ; then
-    if curl -k https://${DOCKER_HOST_NAME}:${PORT}/api/dead | grep "An error occurred" ; then
-        echo "Passed custom error pages with ERROR_REDIRECT_CODES"
-    else
-        echo "Failed custom error pages with ERROR_REDIRECT_CODES on code 500"
-        exit 1
-    fi
-else
-    echo "Failed custom error pages with ERROR_REDIRECT_CODES on code 404"
-    exit 1
-fi
 
 start_test "Start with Custom upload size" "${STD_CMD} \
            --log-driver json-file \
