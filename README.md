@@ -60,8 +60,6 @@ Note the following variables can only be set once:
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
-* `LOAD_BALANCER_CIDR` - Set to preserve client IP addresses. *Important*, to enable, see
-[Preserve Client IP](#preserve-client-ip).
 * `NAME_RESOLVER` - Can override the *default* DNS server used to re-resolve the backend proxy (based on TTL).
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and
 managed by Docker or Kubernetes.
@@ -130,27 +128,6 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -p 8443:443 \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-#### Preserve Client IP
-
-This proxy supports [Proxy Protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt).
-
-To use this feature you will need:
-
-* To enable [proxy protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) on your load balancer.
-  For AWS, see [Enabling Proxy Protocol for AWS](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-proxy-protocol.html).
-* Find the private address range of your load balancer.
-  For AWS, this could be any address in the destination network. E.g.
-  if you have three compute subnets defined as 10.50.0.0/24, 10.50.1.0/24 and 10.50.2.0/24,
-  then a suitable range would be 10.50.0.0/22 see [CIDR Calculator](http://www.subnet-calculator.com/cidr.php).
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'LOAD_BALANCER_CIDR=10.50.0.0/22' \
-           -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 

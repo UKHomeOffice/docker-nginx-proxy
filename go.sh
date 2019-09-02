@@ -42,26 +42,11 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
-if [ -n "${LOAD_BALANCER_CIDR:-}" ]; then
-    msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
-    export REMOTE_IP_VAR="proxy_protocol_addr"
-    cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-PP
-		listen ${HTTP_LISTEN_PORT} proxy_protocol;
-		listen ${HTTPS_LISTEN_PORT} proxy_protocol ssl;
-		real_ip_recursive on;
-		real_ip_header proxy_protocol;
-		set \$real_client_ip_if_set '\$proxy_protocol_addr ';
-		set_real_ip_from ${LOAD_BALANCER_CIDR};
-	EOF-LISTEN-PP
-else
-    msg "No \$LOAD_BALANCER_CIDR set, using straight SSL (client ip will be from loadbalancer if used)..."
-    export REMOTE_IP_VAR="remote_addr"
-    cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
-		listen ${HTTP_LISTEN_PORT};
-		listen ${HTTPS_LISTEN_PORT} ssl;
-		set \$real_client_ip_if_set '';
-	EOF-LISTEN-NONPP
-fi
+cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
+	listen ${HTTP_LISTEN_PORT};
+	listen ${HTTPS_LISTEN_PORT} ssl;
+	set \$real_client_ip_if_set '';
+EOF-LISTEN-NONPP
 
 NGIX_SYSDIG_SERVER_CONF="${NGIX_CONF_DIR}/nginx_sysdig_server.conf"
 touch ${NGIX_SYSDIG_SERVER_CONF}

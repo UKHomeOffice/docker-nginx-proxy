@@ -175,13 +175,13 @@ if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     else
       unset burst_setting
     fi
-    echo "limit_req_zone \$${REMOTE_IP_VAR} zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
+    echo "limit_req_zone \$remote_addr zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
         >${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
     REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting};"
 fi
 if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
     msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
-    echo "limit_conn_zone \$${REMOTE_IP_VAR} zone=connbuffer${LOCATION_ID}:10m;" \
+    echo "limit_conn_zone \$remote_addr zone=connbuffer${LOCATION_ID}:10m;" \
         >>${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
     CONN_LIMITS="limit_conn connbuffer${LOCATION_ID} ${CONCURRENT_CONNS_PER_IP};"
 fi
@@ -206,7 +206,7 @@ location ${LOCATION} {
     ${SSL_VERIFY}
     proxy_set_header Host ${PROXY_HOST_SETTING};
     proxy_set_header X-Username "$ssl_client_s_dn_cn";
-    proxy_set_header X-Real-IP \$${REMOTE_IP_VAR};
+    proxy_set_header X-Real-IP \$remote_addr;
 
 }
 EOF_LOCATION_CONF
