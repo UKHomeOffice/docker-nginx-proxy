@@ -31,8 +31,6 @@ Variables to control how to configure the proxy (can be set per location, see
 * `NAXSI_RULES_URL_CSV` - A CSV of [Naxsi](https://github.com/nbs-system/naxsi) URL's of files to download and use.
 (Files must end in .rules to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
-* `EXTRA_NAXSI_RULES` - Allows NAXSI rules to be specified as an environment variable. This allows one or two extra
-rules to be specified without downloading or mounting in a rule file.
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
  for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
@@ -108,20 +106,6 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            -p 8443:443 \
            -v /path/to/key:/etc/keys/key:ro \
            -v /path/to/crt:/etc/keys/crt:ro \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
-
-#### Extra NAXSI Rules from Environment
-
-The example below allows large documents to be POSTED to the /documents/uploads and /documents/other_uploads locations.
-See [Whitelist NAXSI rules](https://github.com/nbs-system/naxsi/wiki/whitelists) for more examples.
-
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://myapp.svc.cluster.local' \
-           -e 'PROXY_SERVICE_PORT=8080' \
-           -e 'EXTRA_NAXSI_RULES=BasicRule wl:2 "mz:$URL:/documents/uploads|BODY";
-               BasicRule wl:2 "mz:$URL:/documents/other_uploads|BODY";' \
-           -p 8443:443 \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 

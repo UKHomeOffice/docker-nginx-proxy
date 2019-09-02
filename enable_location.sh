@@ -17,7 +17,6 @@ PROXY_SERVICE_PORT=$(get_id_var ${LOCATION_ID} PROXY_SERVICE_PORT)
 NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
 NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
-EXTRA_NAXSI_RULES=$(get_id_var ${LOCATION_ID} EXTRA_NAXSI_RULES)
 PORT_IN_HOST_HEADER=$(get_id_var ${LOCATION_ID} PORT_IN_HOST_HEADER)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
@@ -72,11 +71,6 @@ else
     msg "Core NAXSI rules enabled @ /usr/local/openresty/naxsi/naxsi_core.rules"
     msg "NAXSI location rules enabled @ ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules"
     cp /usr/local/openresty/naxsi/location.template ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
-    if [ "${EXTRA_NAXSI_RULES}" != "" ]; then
-        msg "Adding extra NAXSI rules from environment"
-        echo ''>>${NAXSI_LOCATION_RULES}/location.rules
-        echo ${EXTRA_NAXSI_RULES}>>${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
-    fi
 fi
 # creates .htpasswd file from file
 if [[ "${BASIC_AUTH}" == "" ]]; then
