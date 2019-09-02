@@ -101,15 +101,11 @@ if [ -z "${NAME_RESOLVER:-}" ]; then
     fi
 fi
 
-if [ "${HTTPS_REDIRECT}" == "TRUE" ]; then
-    cat > ${NGIX_CONF_DIR}/ssl_redirect.conf <<-EOF-REDIRECT-TRUE
-	if (\$ssl_protocol = "") {
-	  rewrite ^ https://\$host\$https_port_string\$request_uri? permanent;
-	}
-	EOF-REDIRECT-TRUE
-else
-    touch ${NGIX_CONF_DIR}/ssl_redirect.conf
-fi
+cat > ${NGIX_CONF_DIR}/ssl_redirect.conf <<-EOF-REDIRECT-TRUE
+if (\$ssl_protocol = "") {
+  rewrite ^ https://\$host\$request_uri? permanent;
+}
+EOF-REDIRECT-TRUE
 
 msg "Resolving proxied names using resolver:${NAME_RESOLVER}"
 echo "resolver ${NAME_RESOLVER};">${NGIX_CONF_DIR}/resolver.conf

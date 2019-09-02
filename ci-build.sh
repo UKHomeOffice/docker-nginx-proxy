@@ -432,20 +432,6 @@ curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
-
-start_test "Start with listen for port 80" "${STD_CMD} \
-           --log-driver json-file \
-           -p 8888:10080 \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"DNSMASK=TRUE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"HTTPS_REDIRECT_PORT=${PORT}\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo "Test Redirect ok..."
-wget -O /dev/null --quiet --no-check-certificate http://${DOCKER_HOST_NAME}:8888/
-
-
 start_test "Test text logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \

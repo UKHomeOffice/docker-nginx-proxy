@@ -71,8 +71,6 @@ location.
 The *Default DNS Server* is the first entry in the resolve.conf file in the container and is normally correct and
 managed by Docker or Kubernetes.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
-* `HTTPS_REDIRECT_PORT` - Only required for http to https redirect and only when a non-standard https port is in use.
-This is useful when testing or for development instances or when a load-balancer mandates a non-standard port.
 * `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
 * `NO_LOGGING_URL_PARAMS` - Can be set to `TRUE` if you don't want to log url params. Default is empty which means URL params are logged
 * `NO_LOGGING_BODY` - Defaults to true `TRUE`.  Set otherwise and nginx should log the request_body.
@@ -84,7 +82,6 @@ This is useful when testing or for development instances or when a load-balancer
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `INTERNAL_LISTEN_PORT` - Change the default inside the container from 10418. Note: This is used for internal processing and is not available externally.
-* `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
