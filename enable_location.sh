@@ -29,7 +29,6 @@ BASIC_AUTH=$(get_id_var ${LOCATION_ID} BASIC_AUTH)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 CONCURRENT_CONNS_PER_IP=$(get_id_var ${LOCATION_ID} CONCURRENT_CONNS_PER_IP)
-DENY_COUNTRY_ON=$(get_id_var ${LOCATION_ID} DENY_COUNTRY_ON)
 
 # Backwards compatability
 # This tests for the presence of :// which if missing means we do nt have 
@@ -186,10 +185,6 @@ if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
         >>${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
     CONN_LIMITS="limit_conn connbuffer${LOCATION_ID} ${CONCURRENT_CONNS_PER_IP};"
 fi
-if [ "${DENY_COUNTRY_ON}" == "TRUE" ]; then
-    msg "Enabling GeoIP denies, unless IP is one of ${ALLOW_COUNTRY_CSV}, for location ${LOCATION_ID}."
-    DENY_COUNTRY="if (\$allowed_country = no) { return 403; }"
-fi
 
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
@@ -200,7 +195,6 @@ location ${LOCATION} {
     ${CERT_TXT}
     ${ADD_NGINX_LOCATION_CFG}
     ${BASIC_AUTH_CONFIG}
-    ${DENY_COUNTRY}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 

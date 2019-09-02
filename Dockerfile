@@ -31,7 +31,6 @@ ADD ./security_defaults.conf /usr/local/openresty/nginx/conf/
 ADD ./html/ /usr/local/openresty/nginx/html/
 ADD ./readyness.sh /
 ADD ./helper.sh /
-ADD ./refresh_geoip.sh /
 
 RUN yum remove -y kernel-headers && \
     yum clean all
@@ -47,7 +46,7 @@ RUN useradd -u 1000 nginx && \
       /etc/keys \
       /usr/local/openresty/naxsi/locations \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP
+    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs}
 
 
 WORKDIR /usr/local/openresty

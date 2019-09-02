@@ -47,7 +47,6 @@ rules to be specified without downloading or mounting in a rule file.
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `CONCURRENT_CONNS_PER_IP` - Will limit concurrent connections based on IP e.g. set to 10 to allow max of 10 connections per browser or proxy!
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
-* `DENY_COUNTRY_ON` - Set to `TRUE` to deny access to countries not listed in ALLOW_COUNTRY_CSV with 403 status for a location (set location for 403 with ADD_NGINX_LOCATION_CFG).
 
 #### Single set Variables
 
@@ -78,7 +77,6 @@ managed by Docker or Kubernetes.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `INTERNAL_LISTEN_PORT` - Change the default inside the container from 10418. Note: This is used for internal processing and is not available externally.
-* `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
 * `DISABLE_SYSDIG_METRICS` - Set to any non-empty string to disable support for Sysdig's metric collection

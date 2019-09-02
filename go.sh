@@ -193,57 +193,6 @@ if [ -n "${ADD_NGINX_HTTP_CFG:-}" ]; then
     echo ${ADD_NGINX_HTTP_CFG}>${NGIX_CONF_DIR}/nginx_http_extras.conf
 fi
 
-GEO_CFG="${NGIX_CONF_DIR}/nginx_geoip.conf"
-GEO_CFG_INIT="${NGIX_CONF_DIR}/nginx_geoip_init.conf"
-GEO_CFG_CONFIG="${NGIX_CONF_DIR}/nginx_geoip.conf"
-
-if [ -n "${ALLOW_COUNTRY_CSV:-}" ]; then
-    msg "Enabling Country codes detection: ${ALLOW_COUNTRY_CSV}"
-
-    cat > $GEO_CFG_INIT <<-EOF
-geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
-  auto_reload 21600;
-  \$geoip2_metadata_country_build metadata build_epoch;
-  \$geoip2_data_country_code default=NA source=\$realip country iso_code;
-  \$geoip2_data_country_name country names en;
-}
-
-geoip2 /usr/share/GeoIP/GeoLite2-City.mmdb {
-  \$geoip2_data_city_name default=NA city names en;
-}
-
-geoip2_proxy_recursive on;
-geoip2_proxy 0.0.0.0/0;
-
-map \$geoip2_data_country_code \$allowed_country {
-  default no;
-  NA yes;
-  $(echo -n "${ALLOW_COUNTRY_CSV}" | awk -F',' "{ for (i=1; i<=NF; i++) { printf \"%s yes;\n\", \$i; }}")
-}
-
-EOF
-    cat > $GEO_CFG_CONFIG <<EOF
-# use either the remote addr or the x-forwarded-for header
-set \$realip \$remote_addr;
-if (\$http_x_forwarded_for ~ "^(\d+\.\d+\.\d+\.\d+)") {
-  set \$realip \$1;
-}
-set \$country_code \$geoip2_data_country_code;
-
-# check if the country is allowed and deny
-if (\$allowed_country = no) {
-  return 403;
-}
-
-EOF
-    /refresh_geoip.sh&
-    msg "Enabling the geoip refresh background job"
-else
-    touch ${GEO_CFG_CONFIG}
-    touch ${GEO_CFG_INIT}
-    touch ${GEO_CFG}
-fi
-
 if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
     msg "Setting up statsd configuration with server ${STATSD_SERVER}"
     echo "statsd_server ${STATSD_SERVER};" > ${NGIX_CONF_DIR}/nginx_statsd_server.conf
