@@ -137,25 +137,6 @@ start_test "Test response has gzip" "${STD_CMD} \
 echo "Test gzip ok..."
 curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | grep -q 'Content-Encoding: gzip'
 
-start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
-           -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"SSL_CIPHERS=RC4-MD5\""
-echo "Test excepts defined protocol and cipher....."
-docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${INSTANCE}:10443" &> /dev/null;
-
-
-
-start_test "Start we auto add a protocol " "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=www.w3.org\" \
-           -e \"PROXY_SERVICE_PORT=80\""
-
-echo "Test It works if we do not define the protocol.."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-
-
 start_test "Start with multi locations settings" "${STD_CMD} \
            --log-driver json-file \
            -e \"LOCATIONS_CSV=/,/news\" \
