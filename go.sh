@@ -42,11 +42,6 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
-if [ "${CUSTOM_SECURITY_DEFAULTS}" == "TRUE" ]; then
-    msg "Disabling inbuilt security headers add per location"
-    > /usr/local/openresty/nginx/conf/security_defaults.conf
-fi
-
 if [ -n "${LOAD_BALANCER_CIDR:-}" ]; then
     msg "Using proxy_protocol from '$LOAD_BALANCER_CIDR' (real client ip is forwarded correctly by loadbalancer)..."
     export REMOTE_IP_VAR="proxy_protocol_addr"
