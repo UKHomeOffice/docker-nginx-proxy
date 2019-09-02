@@ -35,17 +35,14 @@ EOF_CERT_CONF
 NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
 
 cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
-		set \$http_listen_port '${HTTP_LISTEN_PORT}';
-		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-		set \$internal_listen_port '10418';
-		listen localhost:10418 ssl;
-EOF-LISTEN
-
-cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
+	set \$http_listen_port '${HTTP_LISTEN_PORT}';
+	set \$https_listen_port '${HTTPS_LISTEN_PORT}';
+	set \$internal_listen_port '10418';
+	listen localhost:10418 ssl;
 	listen ${HTTP_LISTEN_PORT};
 	listen ${HTTPS_LISTEN_PORT} ssl;
 	set \$real_client_ip_if_set '';
-EOF-LISTEN-NONPP
+EOF-LISTEN
 
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
