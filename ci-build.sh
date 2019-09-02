@@ -128,48 +128,6 @@ if docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo 
   exit 2
 fi
 
-start_test "Test rate limits 1 per second" "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"REQS_PER_MIN_PER_IP=60\" \
-           -e \"REQS_PER_PAGE=0\" \
-           -e \"CONCURRENT_CONNS_PER_IP=1\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo "Test two connections in the same second get blocked..."
-curl --fail -v -k https://${DOCKER_HOST_NAME}:${PORT}/
-if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
-   | grep '503 Service Temporarily Unavailable' ; then
-    echo "Passed return text on error with REQS_PER_MIN_PER_IP"
-else
-    echo "Failed return text on error with REQS_PER_MIN_PER_IP"
-    exit 1
-fi
-
-start_test "Test multiple concurrent connections in the same second get blocked" "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${SLOWMOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${SLOWMOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"REQS_PER_MIN_PER_IP=60\" \
-           -e \"REQS_PER_PAGE=0\" \
-           -e \"CONCURRENT_CONNS_PER_IP=1\" \
-           --link \"${SLOWMOCKSERVER}:${SLOWMOCKSERVER}\" "
-echo "First background some requests..."
-curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
-curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
-curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
-curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
-echo "Now test we get blocked with second concurrent request..."
-if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
-   | grep '503 Service Temporarily Unavailable' ; then
-    echo "Passed return text on error with CONCURRENT_CONNS_PER_IP"
-else
-    echo "Failed return text on error with CONCURRENT_CONNS_PER_IP"
-    exit 1
-fi
-
 start_test "Test response has gzip" "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \

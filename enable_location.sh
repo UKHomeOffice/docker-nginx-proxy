@@ -23,7 +23,6 @@ ENABLE_WEB_SOCKETS=$(get_id_var ${LOCATION_ID} ENABLE_WEB_SOCKETS)
 ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
-CONCURRENT_CONNS_PER_IP=$(get_id_var ${LOCATION_ID} CONCURRENT_CONNS_PER_IP)
 
 # Backwards compatability
 # This tests for the presence of :// which if missing means we do nt have 
@@ -117,18 +116,11 @@ if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
         >${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
     REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting};"
 fi
-if [ "${CONCURRENT_CONNS_PER_IP}" != "" ]; then
-    msg "Enabling CONCURRENT_CONNS_PER_IP:${CONCURRENT_CONNS_PER_IP}"
-    echo "limit_conn_zone \$remote_addr zone=connbuffer${LOCATION_ID}:10m;" \
-        >>${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
-    CONN_LIMITS="limit_conn connbuffer${LOCATION_ID} ${CONCURRENT_CONNS_PER_IP};"
-fi
 
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
     ${REQ_LIMITS}
-    ${CONN_LIMITS}
     ${UUID_ARGS}
     ${ADD_NGINX_LOCATION_CFG}
 
