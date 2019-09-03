@@ -185,7 +185,7 @@ start_test "Test text logging format..." "${STD_CMD} \
 echo "Test request (with logging as text)..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing text logs format..."
-docker logs ${INSTANCE} | grep "\"GET / HTTP/1.1\" 200"
+docker logs ${INSTANCE} | grep -E "\"GET / HTTP/1.1\" X-Request-Id=[^ ]+ 200 "
 
 start_test "Test json logging format..." "${STD_CMD} \
            --log-driver json-file \

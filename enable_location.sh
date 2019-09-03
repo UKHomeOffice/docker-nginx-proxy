@@ -66,10 +66,9 @@ if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
     UUID_ARGS=''
     msg "Auto UUID request parameter disabled for location ${LOCATION_ID}."
 elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
-    UUID_ARGS="proxy_set_header X-Request-Id \$uuidopt;"
+    UUID_ARGS="proxy_set_header X-Request-Id \$request_id;"
     # Ensure nginx enables this globaly
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
-    touch ${UUID_FILE}
 fi
 
 if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
@@ -93,6 +92,7 @@ fi
 # Now create the location specific include file.
 cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
+    set \$uuid \$request_id;
     ${REQ_LIMITS}
     ${UUID_ARGS}
     ${ADD_NGINX_LOCATION_CFG}

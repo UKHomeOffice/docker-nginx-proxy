@@ -2,8 +2,6 @@
 
 set -e
 
-export LOG_UUID=FALSE
-
 . /defaults.sh
 
 # Generate a selfsigned key and certificate if we don't have one
@@ -55,9 +53,6 @@ msg "Resolving proxied names using resolver:127.0.0.1:5462"
 
 echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 
-if [ -f ${UUID_FILE} ]; then
-    export LOG_UUID=TRUE
-fi
 if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     UPLOAD_SETTING="client_max_body_size ${CLIENT_MAX_BODY_SIZE}m;"
     echo "${UPLOAD_SETTING}">${NGIX_CONF_DIR}/upload_size.conf

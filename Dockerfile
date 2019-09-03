@@ -19,8 +19,7 @@ RUN yum install -y bind-utils dnsmasq && \
 
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
 ADD ./nginx*.conf /usr/local/openresty/nginx/conf/
-RUN mkdir -p /usr/local/openresty/nginx/conf/locations /usr/local/openresty/nginx/lua
-ADD ./lua/set_uuid.lua /usr/local/openresty/nginx/lua/
+RUN mkdir -p /usr/local/openresty/nginx/conf/locations
 RUN md5sum /usr/local/openresty/nginx/conf/nginx.conf | cut -d' ' -f 1 > /container_default_ngx
 ADD ./defaults.sh /
 ADD ./go.sh /

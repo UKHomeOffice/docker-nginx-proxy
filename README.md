@@ -32,9 +32,8 @@ Variables to control how to configure the proxy (can be set per location, see
 (Files must end in .rules to be loaded)
 * `NAXSI_RULES_MD5_CSV` - A CSV of md5 hashes for the files specified above
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
-* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID url parameter to all requests. The Default will add this
- for easy tracking in down stream logs e.g. `nginxId=50c91049-667f-4286-c2f0-86b04b27d3f0`.
- If set to `HEADER` it will add `nginxId` to the headers, not append to the get params.
+* `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID header to all requests. If set to HEADER will add this
+ for easy tracking in down stream logs e.g. `X-Request-Id: 50c91049-667f-4286-c2f0-86b04b27d3f0`.
 * `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
 [Arbitrary Config](#arbitrary-config).
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
@@ -103,7 +102,7 @@ For more detail, see the [generated config](./docs/GeneratedConfigs.md#two-separ
 
 ##### One Server, Multiple locations
 
-The example below will proxy the same address for two locations but will disable the UUID (nginxId) parameter for the
+The example below will proxy the same address for two locations but will disable the UUID (X-Request-Id) header for the
 /about location only.
 
 See the [generated config](./docs/GeneratedConfigs.md#same-server-proxied) for below:

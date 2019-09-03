@@ -4,7 +4,6 @@
 set -eu
 set -o pipefail
 
-LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.2.tar.gz'
 NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.56.tar.gz'
 OPEN_RESTY_URL='http://openresty.org/download/openresty-1.11.2.4.tar.gz'
 
@@ -25,11 +24,10 @@ yum -y install \
     unzip \
     wget
 
-mkdir -p openresty luarocks naxsi
+mkdir -p openresty naxsi
 
 # Prepare
 wget -qO - "$OPEN_RESTY_URL"   | tar xzv --strip-components 1 -C openresty/
-wget -qO - "$LUAROCKS_URL"     | tar xzv --strip-components 1 -C luarocks/
 wget -qO - "$NAXSI_URL"        | tar xzv --strip-components 1 -C naxsi/
 
 # Build
@@ -44,18 +42,8 @@ popd
 mkdir -p /usr/local/openresty/naxsi/
 cp "./naxsi/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
 
-pushd luarocks
-./configure --with-lua=/usr/local/openresty/luajit \
-            --lua-suffix=jit-2.1.0-beta2 \
-            --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
-make build install
-popd
-
-luarocks install uuid
-luarocks install luasocket
-
 # Remove the developer tooling
-rm -fr openresty naxsi luarocks
+rm -fr openresty naxsi
 yum -y remove \
     gcc-c++ \
     gcc \
