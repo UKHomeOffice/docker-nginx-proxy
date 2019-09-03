@@ -101,7 +101,21 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
-    $(cat /location_template.conf)
+    set \$_request \$request;
+    if (\$_request ~ (.*)email=[^&+]*(.*)) {
+        set \$_request \$1email=****\$2;
+    }
+    set \$_http_referer \$http_referer;
+    if (\$_http_referer ~ (.*)email=[^&+]*(.*)) {
+        set \$_http_referer \$1email=****\$2;
+    }
+
+    set \$backend_upstream "\$proxy_address";
+    proxy_pass \$backend_upstream;
+    proxy_redirect  off;
+    proxy_intercept_errors on;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_set_header Host \$host:\$server_port;
     proxy_set_header X-Real-IP \$remote_addr;
 
