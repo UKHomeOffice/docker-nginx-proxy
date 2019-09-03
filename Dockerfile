@@ -26,7 +26,6 @@ ADD ./defaults.sh /
 ADD ./go.sh /
 ADD ./enable_location.sh /
 ADD ./logging.conf /usr/local/openresty/nginx/conf/
-ADD ./security_defaults.conf /usr/local/openresty/nginx/conf/
 ADD ./html/ /usr/local/openresty/nginx/html/
 ADD ./readyness.sh /
 
