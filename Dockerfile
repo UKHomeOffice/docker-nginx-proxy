@@ -30,7 +30,6 @@ ADD ./logging.conf /usr/local/openresty/nginx/conf/
 ADD ./security_defaults.conf /usr/local/openresty/nginx/conf/
 ADD ./html/ /usr/local/openresty/nginx/html/
 ADD ./readyness.sh /
-ADD ./helper.sh /
 
 RUN yum remove -y kernel-headers && \
     yum clean all
