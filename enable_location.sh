@@ -8,7 +8,7 @@ set -e
 
 LOCATION_ID=$1
 LOCATION=$2
-NAXSI_LOCATION_RULES=/usr/local/openresty/naxsi/locations/${LOCATION_ID}
+NAXSI_LOCATION_RULES=/etc/nginx/naxsi/locations/${LOCATION_ID}
 mkdir -p ${NAXSI_LOCATION_RULES}
 
 # Resolve any location specific variable names here:
@@ -29,7 +29,7 @@ eval PROXY_HOST=$(eval "echo $PROXY_SERVICE_HOST")
 export PROXY_SERVICE_PORT=$(eval "echo $PROXY_SERVICE_PORT")
 
 # Detect default configuration...
-md5sum ${NGIX_CONF_DIR}/nginx.conf | cut -d' ' -f 1 >/tmp/nginx_new
+md5sum /etc/nginx/nginx.conf | cut -d' ' -f 1 >/tmp/nginx_new
 if diff /container_default_ngx /tmp/nginx_new ; then
     if [ "$PROXY_SERVICE_HOST" == "" ] || [ "$PROXY_SERVICE_PORT" == "" ] || [ "$PROXY_HOST" == "" ]; then
         echo "Default config requires PROXY_SERVICE_HOST and PROXY_SERVICE_PORT to be set."
@@ -57,9 +57,9 @@ fi
 if [ "${NAXSI_USE_DEFAULT_RULES}" == "FALSE" ]; then
     msg "Not setting up NAXSI default rules for location:'${LOCATION}'"
 else
-    msg "Core NAXSI rules enabled @ /usr/local/openresty/naxsi/naxsi_core.rules"
+    msg "Core NAXSI rules enabled @ /etc/nginx/naxsi/naxsi_core.rules"
     msg "NAXSI location rules enabled @ ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules"
-    cp /usr/local/openresty/naxsi/location.template ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
+    cp /etc/nginx/naxsi/location.template ${NAXSI_LOCATION_RULES}/${LOCATION_ID}.rules
 fi
 
 if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
@@ -90,7 +90,7 @@ if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
 fi
 
 # Now create the location specific include file.
-cat > /usr/local/openresty/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
+cat > /etc/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
     set \$uuid \$request_id;
     ${REQ_LIMITS}

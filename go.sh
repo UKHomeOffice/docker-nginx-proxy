@@ -25,7 +25,7 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
     ssl_stapling on;
-    ssl_dhparam ${NGIX_CONF_DIR}/dhparam.pem;
+    ssl_dhparam /etc/nginx/ssl/dhparam.pem;
 EOF_CERT_CONF
 
 : "${LOCATIONS_CSV:=/}"
@@ -47,7 +47,7 @@ for i in "${!LOCATIONS_ARRAY[@]}"; do
     /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
 done
 
-dnsmasq -p 5462
+dnsmasq -u root -p 5462
 
 msg "Resolving proxied names using resolver:127.0.0.1:5462"
 

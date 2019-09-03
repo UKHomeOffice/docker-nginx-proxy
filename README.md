@@ -1,9 +1,9 @@
-# OpenResty Docker Container
+# Nginx+Naxsi Docker Container
 
 [![Build Status](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy)
 
-This container aims to be a generic proxy layer for your web services. It includes OpenResty with
-Lua and NAXSI filtering compiled in.
+This container aims to be a generic proxy layer for your web services. It includes nginx with
+NAXSI filtering compiled in.
 
 ## Getting Started
 
@@ -66,14 +66,14 @@ N.B. see HTTP(S)_LISTEN_PORT above
 
 ### Useful File Locations
 
-* `nginx.conf` is stored at `/usr/local/openresty/nginx/conf/nginx.conf`
-* `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make OpenResty use it. However a self
+* `nginx.conf` is stored at `/etc/nginx/conf/nginx.conf`
+* `/etc/keys/crt` & `/etc/keys/key` - A certificate can be mounted here to make nginx use it. However a self
   signed one is provided if they have not been mounted.
-* `/usr/local/openresty/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default
+* `/etc/nginx/conf/naxsi/*.conf` - [Naxsi](https://github.com/nbs-system/naxsi) rules location in default
 nginx.conf.
-* `/usr/local/openresty/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
+* `/etc/nginx/html/$CODE.shtml` - HTML (with SSI support) displayed when a the status code $CODE
 is encountered upstream and the proxy is configured to intercept.
-* `/usr/local/openresty/nginx/html/418-request-denied.shtml` - HTML (with SSI support) displayed when NAXSI
+* `/etc/nginx/html/418-request-denied.shtml` - HTML (with SSI support) displayed when NAXSI
 blocks a request.
 
 ### Examples
@@ -138,14 +138,9 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
 
 ## Built With
 
-* [OpenResty](https://openresty.org/) - OpenResty (aka. ngx_openresty) is a full-fledged web
-  application server by bundling the standard Nginx core, lots of 3rd-party Nginx modules, as well
-  as most of their external dependencies.
 * [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
-* [ngx_lua](http://wiki.nginx.org/HttpLuaModule) - Embed the power of Lua into Nginx
 * [Naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source, high performance, low
   rules maintenance WAF for NGINX
-* [GeoLite data](http://www.maxmind.com">http://www.maxmind.com) This product includes GeoLite data created by MaxMind.
 
 ## Find Us
 
