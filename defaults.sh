@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 export DOWNLOAD_VIA_S3_VPC_ENDPOINT=${DOWNLOAD_VIA_S3_VPC_ENDPOINT:-'FALSE'}
 export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
-export NGINX_BIN=/usr/local/openresty/nginx/sbin/nginx
 export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-json}
 export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-10080}
 export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}

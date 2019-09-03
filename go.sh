@@ -90,4 +90,4 @@ if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
 fi
 
-eval "${NGINX_BIN} -g \"daemon off;\""
+exec nginx -g 'daemon off;'
