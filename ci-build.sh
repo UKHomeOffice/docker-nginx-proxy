@@ -230,29 +230,8 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
-docker logs "${MOCKSERVER}" | grep 'Nginxid:'
+docker logs "${MOCKSERVER}" | grep 'X-Request-Id:'
 docker logs ${INSTANCE} | grep '"nginx_uuid": "'
-
-start_test "Test setting UUID name works..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=HEADER\" \
-           -e \"UUID_VAR_NAME=custom_uuid_name\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-docker logs "${MOCKSERVER}" 2>/dev/null | grep "custom_uuid_name"
-echo "Testing setting UUID_VAR_NAME works"
-
-start_test "Test setting empty UUID name defaults correctly..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=HEADER\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-docker logs "${MOCKSERVER}" 2>/dev/null | grep -i "nginxId"
-echo "Testing UUID_VAR_NAME default if empty works"
 
 echo "_________________________________"
 echo "We got here, ALL tests successful"
