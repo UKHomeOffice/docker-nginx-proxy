@@ -1,5 +1,5 @@
 # quay.io/ukhomeofficedigital/centos-base:latest
-FROM quay.io/ukhomeofficedigital/centos-base@sha256:12bd649a54434999a2d9d33767a56b2e018db99170f2c4c10dee9a552123ce44
+FROM quay.io/ukhomeofficedigital/centos-base@sha256:784951d9caa3459a017806bf65c42d49655038f4aeb91f5eccdfd18f198b166e
 MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
 
 WORKDIR /root

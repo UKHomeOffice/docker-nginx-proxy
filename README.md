@@ -89,6 +89,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
 * `DISABLE_SYSDIG_METRICS` - Set to any non-empty string to disable support for Sysdig's metric collection
+* `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')
 
 ### Ports
 

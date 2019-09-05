@@ -576,7 +576,7 @@ start_test "Test setting empty UUID name defaults correctly..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-docker logs "${MOCKSERVER}" 2>/dev/null | grep "nginxId"
+docker logs "${MOCKSERVER}" 2>/dev/null | grep -i "nginxId"
 echo "Testing UUID_VAR_NAME default if empty works"
 
 echo "_________________________________"

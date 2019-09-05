@@ -135,6 +135,10 @@ else
     msg "No client certs mounted - not loading..."
 fi
 
+cat >> ${NGIX_CONF_DIR}/error_logging.conf <<-EOF_ERRORLOGGING
+error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
+EOF_ERRORLOGGING
+
 case "${LOG_FORMAT_NAME}" in
     json|text|custom)
         msg "Logging set to ${LOG_FORMAT_NAME}"
