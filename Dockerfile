@@ -28,7 +28,6 @@ ADD ./go.sh /
 ADD ./enable_location.sh /
 ADD ./logging.conf /etc/nginx/conf/
 ADD ./html/ /etc/nginx/html/
-ADD ./readyness.sh /
 
 RUN ["chown", "-R", "nginx:nginx", "/etc/nginx/conf"]
 
