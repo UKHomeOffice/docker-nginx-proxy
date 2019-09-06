@@ -35,18 +35,6 @@ function clean_up() {
     tear_down_container "${TAG}-${BUILD_NUMBER}"
 }
 
-function add_files_to_container() {
-  local CONTAINER=$1
-  shift
-  while [[ -n $@ ]]; do
-    local file=$1
-    shift
-    local dest=$1
-    docker cp ${file} ${CONTAINER}:${dest}
-    shift
-  done
-}
-
 function start_test() {
     INSTANCE="${TAG}-${BUILD_NUMBER}"
     tear_down
@@ -57,21 +45,8 @@ function start_test() {
     echo "STARTING TEST:$1"
     echo "============="
     shift
-    # handle files that need to be mounted in
-    local files=""
-    while [[ $@ != docker* ]]; do
-      # should be in format - file destination file destination etc.
-      files="${files} $1"
-      shift
-    done
     echo "Running:$@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
-    # if files needed to be mounted in, the container stops immediately so start it again
-    if [[ ${files} != "" ]]; then
-      echo "${files}"
-      add_files_to_container ${INSTANCE} ${files}
-      docker start ${INSTANCE}
-    fi
     docker run --rm --link ${INSTANCE}:${INSTANCE} martin/wait
 }
 
