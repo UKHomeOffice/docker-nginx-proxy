@@ -18,7 +18,6 @@ NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
 NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
-ADD_NGINX_LOCATION_CFG=$(get_id_var ${LOCATION_ID} ADD_NGINX_LOCATION_CFG)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 
@@ -71,10 +70,6 @@ elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
 fi
 
-if [ "${ADD_NGINX_LOCATION_CFG}" != "" ]; then
-    msg "Enabling extra ADD_NGINX_LOCATION_CFG:${ADD_NGINX_LOCATION_CFG}"
-fi
-#nginx_var_for_loc=$(get_namefrom_number ${LOCATION_ID})
 if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     REQS_PER_PAGE=${REQS_PER_PAGE:-20}
     msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
@@ -95,7 +90,6 @@ location ${LOCATION} {
     set \$uuid \$request_id;
     ${REQ_LIMITS}
     ${UUID_ARGS}
-    ${ADD_NGINX_LOCATION_CFG}
 
     set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
 

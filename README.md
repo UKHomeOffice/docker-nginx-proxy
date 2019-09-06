@@ -34,8 +34,6 @@ Variables to control how to configure the proxy (can be set per location, see
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID header to all requests. If set to HEADER will add this
  for easy tracking in down stream logs e.g. `X-Request-Id: 50c91049-667f-4286-c2f0-86b04b27d3f0`.
-* `ADD_NGINX_LOCATION_CFG` - Arbitrary extra NGINX configuration to be added to the location context, see
-[Arbitrary Config](#arbitrary-config).
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
 
@@ -117,15 +115,6 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
 ```
 
 #### Arbitrary Config
-
-The example below will return "ping ok" for the URL /ping.
-```shell
-docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
-           -e 'PROXY_SERVICE_PORT=80' \
-           -e 'ADD_NGINX_LOCATION_CFG=if ($uri = /proxy-ping) return 200 "ping ok";' \
-           -p 8443:443 \
-           quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
-```
 
 The example below will return "404" for the URL /notfound.
 ```shell
