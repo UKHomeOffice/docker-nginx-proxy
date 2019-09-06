@@ -24,10 +24,6 @@ function tear_down_container() {
     fi
 }
 
-function tear_down() {
-    tear_down_container "${INSTANCE}"
-}
-
 function clean_up() {
     rm -f /tmp/file.txt
     tear_down_container "${MOCKSERVER}"
@@ -37,7 +33,7 @@ function clean_up() {
 
 function start_test() {
     INSTANCE="${TAG}-${BUILD_NUMBER}"
-    tear_down
+    tear_down_container "${INSTANCE}"
     HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
     echo ""
     echo ""
