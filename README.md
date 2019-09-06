@@ -48,7 +48,7 @@ Note the following variables can only be set once:
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
-* `LOG_FORMAT_NAME` - Can be set to `text` or `json` (default).
+* `CUSTOM_LOG_FORMAT` - Set this to override the logging format in use.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')

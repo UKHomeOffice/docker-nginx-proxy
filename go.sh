@@ -60,31 +60,17 @@ if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
-cat >> ${NGIX_CONF_DIR}/error_logging.conf <<-EOF_ERRORLOGGING
+cat > ${NGIX_CONF_DIR}/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING
 
-case "${LOG_FORMAT_NAME}" in
-    json|text|custom)
-        msg "Logging set to ${LOG_FORMAT_NAME}"
-
-        if [ "${LOG_FORMAT_NAME}" = "custom" ]; then
-            : "${CUSTOM_LOG_FORMAT?ERROR:Custom log format specified, but no 'CUSTOM_LOG_FORMAT' given}"
-
-            cat >> ${NGIX_CONF_DIR}/logging.conf <<- EOF_LOGGING
-log_format extended_${LOG_FORMAT_NAME} '{'
+cat > ${NGIX_CONF_DIR}/logging.conf <<-EOF_LOGGING
+log_format extended '{'
 ${CUSTOM_LOG_FORMAT}
 '}';
+map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}
+access_log /dev/stdout extended if=\$loggable;
 EOF_LOGGING
-        fi
-
-        echo "map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}">>${NGIX_CONF_DIR}/logging.conf #remove logging for the sysdig agent.
-        echo "access_log /dev/stdout extended_${LOG_FORMAT_NAME} if=\$loggable;" >> ${NGIX_CONF_DIR}/logging.conf
-        ;;
-    *)
-        exit_error_msg "Invalid log format specified:${LOG_FORMAT_NAME}. Expecting custom, json or text."
-    ;;
-esac
 
 if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     msg "Adding extra config for server context."

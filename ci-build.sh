@@ -146,11 +146,10 @@ curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
-start_test "Test text logging format..." "${STD_CMD} \
+start_test "Test default logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"LOG_FORMAT_NAME=text\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test request (with logging as text)..."
@@ -158,23 +157,10 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
 echo "Testing text logs format..."
 docker logs ${INSTANCE} | grep -E "\"GET / HTTP/1.1\" X-Request-Id=[^ ]+ 200 "
 
-start_test "Test json logging format..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"LOG_FORMAT_NAME=json\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
-echo "Testing json logs format..."
-docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
-docker logs ${INSTANCE}  | grep 'animal=cow'
-
 start_test "Test custom logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"LOG_FORMAT_NAME=custom\" \
            -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -189,9 +175,8 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-echo "Testing no logging of url params option works..."
-docker logs "${MOCKSERVER}" | grep 'X-Request-Id:'
-docker logs ${INSTANCE} | grep '"nginx_uuid": "'
+echo "Testing sending the request ID in a header works..."
+docker logs "${MOCKSERVER}" | grep -F 'X-Request-Id:'
 
 echo "_________________________________"
 echo "We got here, ALL tests successful"

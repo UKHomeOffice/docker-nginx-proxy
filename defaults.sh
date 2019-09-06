@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 export DOWNLOAD_VIA_S3_VPC_ENDPOINT=${DOWNLOAD_VIA_S3_VPC_ENDPOINT:-'FALSE'}
 export NGIX_CONF_DIR=/etc/nginx/conf
-export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-json}
 export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-10080}
 export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
 export AWS_REGION=${AWS_REGION:-'eu-west-1'}
+export CUSTOM_LOG_FORMAT=${CUSTOM_LOG_FORMAT:=\''$real_client_ip_if_set$remote_addr - $remote_user [$time_local] "$_request" X-Request-Id=$request_id $status $bytes_sent "$_http_referer" "$http_user_agent" "$gzip_ratio" '\'}
 
 function download() {
 

@@ -26,7 +26,6 @@ RUN md5sum /etc/nginx/nginx.conf | cut -d' ' -f 1 > /container_default_ngx
 ADD ./defaults.sh /
 ADD ./go.sh /
 ADD ./enable_location.sh /
-ADD ./logging.conf /etc/nginx/conf/
 ADD ./html/ /etc/nginx/html/
 
 RUN ["chown", "-R", "nginx:nginx", "/etc/nginx/conf"]
