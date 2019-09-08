@@ -11,6 +11,7 @@ if [ ! -f /etc/keys/crt ]; then
   install -m 0600 -o nginx -g nginx "$dir/key" /etc/keys/key
   install -m 0644 -o nginx -g nginx "$dir/crt" /etc/keys/crt
   rm -rf "$dir"
+  SSL_STAPLING=off
 fi
 
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
@@ -24,7 +25,7 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
-    ssl_stapling on;
+    ssl_stapling ${SSL_STAPLING:-on};
     ssl_dhparam /etc/nginx/ssl/dhparam.pem;
 EOF_CERT_CONF
 
