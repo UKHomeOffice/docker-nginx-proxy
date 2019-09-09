@@ -42,6 +42,17 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 	listen ${HTTPS_LISTEN_PORT} ssl;
 EOF-LISTEN
 
+
+NGIX_REAL_IP_CONF="${NGINX_CONF_DIR}/nginx_real_ip.conf"
+if [ -n "${REAL_IP_HEADER:-}" && -n "${REAL_IP_FROM:-}" ]; then
+    cat > ${NGIX_REAL_IP_CONF} <<-EOF-REALIP
+        set_real_ip_from '${REAL_IP_FROM}';
+        real_ip_header '${REAL_IP_HEADER}';
+        real_ip_recursive on;
+    EOF-REALIP
+fi
+
+
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
     /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
