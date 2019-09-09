@@ -1,28 +1,10 @@
 #!/usr/bin/env bash
 export DOWNLOAD_VIA_S3_VPC_ENDPOINT=${DOWNLOAD_VIA_S3_VPC_ENDPOINT:-'FALSE'}
-export NGIX_CONF_DIR=/usr/local/openresty/nginx/conf
-export NGINX_BIN=/usr/local/openresty/nginx/sbin/nginx
-export UUID_FILE=/tmp/uuid_on
-export UUID_VAR_NAME=${UUID_VAR_NAME:-'nginxId'}
-export DEFAULT_ERROR_CODES=""
-export LOG_FORMAT_NAME=${LOG_FORMAT_NAME:-json}
-export SERVER_CERT=${SERVER_CERT:-/etc/keys/crt}
-export SERVER_KEY=${SERVER_KEY:-/etc/keys/key}
-export SSL_CIPHERS=${SSL_CIPHERS:-'AES256+EECDH:AES256+EDH:!aNULL'}
-export SSL_PROTOCOLS=${SSL_PROTOCOLS:-'TLSv1.2'}
+export NGIX_CONF_DIR=/etc/nginx/conf
 export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-10080}
 export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
-export HTTPS_REDIRECT=${HTTPS_REDIRECT:-'TRUE'}
-export NO_LOGGING_BODY=${NO_LOGGING_BODY:-'TRUE'}
-export NO_LOGGING_RESPONSE=${NO_LOGGING_RESPONSE:-'TRUE'}
-export STATSD_METRICS_ENABLED=${STATSD_METRICS:-'TRUE'}
-export STATSD_SERVER=${STATSD_SERVER:-'127.0.0.1'}
 export AWS_REGION=${AWS_REGION:-'eu-west-1'}
-
-export HTTPS_REDIRECT_PORT_STRING=":${HTTPS_REDIRECT_PORT}"
-if [ "${HTTPS_REDIRECT_PORT_STRING}" == ":" ]; then
-    export HTTPS_REDIRECT_PORT_STRING=""
-fi
+export CUSTOM_LOG_FORMAT=${CUSTOM_LOG_FORMAT:=\''$real_client_ip_if_set$remote_addr - $remote_user [$time_local] "$_request" X-Request-Id=$request_id $status $bytes_sent "$_http_referer" "$http_user_agent" "$gzip_ratio" '\'}
 
 function download() {
 
