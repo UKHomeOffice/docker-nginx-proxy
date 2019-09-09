@@ -21,6 +21,7 @@ ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 RATE_LIMIT_DELAY=$(get_id_var ${LOCATION_ID} RATE_LIMIT_DELAY)
+UUID_VARIABLE_NAME=$(get_id_var ${LOCATION_ID} UUID_VARIABLE_NAME)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -66,7 +67,7 @@ if [ "${ENABLE_UUID_PARAM}" == "FALSE" ]; then
     UUID_ARGS=''
     msg "Auto UUID request parameter disabled for location ${LOCATION_ID}."
 elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
-    UUID_ARGS="proxy_set_header X-Request-Id \$request_id;"
+    UUID_ARGS="proxy_set_header X-Request-Id $UUID_VARIABLE_NAME;"
     # Ensure nginx enables this globaly
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
 fi
@@ -90,7 +91,7 @@ fi
 # Now create the location specific include file.
 cat > /etc/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_LOCATION_CONF
 location ${LOCATION} {
-    set \$uuid \$request_id;
+    set \$uuid ${UUID_VARIABLE_NAME};
     ${REQ_LIMITS}
     ${UUID_ARGS}
 

@@ -40,6 +40,10 @@ cat > /etc/nginx/conf/nginx_listen.conf <<-EOF-LISTEN
 	listen ${HTTPS_LISTEN_PORT} ssl;
 EOF-LISTEN
 
+cat > "${NGINX_CONF_DIR}/nginx_server_extras_requestid.conf" <<-EOF-UUID
+  set \$uuid $UUID_VARIABLE_NAME;
+EOF-UUID
+
 if test -n "${REAL_IP_HEADER:-}" -a -n "${REAL_IP_FROM:-}"; then
 cat > /etc/nginx/conf/nginx_server_extras_real_ip.conf <<-EOF-REALIP
     set_real_ip_from '${REAL_IP_FROM}';
