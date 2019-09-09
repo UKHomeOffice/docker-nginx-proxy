@@ -40,7 +40,6 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 	listen localhost:10418 ssl;
 	listen ${HTTP_LISTEN_PORT};
 	listen ${HTTPS_LISTEN_PORT} ssl;
-	set \$real_client_ip_if_set '';
 EOF-LISTEN
 
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
