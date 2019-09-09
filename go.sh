@@ -40,8 +40,18 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 	listen localhost:10418 ssl;
 	listen ${HTTP_LISTEN_PORT};
 	listen ${HTTPS_LISTEN_PORT} ssl;
-	set \$real_client_ip_if_set '';
 EOF-LISTEN
+
+if [ -n "${REAL_IP_HEADER:-}" && -n "${REAL_IP_FROM:-}" ]; then
+    NGIX_REAL_IP_CONF="${NGINX_CONF_DIR}/nginx_server_extras_real_ip.conf"
+    touch ${NGINX_REAL_IP_CONF}
+cat > ${NGIX_REAL_IP_CONF} <<-EOF-REALIP
+    set_real_ip_from '${REAL_IP_FROM}';
+    real_ip_header '${REAL_IP_HEADER}';
+    real_ip_recursive on;
+EOF-REALIP
+fi
+
 
 IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do

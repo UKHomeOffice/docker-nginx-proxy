@@ -53,6 +53,8 @@ location.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')
+* `REAL_IP_HEADER` - The header containing the forwarded client ip e.g. `X-Forwarded-For`
+* `REAL_IP_FROM` - The IP or CIDR from which to trust IPs set in REAL_IP_HEADER
 
 ### Ports
 
