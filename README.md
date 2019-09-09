@@ -36,6 +36,7 @@ Variables to control how to configure the proxy (can be set per location, see
  for easy tracking in down stream logs e.g. `X-Request-Id: 50c91049-667f-4286-c2f0-86b04b27d3f0`.
 * `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
+* `RATE_LIMIT_DELAY` - The number of requests to process without delay within the burst setting e.g. `delay=10` (default off, can also be set to `nodelay`)
 
 #### Single set Variables
 

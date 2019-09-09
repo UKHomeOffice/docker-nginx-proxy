@@ -20,6 +20,7 @@ NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
 REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
+RATE_LIMIT_DELAY=$(get_id_var ${LOCATION_ID} RATE_LIMIT_DELAY)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -72,8 +73,10 @@ fi
 
 if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     REQS_PER_PAGE=${REQS_PER_PAGE:-20}
+    RATE_LIMIT_DELAY=${RATE_LIMIT_DELAY:-""}
     msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
     msg "Enabling REQS_PER_PAGE:${REQS_PER_PAGE}"
+    msg "Enabling RATE_LIMIT_DELAY:${RATE_LIMIT_DELAY}"
     if [ "${REQS_PER_PAGE}" != "0" ]; then
       burst_setting="burst=${REQS_PER_PAGE}"
     else
@@ -81,7 +84,7 @@ if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
     fi
     echo "limit_req_zone \$binary_remote_addr zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
         >${NGIX_CONF_DIR}/nginx_rate_limits_${LOCATION_ID}.conf
-    REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting};"
+    REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting} ${RATE_LIMIT_DELAY};"
 fi
 
 # Now create the location specific include file.
