@@ -101,7 +101,6 @@ start_test "Test response has gzip" "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test gzip ok..."
 curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | grep -q 'Content-Encoding: gzip'
@@ -137,7 +136,6 @@ start_test "Start with Custom upload size" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"CLIENT_MAX_BODY_SIZE=15\" \
            -e \"NAXSI_USE_DEFAULT_RULES=FALSE\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 dd if=/dev/urandom of=/tmp/file.txt bs=1048576 count=10
 
@@ -150,7 +148,6 @@ start_test "Test default logging format..." "${STD_CMD} \
            --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test request (with logging as text)..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
@@ -162,21 +159,10 @@ start_test "Test custom logging format..." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
-           -e \"ENABLE_UUID_PARAM=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing custom logs format..."
 docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
-
-start_test "Test UUID header logging option works..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"ENABLE_UUID_PARAM=HEADER\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-curl -sk https://${DOCKER_HOST_NAME}:${PORT}
-echo "Testing sending the request ID in a header works..."
-docker logs "${MOCKSERVER}" | grep -F 'X-Request-Id:'
 
 echo "_________________________________"
 echo "We got here, ALL tests successful"
