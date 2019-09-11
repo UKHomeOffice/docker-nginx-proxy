@@ -42,7 +42,7 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 	listen ${HTTPS_LISTEN_PORT} ssl;
 EOF-LISTEN
 
-if [ -n "${REAL_IP_HEADER:-}" && -n "${REAL_IP_FROM:-}" ]; then
+if test -n "${REAL_IP_HEADER:-}" -a -n "${REAL_IP_FROM:-}"; then
     NGIX_REAL_IP_CONF="${NGINX_CONF_DIR}/nginx_server_extras_real_ip.conf"
     touch ${NGINX_REAL_IP_CONF}
 cat > ${NGIX_REAL_IP_CONF} <<-EOF-REALIP
