@@ -89,6 +89,9 @@ start_test "Start with minimal settings" "${STD_CMD} \
 
 echo "Test it's up and working..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+echo "Check the log output"
+# Should look something like: {localhost:10443 0cedbe2eae0760fd180a4347975376d3 - 172.17.0.1 - [11/Sep/2019:14:00:53 +0000] "GET / HTTP/1.1" 200 32424 0.294 - "-" "curl/7.54.0"}
+docker logs "$INSTANCE" | grep -E '\{[^:]+:'${HTTPS_LISTEN_PORT:-10443}' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
 echo "Test limited protcol and SSL cipher... "
 docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 echo "Test sslv2 not accepted...."
@@ -143,26 +146,6 @@ echo "Upload a large file"
 curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
-
-start_test "Test default logging format..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo "Test request (with logging as text)..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-echo "Testing text logs format..."
-docker logs ${INSTANCE} | grep -E "\"GET / HTTP/1.1\" X-Request-Id=[^ ]+ 200 "
-
-start_test "Test custom logging format..." "${STD_CMD} \
-           --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
-           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
-           -e \"CUSTOM_LOG_FORMAT=' \\\$host:\\\$server_port \\\$uuid \\\$http_x_forwarded_for \\\$remote_addr \\\$remote_user [\\\$time_local] \\\$request \\\$status \\\$body_bytes_sent \\\$request_time \\\$http_x_forwarded_proto \\\$http_referer \\\$http_user_agent '\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-wget -O /dev/null --quiet --no-check-certificate --header="Host: example.com" https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
-echo "Testing custom logs format..."
-docker logs ${INSTANCE} | egrep '^\{\sexample\.com:10443.*\[.*\]\sGET\s\/\?animal\=cow\sHTTP/[0-9]\.[0-9]\s200.*\s\}$'
 
 echo "_________________________________"
 echo "We got here, ALL tests successful"
