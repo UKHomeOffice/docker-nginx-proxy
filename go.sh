@@ -43,8 +43,7 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 EOF-LISTEN
 
 if test -n "${REAL_IP_HEADER:-}" -a -n "${REAL_IP_FROM:-}"; then
-    NGIX_REAL_IP_CONF="${NGINX_CONF_DIR}/nginx_server_extras_real_ip.conf"
-cat > ${NGIX_REAL_IP_CONF} <<-EOF-REALIP
+cat > /etc/nginx/conf/nginx_server_extras_real_ip.conf <<-EOF-REALIP
     set_real_ip_from '${REAL_IP_FROM}';
     real_ip_header '${REAL_IP_HEADER}';
     real_ip_recursive on;
