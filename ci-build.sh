@@ -88,7 +88,7 @@ start_test "Start with minimal settings" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test it's up and working..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl --fail -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Check the log output"
 # Should look something like: {localhost:10443 0cedbe2eae0760fd180a4347975376d3 - 172.17.0.1 - [11/Sep/2019:14:00:53 +0000] "GET / HTTP/1.1" 200 32424 0.294 - "-" "curl/7.54.0"}
 docker logs "$INSTANCE" | grep -E '\{[^:]+:'${HTTPS_LISTEN_PORT:-10443}' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
@@ -118,9 +118,9 @@ start_test "Start with multi locations settings" "${STD_CMD} \
 
 
 echo "Test for location 1 @ /..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl --fail -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test for news..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
+curl --fail -sk -o /dev/null -H "Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
 
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
            --log-driver json-file \
@@ -131,7 +131,7 @@ start_test "Start with Multiple locations, single proxy and NAXSI download." "${
            -e \"NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432\""
 
 echo "Test for all OK..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+curl --fail -sk -o /dev/null -H "Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
 
 start_test "Start with Custom upload size" "${STD_CMD} \
            --log-driver json-file \
