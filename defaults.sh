@@ -3,7 +3,7 @@ export DOWNLOAD_VIA_S3_VPC_ENDPOINT=${DOWNLOAD_VIA_S3_VPC_ENDPOINT:-'FALSE'}
 export HTTP_LISTEN_PORT=${HTTP_LISTEN_PORT:-10080}
 export HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT:-10443}
 export AWS_REGION=${AWS_REGION:-'eu-west-1'}
-export CUSTOM_LOG_FORMAT=${CUSTOM_LOG_FORMAT:=\''$remote_addr - $remote_user [$time_local] "$_request" X-Request-Id=$request_id $status $bytes_sent "$_http_referer" "$http_user_agent" "$gzip_ratio" '\'}
+export UUID_VARIABLE_NAME=${UUID_VARIABLE_NAME:='$request_id'}
 
 function download() {
 

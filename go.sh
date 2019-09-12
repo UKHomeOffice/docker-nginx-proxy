@@ -40,6 +40,10 @@ cat > /etc/nginx/conf/nginx_listen.conf <<-EOF-LISTEN
 	listen ${HTTPS_LISTEN_PORT} ssl;
 EOF-LISTEN
 
+cat > "${NGINX_CONF_DIR}/nginx_server_extras_requestid.conf" <<-EOF-UUID
+  set \$uuid $UUID_VARIABLE_NAME;
+EOF-UUID
+
 if test -n "${REAL_IP_HEADER:-}" -a -n "${REAL_IP_FROM:-}"; then
 cat > /etc/nginx/conf/nginx_server_extras_real_ip.conf <<-EOF-REALIP
     set_real_ip_from '${REAL_IP_FROM}';
@@ -69,14 +73,6 @@ fi
 cat > /etc/nginx/conf/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING
-
-cat > /etc/nginx/conf/logging.conf <<-EOF_LOGGING
-log_format extended '{'
-${CUSTOM_LOG_FORMAT}
-'}';
-map \$request_uri \$loggable { ~^/nginx_status/  0; default 1;}
-access_log /dev/stdout extended if=\$loggable;
-EOF_LOGGING
 
 if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     msg "Adding extra config for server context."
