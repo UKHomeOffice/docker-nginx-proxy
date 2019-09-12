@@ -14,7 +14,7 @@ if [ ! -f /etc/keys/crt ]; then
   SSL_STAPLING=off
 fi
 
-cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
+cat > /etc/nginx/conf/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     /etc/keys/crt;
     ssl_certificate_key /etc/keys/key;
     # Can add SSLv3 for IE 6 but this opens up to poodle
@@ -31,9 +31,7 @@ EOF_CERT_CONF
 
 : "${LOCATIONS_CSV:=/}"
 
-NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
-
-cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
+cat > /etc/nginx/conf/nginx_listen.conf <<-EOF-LISTEN
 	set \$http_listen_port '${HTTP_LISTEN_PORT}';
 	set \$https_listen_port '${HTTPS_LISTEN_PORT}';
 	set \$internal_listen_port '10418';
@@ -43,9 +41,7 @@ cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 EOF-LISTEN
 
 if test -n "${REAL_IP_HEADER:-}" -a -n "${REAL_IP_FROM:-}"; then
-    NGIX_REAL_IP_CONF="${NGINX_CONF_DIR}/nginx_server_extras_real_ip.conf"
-    touch ${NGINX_REAL_IP_CONF}
-cat > ${NGIX_REAL_IP_CONF} <<-EOF-REALIP
+cat > /etc/nginx/conf/nginx_server_extras_real_ip.conf <<-EOF-REALIP
     set_real_ip_from '${REAL_IP_FROM}';
     real_ip_header '${REAL_IP_HEADER}';
     real_ip_recursive on;
@@ -66,15 +62,15 @@ echo "HTTPS_LISTEN_PORT=${HTTPS_LISTEN_PORT}">/tmp/readyness.cfg
 
 if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     UPLOAD_SETTING="client_max_body_size ${CLIENT_MAX_BODY_SIZE}m;"
-    echo "${UPLOAD_SETTING}">${NGIX_CONF_DIR}/upload_size.conf
+    echo "${UPLOAD_SETTING}">/etc/nginx/conf/upload_size.conf
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
-cat > ${NGIX_CONF_DIR}/error_logging.conf <<-EOF_ERRORLOGGING
+cat > /etc/nginx/conf/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING
 
-cat > ${NGIX_CONF_DIR}/logging.conf <<-EOF_LOGGING
+cat > /etc/nginx/conf/logging.conf <<-EOF_LOGGING
 log_format extended '{'
 ${CUSTOM_LOG_FORMAT}
 '}';
@@ -84,7 +80,7 @@ EOF_LOGGING
 
 if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     msg "Adding extra config for server context."
-    echo ${ADD_NGINX_SERVER_CFG}>${NGIX_CONF_DIR}/nginx_server_extras.conf
+    echo ${ADD_NGINX_SERVER_CFG}>/etc/nginx/conf/nginx_server_extras.conf
 fi
 
 exec nginx -g 'daemon off;'
