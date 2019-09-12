@@ -18,9 +18,10 @@ NAXSI_RULES_URL_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_URL_CSV)
 NAXSI_RULES_MD5_CSV=$(get_id_var ${LOCATION_ID} NAXSI_RULES_MD5_CSV)
 NAXSI_USE_DEFAULT_RULES=$(get_id_var ${LOCATION_ID} NAXSI_USE_DEFAULT_RULES)
 ENABLE_UUID_PARAM=$(get_id_var ${LOCATION_ID} ENABLE_UUID_PARAM)
-REQS_PER_MIN_PER_IP=$(get_id_var ${LOCATION_ID} REQS_PER_MIN_PER_IP)
+REQS_PER_MIN=$(get_id_var ${LOCATION_ID} REQS_PER_MIN)
 REQS_PER_PAGE=$(get_id_var ${LOCATION_ID} REQS_PER_PAGE)
 RATE_LIMIT_DELAY=$(get_id_var ${LOCATION_ID} RATE_LIMIT_DELAY)
+RATE_LIMIT_ZONE_KEY=$(get_id_var ${LOCATION_ID} RATE_LIMIT_ZONE_KEY)
 
 msg "Setting up location '${LOCATION}' to be proxied to " \
     "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}${LOCATION}"
@@ -71,18 +72,20 @@ elif [ "${ENABLE_UUID_PARAM}" == "HEADER" ]; then
     msg "Auto UUID request header enabled for location ${LOCATION_ID}."
 fi
 
-if [ "${REQS_PER_MIN_PER_IP}" != "" ]; then
+if [ "${REQS_PER_MIN}" != "" ]; then
     REQS_PER_PAGE=${REQS_PER_PAGE:-20}
     RATE_LIMIT_DELAY=${RATE_LIMIT_DELAY:-""}
-    msg "Enabling REQS_PER_MIN_PER_IP:${REQS_PER_MIN_PER_IP}"
+    RATE_LIMIT_ZONE_KEY=${RATE_LIMIT_ZONE_KEY:-"binary_remote_addr"}
+    msg "Enabling REQS_PER_MIN:${REQS_PER_MIN}"
     msg "Enabling REQS_PER_PAGE:${REQS_PER_PAGE}"
     msg "Enabling RATE_LIMIT_DELAY:${RATE_LIMIT_DELAY}"
+    msg "Using RATE_LIMIT_ZONE_KEY:${RATE_LIMIT_ZONE_KEY}"
     if [ "${REQS_PER_PAGE}" != "0" ]; then
       burst_setting="burst=${REQS_PER_PAGE}"
     else
       unset burst_setting
     fi
-    echo "limit_req_zone \$binary_remote_addr zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN_PER_IP}r/m;" \
+    echo "limit_req_zone \$${RATE_LIMIT_ZONE_KEY} zone=reqsbuffer${LOCATION_ID}:10m rate=${REQS_PER_MIN}r/m;" \
         >/etc/nginx/conf/nginx_rate_limits_${LOCATION_ID}.conf
     REQ_LIMITS="limit_req zone=reqsbuffer${LOCATION_ID} ${burst_setting} ${RATE_LIMIT_DELAY};"
 fi

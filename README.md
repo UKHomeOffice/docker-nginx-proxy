@@ -34,9 +34,10 @@ Variables to control how to configure the proxy (can be set per location, see
 * `NAXSI_USE_DEFAULT_RULES` - If set to "FALSE" will delete the default rules file.
 * `ENABLE_UUID_PARAM` - If set to "FALSE", will NOT add a UUID header to all requests. If set to HEADER will add this
  for easy tracking in down stream logs e.g. `X-Request-Id: 50c91049-667f-4286-c2f0-86b04b27d3f0`.
-* `REQS_PER_MIN_PER_IP` - Will limit requests based on IP e.g. set to 60 to allow one request per second.
+* `REQS_PER_MIN` - Will limit requests e.g. set to 60 to allow one request per second.
 * `REQS_PER_PAGE` - Will limit requests to 'bursts' of x requests at a time before terminating (will default to 20)
 * `RATE_LIMIT_DELAY` - The number of requests to process without delay within the burst setting e.g. `delay=10` (default off, can also be set to `nodelay`)
+* `RATE_LIMIT_ZONE_KEY` - The key used to apply rate limiting (default `binary_remote_addr` will apply the configured rate limit by user IP)
 
 #### Single set Variables
 
