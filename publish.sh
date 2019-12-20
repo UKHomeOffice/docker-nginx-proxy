@@ -45,6 +45,8 @@ tag_n_push() {
 }
 
 tag_n_push "${PATCH}"
-tag_n_push "${MINOR}"
-tag_n_push "${MAJOR}"
-tag_n_push "latest"
+if echo "${PATCH}" | grep -qvP '^v?\d+\.\d+\.\d+-rc\d*$' ; then
+    tag_n_push "${MINOR}"
+    tag_n_push "${MAJOR}"
+    tag_n_push "latest"
+fi
