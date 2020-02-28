@@ -50,8 +50,6 @@ mkdir -p ${MAXMIND_PATH}
 ./configure
 make check install
 echo "/usr/local/lib" >> /etc/ld.so.conf.d/libmaxminddb.conf
-curl -fSL ${GEOIP_COUNTRY_URL} | gzip -d > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
-curl -fSL ${GEOIP_CITY_URL} | gzip -d > ${MAXMIND_PATH}/GeoLite2-City.mmdb
 chown -R 1000:1000 ${MAXMIND_PATH}
 popd
 

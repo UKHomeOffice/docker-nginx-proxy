@@ -147,7 +147,8 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /nginx-proxy/50x.shtml;\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test GeoIP config IS rejected..."
-if ! curl -v -k -H "X-Forwarded-For: 1.1.1.1" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
+curl -v -k -H "X-Forwarded-For: 8.8.8.8" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1
+if ! curl -v -k -H "X-Forwarded-For: 8.8.8.8" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
   echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
   exit 2
 else
