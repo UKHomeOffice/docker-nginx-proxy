@@ -1,7 +1,21 @@
 workspace:
   base: /workdir
-
+  
 pipeline:
+  get_geoip_databases:
+    image: docker
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    secrets:
+      - GEOIP_CITY_URL
+      - GEOIP_COUNTRY_URL
+    commands:
+      - apk add curl
+      - curl -fSL $${GEOIP_CITY_URL} | gzip -d > GeoLite2-City.mmdb
+      - curl -fSL $${GEOIP_COUNTRY_URL} | gzip -d > GeoLite2-Country.mmdb
+    when:
+      event: push
+
   build_and_test_image:
     image: quay.io/ukhomeofficedigital/centos-base:latest
     environment:
