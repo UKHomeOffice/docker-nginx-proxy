@@ -49,6 +49,7 @@ Note the following variables can only be set once:
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
 * `CLIENT_MAX_BODY_SIZE` - Can set a larger upload than Nginx defaults in MB.
+* `CLIENT_BODY_BUFFER_SIZE` - Can set a larger body buffer size than Nginx defaults in MB.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')

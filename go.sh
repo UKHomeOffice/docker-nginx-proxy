@@ -70,6 +70,12 @@ if [ -n "${CLIENT_MAX_BODY_SIZE:-}" ]; then
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
+if [ -n "${CLIENT_BODY_BUFFER_SIZE:-}" ]; then
+    UPLOAD_SETTING="client_body_buffer_size ${CLIENT_BODY_BUFFER_SIZE}m;"
+    echo "${UPLOAD_SETTING}">>/etc/nginx/conf/upload_size.conf
+    msg "Setting '${UPLOAD_SETTING};'"
+fi
+
 cat > /etc/nginx/conf/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING
