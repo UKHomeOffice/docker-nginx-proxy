@@ -92,23 +92,38 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
-    set \$_request \$request;
-    if (\$_request ~ (.*)email=[^&+]*(.*)) {
-        set \$_request \$1email=****\$2;
-    }
-    set \$_http_referer \$http_referer;
-    if (\$_http_referer ~ (.*)email=[^&+]*(.*)) {
-        set \$_http_referer \$1email=****\$2;
-    }
-
-    set \$backend_upstream "\$proxy_address";
-    proxy_pass \$backend_upstream;
-    proxy_redirect  off;
-    proxy_intercept_errors on;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header Host \$host:\$server_port;
-    proxy_set_header X-Real-IP \$remote_addr;
+    # Include the Nginx proxy_pass and headers - we want to use these again.
+    include /etc/nginx/conf/nginx_proxy_config.conf;
 
 }
 EOF_LOCATION_CONF
+
+# If Static Caching is enabled, add Cache Config for the Server Block...
+if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
+cat >> /etc/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_SERVERCACHE_CONF
+
+# Allow Nginx to cache static assets - follow the same proxy config as above.
+location ~* ^${LOCATION}(.+\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
+    proxy_cache staticcache;
+    proxy_cache_bypass $http_cache_control; # Support client "Cache-Control: no-cache" directive
+    add_header X-Proxy-Cache $upstream_cache_status; # Hit or Miss
+
+    # Nginx cache to ignore Node.js "Cache-Control: public, max-age=0"
+    proxy_ignore_headers Cache-Control;
+    proxy_hide_header Cache-Control;
+    add_header Cache-Control "public";
+    expires 60m; # "Cache-Control: max-age=3600" tells client to cache for 60 minutes
+
+    set \$uuid ${UUID_VARIABLE_NAME};
+    ${REQ_LIMITS}
+    proxy_set_header X-Request-Id \$uuid;
+
+    set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
+
+    include  ${NAXSI_LOCATION_RULES}/*.rules ;
+
+    # Include the Nginx proxy_pass and headers again.
+    include /etc/nginx/conf/nginx_proxy_config.conf;
+}
+EOF_SERVERCACHE_CONF
+fi
