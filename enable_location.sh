@@ -92,8 +92,24 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
-    # Include the Nginx proxy_pass and headers - we want to use these again.
-    include /etc/nginx/conf/nginx_proxy_config.conf;
+    # We need to re-use these later, but cannot use include due to using variables.
+    set \$_request \$request;
+    if (\$_request ~ (.*)email=[^&+]*(.*)) {
+        set \$_request \$1email=****\$2;
+    }
+    set \$_http_referer \$http_referer;
+    if (\$_http_referer ~ (.*)email=[^&+]*(.*)) {
+        set \$_http_referer \$1email=****\$2;
+    }
+
+    set \$backend_upstream "\$proxy_address";
+    proxy_pass \$backend_upstream;
+    proxy_redirect  off;
+    proxy_intercept_errors on;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Host \$host:\$server_port;
+    proxy_set_header X-Real-IP \$remote_addr;
 
 }
 EOF_LOCATION_CONF
@@ -122,8 +138,24 @@ location ~* ^${LOCATION}(.+\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|o
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
-    # Include the Nginx proxy_pass and headers again.
-    include /etc/nginx/conf/nginx_proxy_config.conf;
+    # Re-use these again...
+    set \$_request \$request;
+    if (\$_request ~ (.*)email=[^&+]*(.*)) {
+        set \$_request \$1email=****\$2;
+    }
+    set \$_http_referer \$http_referer;
+    if (\$_http_referer ~ (.*)email=[^&+]*(.*)) {
+        set \$_http_referer \$1email=****\$2;
+    }
+
+    set \$backend_upstream "\$proxy_address";
+    proxy_pass \$backend_upstream;
+    proxy_redirect  off;
+    proxy_intercept_errors on;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Host \$host:\$server_port;
+    proxy_set_header X-Real-IP \$remote_addr;
 }
 EOF_SERVERCACHE_CONF
 fi
