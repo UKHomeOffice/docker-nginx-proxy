@@ -78,7 +78,7 @@ fi
 if [ "${CUSTOM_PROXY_CONFIG}" != "TRUE" ]; then
   IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
   for i in "${!LOCATIONS_ARRAY[@]}"; do
-      /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+      /enable_location.sh $((${i} + 1)) "${LOCATIONS_ARRAY[$i]}"
   done
 fi
 
