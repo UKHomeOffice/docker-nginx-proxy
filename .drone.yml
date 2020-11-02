@@ -8,6 +8,8 @@ pipeline:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
       - yum update -y
+      - yum install -y yum-utils
+      - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
       - yum install -y -q docker-ce openssl wget
       - ./ci-build.sh
     when:
