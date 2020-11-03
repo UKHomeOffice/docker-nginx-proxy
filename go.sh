@@ -146,7 +146,7 @@ case "${LOG_FORMAT_NAME}" in
 			lua_need_request_body on;
                         set \$response_body "";
 			body_filter_by_lua '
-				local resp_body = string.sub(ngx.arg[1], 1, 1000)
+				local resp_body = string.sub(ngx.arg[1], 1, 10000)
 				ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
 				if ngx.arg[2] then
 					ngx.var.response_body = ngx.ctx.buffered
