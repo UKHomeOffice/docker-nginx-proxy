@@ -12,7 +12,7 @@ GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.3.2/libma
 LUAROCKS_URL='http://luarocks.org/releases/luarocks-3.4.0.tar.gz'
 NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.56.tar.gz'
 OPEN_RESTY_URL='http://openresty.org/download/openresty-1.15.8.3.tar.gz'
-STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
+#STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
 
 MAXMIND_PATH='/usr/share/GeoIP'
 
@@ -39,8 +39,7 @@ mkdir -p openresty luarocks naxsi nginx-statsd geoip geoipupdate ngx_http_geoip2
 wget -qO - "$OPEN_RESTY_URL"   | tar xzv --strip-components 1 -C openresty/
 wget -qO - "$LUAROCKS_URL"     | tar xzv --strip-components 1 -C luarocks/
 wget -qO - "$NAXSI_URL"        | tar xzv --strip-components 1 -C naxsi/
-
-wget -qO - "$STATSD_URL"       | tar xzv --strip-components 1 -C nginx-statsd/
+#wget -qO - "$STATSD_URL"       | tar xzv --strip-components 1 -C nginx-statsd/
 wget -qO - "$GEOIP_URL"        | tar xzv --strip-components 1 -C geoip/
 wget -qO - "$GEOIP_UPDATE_CLI" | tar xzv --strip-components 1 -C geoipupdate/
 wget -qO - "$GEOIP_MOD_URL"    | tar xzv --strip-components 1 -C ngx_http_geoip2_module/
@@ -69,6 +68,7 @@ popd
 echo "Checking libmaxminddb module"
 ldconfig && ldconfig -p | grep libmaxminddb
 
+#--add-module="../nginx-statsd" \
 pushd openresty
 ./configure --add-dynamic-module="/root/ngx_http_geoip2_module" \
             --add-module="../naxsi/naxsi_src" \
