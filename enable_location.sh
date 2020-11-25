@@ -122,8 +122,8 @@ cat << EOF_SERVERCACHE_CONF >> /etc/nginx/conf/locations/${LOCATION_ID}.conf
 # Allow Nginx to cache static assets - follow the same proxy config as above.
 location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
     proxy_cache staticcache;
-    add_header X-Proxy-Cache $upstream_cache_status;
-
+    add_header X-Proxy-Cache \$upstream_cache_status;
+    
     # Nginx cache to ignore Node.js "Cache-Control: public, max-age=0"
     proxy_ignore_headers Cache-Control;
     proxy_hide_header Cache-Control;
