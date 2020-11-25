@@ -118,18 +118,17 @@ EOF_LOCATION_CONF
 if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
 ESCAPED_LOCATION=$(eval "echo $LOCATION | sed 's;/;\\\/;g'")
 
-cat >> /etc/nginx/conf/locations/${LOCATION_ID}.conf <<-EOF_SERVERCACHE_CONF
-
+cat << EOF_SERVERCACHE_CONF >> /etc/nginx/conf/locations/${LOCATION_ID}.conf
 # Allow Nginx to cache static assets - follow the same proxy config as above.
 location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
     proxy_cache staticcache;
-    add_header X-Proxy-Cache $upstream_cache_status; # Hit or Miss
+    add_header X-Proxy-Cache $upstream_cache_status;
 
     # Nginx cache to ignore Node.js "Cache-Control: public, max-age=0"
     proxy_ignore_headers Cache-Control;
     proxy_hide_header Cache-Control;
     add_header Cache-Control "public";
-    expires 60m; # "Cache-Control: max-age=3600" tells client to cache for 60 minutes
+    expires 60m;
 
     set \$uuid ${UUID_VARIABLE_NAME};
     ${REQ_LIMITS}
