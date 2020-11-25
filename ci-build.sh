@@ -148,7 +148,6 @@ curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
 start_test "Start with single location, PROXY_STATIC_CACHE works." "${STD_CMD} \
-           --log-driver json-file \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"PROXY_STATIC_CACHING=true\" \
