@@ -116,10 +116,12 @@ EOF_LOCATION_CONF
 
 # If Static Caching is enabled, add Cache Config for the Server Block...
 if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
-cat >> /etc/nginx/conf/locations/${LOCATION_ID}.conf <<- EOF_SERVERCACHE_CONF
+ESCAPED_LOCATION=$(eval "echo $LOCATION | sed 's;/;\\\/;g'")
+
+cat >> /etc/nginx/conf/locations/${LOCATION_ID}.conf <<-EOF_SERVERCACHE_CONF
 
 # Allow Nginx to cache static assets - follow the same proxy config as above.
-location ~* ^${LOCATION}(.+\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
+location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
     proxy_cache staticcache;
     proxy_cache_bypass $http_cache_control; # Support client "Cache-Control: no-cache" directive
     add_header X-Proxy-Cache $upstream_cache_status; # Hit or Miss

@@ -87,7 +87,7 @@ fi
 
 if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
 # Include the HTTP-level Proxy Cache Configuration.
-cat > /etc/nginx/conf/nginx_cache_http.conf <<- EOF_HTTPCACHE_CONF
+cat > /etc/nginx/conf/nginx_cache_http.conf <<-EOF_HTTPCACHE_CONF
     # Cache path for static files
     proxy_cache_path /tmp/nginx-cache levels=1:2 keys_zone=staticcache:8m max_size=100m inactive=60m use_temp_path=off;
     # Keyzone size 8MB, Cache size 100MB, Inactive delete 60min
