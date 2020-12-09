@@ -92,6 +92,7 @@ location ${LOCATION} {
 
     include  ${NAXSI_LOCATION_RULES}/*.rules ;
 
+    # We need to re-use these later, but cannot use include due to using variables.
     set \$_request \$request;
     if (\$_request ~ (.*)email=[^&+]*(.*)) {
         set \$_request \$1email=****\$2;
@@ -112,3 +113,49 @@ location ${LOCATION} {
 
 }
 EOF_LOCATION_CONF
+
+# If Static Caching is enabled, add Cache Config for the Server Block...
+if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
+ESCAPED_LOCATION=$(eval "echo $LOCATION | sed 's;/;\\\/;g'")
+
+cat << EOF_SERVERCACHE_CONF >> /etc/nginx/conf/locations/${LOCATION_ID}.conf
+# Allow Nginx to cache static assets - follow the same proxy config as above.
+location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
+    proxy_cache staticcache;
+    add_header X-Proxy-Cache \$upstream_cache_status;
+    
+    # Nginx cache to ignore Node.js "Cache-Control: public, max-age=0"
+    proxy_ignore_headers Cache-Control;
+    proxy_hide_header Cache-Control;
+    add_header Cache-Control "public";
+    expires 60m;
+
+    set \$uuid ${UUID_VARIABLE_NAME};
+    ${REQ_LIMITS}
+    proxy_set_header X-Request-Id \$uuid;
+
+    set \$proxy_address "${PROXY_SERVICE_HOST}:${PROXY_SERVICE_PORT}";
+
+    include  ${NAXSI_LOCATION_RULES}/*.rules ;
+
+    # Re-use these again...
+    set \$_request \$request;
+    if (\$_request ~ (.*)email=[^&+]*(.*)) {
+        set \$_request \$1email=****\$2;
+    }
+    set \$_http_referer \$http_referer;
+    if (\$_http_referer ~ (.*)email=[^&+]*(.*)) {
+        set \$_http_referer \$1email=****\$2;
+    }
+
+    set \$backend_upstream "\$proxy_address";
+    proxy_pass \$backend_upstream;
+    proxy_redirect  off;
+    proxy_intercept_errors on;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Host \$host:\$server_port;
+    proxy_set_header X-Real-IP \$remote_addr;
+}
+EOF_SERVERCACHE_CONF
+fi

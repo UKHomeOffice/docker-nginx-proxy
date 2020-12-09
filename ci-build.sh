@@ -147,6 +147,15 @@ curl -k -F "file=@/tmp/file.txt;filename=nameinpost" \
      https://${DOCKER_HOST_NAME}:${PORT}/uploads/doc &> /tmp/upload_test.txt
 grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
+start_test "Start with single location, PROXY_STATIC_CACHING works." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"PROXY_STATIC_CACHING=true\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+
+echo "Test for all OK..."
+curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | grep -q 'Content-Encoding: gzip'
+
 echo "_________________________________"
 echo "We got here, ALL tests successful"
 clean_up
