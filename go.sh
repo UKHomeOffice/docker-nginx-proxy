@@ -6,7 +6,7 @@ set -e
 
 # Generate a selfsigned key and certificate if we don't have one
 if [ ! -f /etc/keys/crt ]; then
-  dir=`mktemp -d`
+  dir=$(mktemp -d)
   openssl req -x509 -days 1000 -newkey rsa:2048 -nodes -subj '/CN=waf' -keyout "$dir/key" -out "$dir/crt"
   install -m 0600 -o nginx -g nginx "$dir/key" /etc/keys/key
   install -m 0644 -o nginx -g nginx "$dir/crt" /etc/keys/crt
@@ -53,9 +53,9 @@ EOF-REALIP
 fi
 
 
-IFS=',' read -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
+IFS=',' read -r -a LOCATIONS_ARRAY <<< "$LOCATIONS_CSV"
 for i in "${!LOCATIONS_ARRAY[@]}"; do
-    /enable_location.sh $((${i} + 1)) ${LOCATIONS_ARRAY[$i]}
+    /enable_location.sh $((i + 1)) "${LOCATIONS_ARRAY[$i]}"
 done
 
 dnsmasq -u root -p 5462
@@ -82,7 +82,7 @@ EOF_ERRORLOGGING
 
 if [ -n "${ADD_NGINX_SERVER_CFG:-}" ]; then
     msg "Adding extra config for server context."
-    echo ${ADD_NGINX_SERVER_CFG}>/etc/nginx/conf/nginx_server_extras.conf
+    echo "${ADD_NGINX_SERVER_CFG}">/etc/nginx/conf/nginx_server_extras.conf
 fi
 
 if [ -n "${PROXY_STATIC_CACHING:-}" ]; then
@@ -91,7 +91,7 @@ cat > /etc/nginx/conf/nginx_cache_http.conf <<-EOF_HTTPCACHE_CONF
     # Cache path for static files
     proxy_cache_path /tmp/nginx-cache levels=1:2 keys_zone=staticcache:8m max_size=100m inactive=60m use_temp_path=off;
     # Keyzone size 8MB, Cache size 100MB, Inactive delete 60min
-    proxy_cache_key "$scheme$request_method$host$request_uri";
+    proxy_cache_key \$scheme\$request_method\$proxy_host\$request_uri;
     proxy_cache_valid 200 302 60m; # Cache successful responses for 60 minutes
     proxy_cache_valid 404 1m; # expire 404 responses 1 minute
 EOF_HTTPCACHE_CONF
