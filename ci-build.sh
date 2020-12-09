@@ -49,7 +49,7 @@ function start_test() {
 clean_up
 
 echo "Running Shellcheck against go.sh..."
-shellcheck -x go.sh
+docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable -x go.sh
 
 STD_CMD="${START_INSTANCE}"
 
