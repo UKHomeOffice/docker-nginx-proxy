@@ -91,7 +91,7 @@ cat > /etc/nginx/conf/nginx_cache_http.conf <<-EOF_HTTPCACHE_CONF
     # Cache path for static files
     proxy_cache_path /tmp/nginx-cache levels=1:2 keys_zone=staticcache:8m max_size=100m inactive=60m use_temp_path=off;
     # Keyzone size 8MB, Cache size 100MB, Inactive delete 60min
-    proxy_cache_key "$scheme$request_method$host$request_uri";
+    proxy_cache_key \$scheme\$request_method\$proxy_host\$request_uri;
     proxy_cache_valid 200 302 60m; # Cache successful responses for 60 minutes
     proxy_cache_valid 404 1m; # expire 404 responses 1 minute
 EOF_HTTPCACHE_CONF
