@@ -48,6 +48,9 @@ function start_test() {
 
 clean_up
 
+echo "Running Shellcheck against go.sh..."
+shellcheck -x go.sh
+
 STD_CMD="${START_INSTANCE}"
 
 echo "========"
