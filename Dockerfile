@@ -23,6 +23,7 @@ RUN ["install", "-o", "nginx", "-g", "nginx", "-d", \
      "/etc/keys", "/etc/nginx/conf/locations", "/etc/nginx/conf/naxsi/locations", "/etc/nginx/naxsi"]
 ADD ./naxsi/location.rules /etc/nginx/naxsi/location.template
 ADD ./nginx.conf /etc/nginx
+ADD ./nginx_big_buffers.conf /etc/nginx/conf/
 ADD ./nginx_rate_limits_null.conf /etc/nginx/conf/
 ADD ./nginx_cache_http.conf /etc/nginx/conf/
 RUN md5sum /etc/nginx/nginx.conf | cut -d' ' -f 1 > /container_default_ngx

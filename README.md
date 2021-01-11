@@ -45,6 +45,7 @@ Note the following variables can only be set once:
 * `ADD_NGINX_SERVER_CFG` - Arbitrary extra NGINX configuration to be added to the server context, see
 [Arbitrary Config](#arbitrary-config)
 * `AWS_REGION` - Sets the AWS region this container is running in. Used to construct urls from which to download resources from. Defaults to 'eu-west-1' if not set.
+* `ENABLE_BIG_BUFFERS` - Set higher predefined proxy buffer limits. Useful if you're getting errors related to "upstream headers being too big".
 * `LOCATIONS_CSV` - Set to a list of locations that are to be independently proxied, see the example
 [Using Multiple Locations](#using-multiple-locations). Note, if this isn't set, `/` will be used as the default
 location.
@@ -53,6 +54,7 @@ location.
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `ERROR_LOG_LEVEL` - The log level to use for nginx's `error_log` directive (default: 'error')
+* `PROXY_STATIC_CACHING` - Enables static asset caching at the webserver level. Set to 'true' to enable.
 * `REAL_IP_HEADER` - The header containing the forwarded client ip e.g. `X-Forwarded-For`
 * `REAL_IP_FROM` - The IP or CIDR from which to trust IPs set in REAL_IP_HEADER
 
