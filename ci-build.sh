@@ -113,28 +113,28 @@ curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | gre
 
 start_test "Start with multi locations settings" "${STD_CMD} \
            --log-driver json-file \
-           -e \"LOCATIONS_CSV=/,/news\" \
+           -e \"LOCATIONS_CSV=/,/using-govuk-pay\" \
            -e \"PROXY_SERVICE_HOST_1=http://www.w3.org\" \
            -e \"PROXY_SERVICE_PORT_1=80\" \
-           -e \"PROXY_SERVICE_HOST_2=http://www.bbc.co.uk\" \
-           -e \"PROXY_SERVICE_PORT_2=80\""
+           -e \"PROXY_SERVICE_HOST_2=https://www.payments.service.gov.uk\" \
+           -e \"PROXY_SERVICE_PORT_2=443\""
 
 
 echo "Test for location 1 @ /..."
 curl --fail -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
-echo "Test for news..."
-curl --fail -sk -o /dev/null -H "Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
+echo "Test for payment page..."
+curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://${DOCKER_HOST_NAME}:${PORT}/using-govuk-pay
 
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
            --log-driver json-file \
-           -e \"PROXY_SERVICE_HOST=http://www.bbc.co.uk\" \
-           -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"LOCATIONS_CSV=/,/news\" \
+           -e \"PROXY_SERVICE_HOST=https://www.payments.service.gov.uk\" \
+           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"LOCATIONS_CSV=/,/using-govuk-pay\" \
            -e \"NAXSI_RULES_URL_CSV_1=https://raw.githubusercontent.com/nbs-system/naxsi-rules/master/drupal.rules\" \
            -e \"NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432\""
 
 echo "Test for all OK..."
-curl --fail -sk -o /dev/null -H "Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://${DOCKER_HOST_NAME}:${PORT}/
 
 start_test "Start with Custom upload size" "${STD_CMD} \
            --log-driver json-file \
