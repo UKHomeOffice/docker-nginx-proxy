@@ -156,6 +156,12 @@ start_test "Start with single location, PROXY_STATIC_CACHING works." "${STD_CMD}
            -e \"PROXY_STATIC_CACHING=true\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 
+start_test "Start with single location, ENABLE_BIG_BUFFERS works." "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"ENABLE_BIG_BUFFERS=true\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+
 echo "Test for all OK..."
 curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | grep -q 'Content-Encoding: gzip'
 

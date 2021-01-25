@@ -76,6 +76,13 @@ if [ -n "${CLIENT_BODY_BUFFER_SIZE:-}" ]; then
     msg "Setting '${UPLOAD_SETTING};'"
 fi
 
+if [ -n "${ENABLE_BIG_BUFFERS:-}" ]; then
+cat > /etc/nginx/conf/nginx_big_buffers.conf <<-EOF_BIGBUFFERS
+    # Proxy Buffer Size Increase
+    proxy_buffer_size 8k;
+EOF_BIGBUFFERS
+fi
+
 cat > /etc/nginx/conf/error_logging.conf <<-EOF_ERRORLOGGING
 error_log /dev/stderr ${ERROR_LOG_LEVEL:-error};
 EOF_ERRORLOGGING

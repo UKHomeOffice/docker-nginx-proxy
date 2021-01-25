@@ -1,4 +1,4 @@
-FROM alpine:3.12.0@sha256:185518070891758909c9f839cf4ca393ee977ac378609f700f60a771a2dfe321
+FROM alpine:3.12.3@sha256:3c7497bf0c7af93428242d6176e8f7905f2201d8fc5861f45be7a346b5f23436
 
 USER root
 
@@ -23,6 +23,7 @@ RUN ["install", "-o", "nginx", "-g", "nginx", "-d", \
      "/etc/keys", "/etc/nginx/conf/locations", "/etc/nginx/conf/naxsi/locations", "/etc/nginx/naxsi"]
 ADD ./naxsi/location.rules /etc/nginx/naxsi/location.template
 ADD ./nginx.conf /etc/nginx
+ADD ./nginx_big_buffers.conf /etc/nginx/conf/
 ADD ./nginx_rate_limits_null.conf /etc/nginx/conf/
 ADD ./nginx_cache_http.conf /etc/nginx/conf/
 RUN md5sum /etc/nginx/nginx.conf | cut -d' ' -f 1 > /container_default_ngx
