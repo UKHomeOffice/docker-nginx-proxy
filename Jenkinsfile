@@ -37,5 +37,13 @@ pipeline {
         }
       }
     }
+    stage('Tag Build') {
+      when {
+        branch 'master'
+      }
+      steps {
+        tagDeployment("docker-nginx-proxy")
+      }
+    }
   }
 }
