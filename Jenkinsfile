@@ -42,7 +42,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        tagDeployment("docker-nginx-proxy")
+        tagDeployment("nginx-proxy")
       }
     }
   }
