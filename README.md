@@ -1,21 +1,19 @@
-# Nginx+Naxsi Docker Container
+# pay-nginx-proxy
 
-[![Build Status](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy.svg?branch=master)](https://travis-ci.org/UKHomeOffice/docker-nginx-proxy)
+Proxy for GOV.UK Pay.
 
-This container aims to be a generic proxy layer for your web services. It includes nginx with
-NAXSI filtering compiled in.
+We run the nginx proxy inside a Fargate container for all of our apps.
 
-## Getting Started
+## Fargate deployment
 
-In this section I'll show you some examples of how you might run this container with docker.
+To update and deploy a new nginx-forward-proxy container:
 
-### Prerequisites
-
-In order to run this container you'll need docker installed.
-
-* [Windows](https://docs.docker.com/windows/started)
-* [OS X](https://docs.docker.com/mac/started/)
-* [Linux](https://docs.docker.com/linux/started/)
+- Raise a pull request, get an approval and merge it.
+- The [Concourse `deploy-to-test` pipeline](https://cd.gds-reliability.engineering/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) will pull the Docker image from DockerHub, tag it as `*-release` and push to the AWS test account's ECR repository.
+- Concourse will attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,
+  the `*-release` image will be pushed to the AWS staging account's ECR repository.
+- The [Concourse `deploy-to-staging` pipeline](https://cd.gds-reliability.engineering/teams/pay-deploy/pipelines/deploy-to-staging?group=nginx-proxy) will then deploy Toolbox to the staging environment. If successful, the `*-release` image will be pushed to the AWS staging account's ECR repository. push to the AWS production account's repository.
+- The [Concourse `deploy-to-production` pipeline](https://cd.gds-reliability.engineering/teams/pay-deploy/pipelines/deploy-to-production?group=nginx-proxy) will deploy Toolbox with the new `*-release` nginx-proxy container.
 
 ## Usage
 
