@@ -10,7 +10,7 @@ RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl"]
 RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing", "add", \
      "nginx-naxsi=1.16.1-r0", "nginx-naxsi-mod-http-naxsi=1.16.1-r0", "nginx-naxsi-mod-http-xslt-filter=1.16.1-r0"]
 
-RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/edge/community", "add", "aws-cli"]
+RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/community", "add", "aws-cli=1.18.177-r0"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
