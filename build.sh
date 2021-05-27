@@ -4,15 +4,17 @@
 set -eu
 set -o pipefail
 
-GEOIP_CITY_URL='http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
-GEOIP_COUNTRY_URL='http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz'
-GEOIP_MOD_URL='https://github.com/leev/ngx_http_geoip2_module/archive/3.0.tar.gz'
-GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v3.1.1/geoipupdate-3.1.1.tar.gz'
-GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.3.2/libmaxminddb-1.3.2.tar.gz'
-LUAROCKS_URL='http://luarocks.org/releases/luarocks-2.4.2.tar.gz'
-NAXSI_URL='https://github.com/nbs-system/naxsi/archive/0.56.tar.gz'
-OPEN_RESTY_URL='http://openresty.org/download/openresty-1.11.2.4.tar.gz'
-STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1.tar.gz'
+GEOIP_ACCOUNT_ID="${GEOIP_ACCOUNT_ID:-123456}"
+GEOIP_LICENSE_KEY="${GEOIP_LICENSE_KEY:-xxxxxx}"
+GEOIP_CITY_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${GEOIP_LICENSE_KEY}&suffix=tar.gz"
+GEOIP_COUNTRY_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${GEOIP_LICENSE_KEY}&suffix=tar.gz"
+GEOIP_MOD_URL='https://github.com/leev/ngx_http_geoip2_module/archive/3.3.tar.gz'
+GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v4.7.1/geoipupdate_4.7.1_linux_amd64.tar.gz'
+GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.6.0/libmaxminddb-1.6.0.tar.gz'
+LUAROCKS_URL='https://luarocks.github.io/luarocks/releases/luarocks-3.7.0.tar.gz'
+NAXSI_URL='https://github.com/nbs-system/naxsi/archive/1.3.tar.gz'
+OPEN_RESTY_URL='http://openresty.org/download/openresty-1.19.3.1.tar.gz'
+STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1-ngxpatch.tar.gz'
 
 MAXMIND_PATH='/usr/share/GeoIP'
 
@@ -50,20 +52,21 @@ mkdir -p ${MAXMIND_PATH}
 ./configure
 make check install
 echo "/usr/local/lib" >> /etc/ld.so.conf.d/libmaxminddb.conf
-curl -fSL ${GEOIP_COUNTRY_URL} | gzip -d > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
-curl -fSL ${GEOIP_CITY_URL} | gzip -d > ${MAXMIND_PATH}/GeoLite2-City.mmdb
+curl -fSL ${GEOIP_COUNTRY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
+curl -fSL ${GEOIP_CITY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-City.mmdb
 chown -R 1000:1000 ${MAXMIND_PATH}
 popd
 
 pushd geoipupdate
-./configure
-make check install
+sed -i 's/YOUR_ACCOUNT_ID_HERE/'"${GEOIP_ACCOUNT_ID}"'/g' GeoIP.conf
+sed -i 's/YOUR_LICENSE_KEY_HERE/'"${GEOIP_LICENSE_KEY}"'/g' GeoIP.conf
+./geoipupdate -f GeoIP.conf -d ${MAXMIND_PATH}
 popd
 
-# check maxmind module
 echo "Checking libmaxminddb module"
 ldconfig && ldconfig -p | grep libmaxminddb
 
+echo "Install openresty"
 pushd openresty
 ./configure --add-dynamic-module="/root/ngx_http_geoip2_module" \
             --add-module="../naxsi/naxsi_src" \
@@ -73,10 +76,11 @@ pushd openresty
 make install
 popd
 
-# Install NAXSI default rules...
+echo "Install NAXSI default rules"
 mkdir -p /usr/local/openresty/naxsi/
 cp "./naxsi/naxsi_config/naxsi_core.rules" /usr/local/openresty/naxsi/
 
+echo "Installing luarocks"
 pushd luarocks
 ./configure --with-lua=/usr/local/openresty/luajit \
             --lua-suffix=jit-2.1.0-beta2 \
@@ -84,10 +88,11 @@ pushd luarocks
 make build install
 popd
 
+echo "Installing luarocks packages"
 luarocks install uuid
 luarocks install luasocket
 
-# Remove the developer tooling
+echo "Removing unnecessary developer tooling"
 rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module
 yum -y remove \
     gcc-c++ \

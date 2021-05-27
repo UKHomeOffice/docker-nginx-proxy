@@ -23,14 +23,11 @@ EOF_CERT_CONF
 
 : "${LOCATIONS_CSV:=/}"
 
-INTERNAL_LISTEN_PORT="${INTERNAL_LISTEN_PORT:-10418}"
 NGIX_LISTEN_CONF="${NGIX_CONF_DIR}/nginx_listen.conf"
 
 cat > ${NGIX_LISTEN_CONF} <<-EOF-LISTEN
 		set \$http_listen_port '${HTTP_LISTEN_PORT}';
 		set \$https_listen_port '${HTTPS_LISTEN_PORT}';
-		set \$internal_listen_port '${INTERNAL_LISTEN_PORT}';
-		listen localhost:${INTERNAL_LISTEN_PORT} ssl;
 EOF-LISTEN
 
 if [ "${CUSTOM_SECURITY_DEFAULTS:-}" == "TRUE" ]; then
@@ -225,7 +222,7 @@ else
     touch ${GEO_CFG}
 fi
 
-if [ "${STATSD_METRICS_ENABLED}" = "TRUE" ]; then
+if [ "${STATSD_METRICS}" = "TRUE" ]; then
     msg "Setting up statsd configuration with server ${STATSD_SERVER}"
     echo "statsd_server ${STATSD_SERVER};" > ${NGIX_CONF_DIR}/nginx_statsd_server.conf
     echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf

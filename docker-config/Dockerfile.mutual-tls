@@ -1,3 +1,5 @@
 FROM ngx
 
 COPY client_certs/ca.crt /etc/keys/client-ca
+
+EXPOSE 10081 10444

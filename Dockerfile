@@ -1,5 +1,7 @@
 FROM quay.io/ukhomeofficedigital/centos-base:latest
-MAINTAINER Lewis Marshall <lewis@technoplusit.co.uk>
+
+ARG GEOIP_ACCOUNT_ID
+ARG GEOIP_LICENSE_KEY
 
 WORKDIR /root
 ADD ./build.sh /root/
@@ -8,7 +10,8 @@ RUN ./build.sh
 RUN yum install -y openssl && \
     yum clean all && \
     mkdir -p /etc/keys && \
-    openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test'
+    openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test' && \
+    chmod 644 /etc/keys/key
 
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
