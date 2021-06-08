@@ -4,10 +4,10 @@ set -e
 
 TAG=ngx
 BUILD_NUMBER="${BUILD_NUMBER:-${DRONE_BUILD_NUMBER}}"
-PORT=$((${BUILD_NUMBER} + 1025))
+PORT="${HTTPS_LISTEN_PORT:-10443}"
 BUILD_NUMBER="${BUILD_NUMBER:-local}"
 START_INSTANCE="docker run "
-DOCKER_HOST_NAME=172.17.0.1
+DOCKER_HOST_NAME="localhost"
 MOCKSERVER="mockserver-${BUILD_NUMBER}"
 SLOWMOCKSERVER="slowmockserver-${BUILD_NUMBER}"
 MUTUAL_TLS="mutual-tls-${BUILD_NUMBER}"
@@ -40,13 +40,17 @@ function clean_up() {
 }
 
 function add_files_to_container() {
+  echo "Copying files to container: $1"
   local CONTAINER=$1
   shift
   while [[ -n $@ ]]; do
     local file=$1
     shift
-    local dest=$1
-    docker cp ${file} ${CONTAINER}:${dest}
+    local rename=$1
+    shift
+    local destdir=$1
+    cp ${file} ${rename}
+    tar -cf - ${rename} --mode u=+rw,g=+r,o=+r --owner root --group root | docker cp - ${CONTAINER}:${destdir}
     shift
   done
 }
@@ -68,7 +72,7 @@ function start_test() {
       files="${files} $1"
       shift
     done
-    echo "Running:$@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    echo "Running: $@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     # if files needed to be mounted in, the container stops immediately so start it again
     if [[ ${files} != "" ]]; then
@@ -87,7 +91,7 @@ echo "========"
 echo "BUILD..."
 echo "========"
 echo "travis_fold:start:BUILD"
-docker build -t ${TAG} .
+docker build --build-arg GEOIP_ACCOUNT_ID=${GEOIP_ACCOUNT_ID} --build-arg GEOIP_LICENSE_KEY=${GEOIP_LICENSE_KEY} -t ${TAG} .
 echo "travis_fold:end:BUILD"
 
 echo "Running mocking-server..."
@@ -114,8 +118,8 @@ echo "TESTING..."
 echo "=========="
 
 start_test "Start with minimal settings" "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=http://www.w3.org\" \
-           -e \"PROXY_SERVICE_PORT=80\""
+           -e \"PROXY_SERVICE_HOST=https://www.w3.org\" \
+           -e \"PROXY_SERVICE_PORT=443\""
 
 echo "Test it's up and working..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
@@ -208,10 +212,10 @@ curl -s -I -X GET -k --compressed https://${DOCKER_HOST_NAME}:${PORT}/gzip | gre
 start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"SSL_CIPHERS=RC4-MD5\" \
-           -e \"SSL_PROTOCOLS=TLSv1.1\""
-echo "Test excepts defined protocol and cipher....."
-docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'RC4-MD5' -tls1_1 -connect ${INSTANCE}:10443" &> /dev/null;
+           -e \"SSL_CIPHERS=DHE-RSA-AES256-SHA\" \
+           -e \"SSL_PROTOCOLS=TLSv1.2\""
+echo "Test accepts defined protocol and cipher....."
+docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'DHE-RSA-AES256-SHA' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 
 
 
@@ -219,7 +223,7 @@ start_test "Start we auto add a protocol " "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\""
 
-echo "Test It works if we do not define the protocol.."
+echo "Test it works if we do not define the protocol.."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 
 
@@ -253,7 +257,7 @@ cd ./client_certs/
 ./sign_client_key_with_ca.sh
 cd ..
 start_test "Start with Client CA, and single proxy. Block unauth for /standards" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/client-ca" \
+           "${WORKDIR}/client_certs/ca.crt" "client-ca" "/etc/keys/" \
            "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://www.w3.org\" \
            -e \"PROXY_SERVICE_PORT=80\" \
@@ -278,18 +282,20 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
 echo "Test upstream client certs..."
 docker build -t mutual-tls:latest ${WORKDIR} -f docker-config/Dockerfile.mutual-tls
 ${STD_CMD} -d \
+           -e "HTTP_LISTEN_PORT=10081" \
+           -e "HTTPS_LISTEN_PORT=10444" \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
            -e "CLIENT_CERT_REQUIRED=TRUE" \
-           --name="${MUTUAL_TLS}" mutual-tls:latest
+           -p 10444:10444 --name="${MUTUAL_TLS}" mutual-tls:latest
+docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait -p 10444
 
-docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait
 start_test "Start with upstream client certs" \
-           "${WORKDIR}/client_certs/client.crt" "/etc/keys/upstream-client-crt" \
-           "${WORKDIR}/client_certs/client.key" "/etc/keys/upstream-client-key" \
+           "${WORKDIR}/client_certs/client.crt" "upstream-client-crt" "/etc/keys/" \
+           "${WORKDIR}/client_certs/client.key" "upstream-client-key" "/etc/keys/" \
            "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${MUTUAL_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
+           -e \"PROXY_SERVICE_PORT=10444\" \
            -e \"DNSMASK=TRUE\" \
            -e \"USE_UPSTREAM_CLIENT_CERT=TRUE\" \
            --link \"${MUTUAL_TLS}:${MUTUAL_TLS}\" "
@@ -301,15 +307,18 @@ tear_down_container "${MUTUAL_TLS}"
 echo "Test failure to verify upstream server cert..."
 docker build -t standard-tls:latest ${WORKDIR} -f docker-config/Dockerfile.standard-tls
 ${STD_CMD} -d \
+           -e "HTTP_LISTEN_PORT=10081" \
+           -e "HTTPS_LISTEN_PORT=10444" \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
-           --name="${STANDARD_TLS}" standard-tls:latest
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
+           -p 10444:10444 --name="${STANDARD_TLS}" standard-tls:latest
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -p 10444
+
 start_test "Start with failing upstream server verification" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/upstream-server-ca" \
+           "${WORKDIR}/client_certs/ca.crt" "upstream-server-ca" "/etc/keys/" \
            "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
+           -e \"PROXY_SERVICE_PORT=10444\" \
            -e \"DNSMASK=TRUE\" \
            -e \"VERIFY_SERVER_CERT=TRUE\" \
            --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
@@ -328,17 +337,19 @@ cd ./client_certs/
 ./sign_server_key_with_ca.sh
 cd ..
 ${STD_CMD} -d \
+           -e "HTTP_LISTEN_PORT=10081" \
+           -e "HTTPS_LISTEN_PORT=10444" \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
-           --name="${STANDARD_TLS}" ${TAG}
-
+           -p 10444:10444 --name="${STANDARD_TLS}" ${TAG}
 docker start ${STANDARD_TLS}
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -p 10444
+
 start_test "Start with succeeding upstream server verification" \
-           "${WORKDIR}/client_certs/ca.crt" "/etc/keys/upstream-server-ca" \
+           "${WORKDIR}/client_certs/ca.crt" "upstream-server-ca" "/etc/keys/" \
            "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://${STANDARD_TLS}\" \
-           -e \"PROXY_SERVICE_PORT=10443\" \
+           -e \"PROXY_SERVICE_PORT=10444\" \
            -e \"DNSMASK=TRUE\" \
            -e \"VERIFY_SERVER_CERT=TRUE\" \
            --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "

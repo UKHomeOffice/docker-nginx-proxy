@@ -82,10 +82,9 @@ This is useful when testing or for development instances or when a load-balancer
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
-* `INTERNAL_LISTEN_PORT` - Change the default inside the container from 10418. Note: This is used for internal processing and is not available externally.
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
-* `STATSD_METRICS_ENABLED` - Toggle if metrics are logged to statsd (defaults to true)
+* `STATSD_METRICS` - Toggle if metrics are logged to statsd (defaults to true)
 * `STATSD_SERVER` - Server to send statsd metrics to, defaults to 127.0.0.1
 * `DISABLE_SYSDIG_METRICS` - Set to any non-empty string to disable support for Sysdig's metric collection
 
