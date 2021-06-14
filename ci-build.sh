@@ -228,27 +228,27 @@ wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${P
 
 
 start_test "Start with multi locations settings" "${STD_CMD} \
-           -e \"LOCATIONS_CSV=/,/news\" \
-           -e \"PROXY_SERVICE_HOST_1=http://www.w3.org\" \
-           -e \"PROXY_SERVICE_PORT_1=80\" \
-           -e \"PROXY_SERVICE_HOST_2=http://www.bbc.co.uk\" \
-           -e \"PROXY_SERVICE_PORT_2=80\""
+           -e \"LOCATIONS_CSV=/,/wiki/Wikipedia:About\" \
+           -e \"PROXY_SERVICE_HOST_1=https://www.w3.org\" \
+           -e \"PROXY_SERVICE_PORT_1=443\" \
+           -e \"PROXY_SERVICE_HOST_2=https://en.wikipedia.org\" \
+           -e \"PROXY_SERVICE_PORT_2=443\""
 
 
 echo "Test for location 1 @ /..."
 wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-echo "Test for news..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/news
+echo "Test for wikipedia about page..."
+wget -O /dev/null --quiet --no-check-certificate --header="Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/wiki/Wikipedia:About
 
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
-           -e \"PROXY_SERVICE_HOST=http://www.bbc.co.uk\" \
-           -e \"PROXY_SERVICE_PORT=80\" \
-           -e \"LOCATIONS_CSV=/,/news\" \
+           -e \"PROXY_SERVICE_HOST=https://en.wikipedia.org\" \
+           -e \"PROXY_SERVICE_PORT=443\" \
+           -e \"LOCATIONS_CSV=/,/wiki/Wikipedia:About\" \
            -e \"NAXSI_RULES_URL_CSV_1=https://raw.githubusercontent.com/nbs-system/naxsi-rules/master/drupal.rules\" \
            -e \"NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432\""
 
 echo "Test for all OK..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: www.bbc.co.uk" https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate --header="Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/
 
 echo "Test client certs..."
 cd ./client_certs/
