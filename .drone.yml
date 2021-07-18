@@ -27,6 +27,18 @@ steps:
     - push
     - tag
 
+- name: anchore_scan
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+  environment:
+    IMAGE_NAME: ngx:latest
+    WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
+  depends_on:
+    - build_and_test_image
+  when:
+    event:
+    - push
+    - pull_request
+
 - name: push_image_to_artifactory
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
@@ -62,3 +74,9 @@ steps:
 services:
 - name: docker
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+
+- name: anchore-submission-server
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+  pull: always
+  commands:
+    - /run.sh server
