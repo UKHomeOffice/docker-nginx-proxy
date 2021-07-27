@@ -80,6 +80,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `SERVER_KEY` - Can override where to find the server's SSL key.
 * `SSL_CIPHERS` - Change the SSL ciphers support default only AES256+EECDH:AES256+EDH:!aNULL
 * `SSL_PROTOCOLS` - Change the SSL protocols supported default only TLSv1.2
+* `SSL_SESSION_TIMEOUT` - Specifies a time during which a client may reuse the session parameters (defaults to 10min)
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.

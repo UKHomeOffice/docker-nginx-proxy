@@ -16,7 +16,7 @@ cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_ciphers ${SSL_CIPHERS};
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    ssl_session_timeout ${SSL_SESSION_TIMEOUT};
     ssl_stapling on;
     ssl_dhparam ${NGIX_CONF_DIR}/dhparam.pem;
 EOF_CERT_CONF

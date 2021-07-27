@@ -51,6 +51,8 @@ steps:
       from_secret: docker_password
     DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
     DOCKER_USERNAME: docker-nginx-proxy-robot
+  depends_on:
+    - build_and_test_image
   when:
     event:
     - tag
@@ -67,6 +69,8 @@ steps:
       from_secret: docker_quay_password
     DOCKER_REPO: quay.io
     DOCKER_USERNAME: ukhomeofficedigital+nginx_proxy
+  depends_on:
+    - build_and_test_image
   when:
     event:
     - tag
