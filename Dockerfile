@@ -5,9 +5,9 @@ USER root
 ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "-U", "upgrade"]
-RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "nginx-mod-http-naxsi=1.20.1-r3"]
+RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3"]
 
-RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/community", "add", "aws-cli=1.18.177-r0"]
+RUN ["pip", "install", "awscli"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
