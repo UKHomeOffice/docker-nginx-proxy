@@ -5,7 +5,7 @@ USER root
 ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "-U", "upgrade"]
-RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3"]
+RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3", "nginx-mod-http-xslt-filter=1.20.1-r3"]
 
 RUN ["pip", "install", "awscli"]
 
@@ -20,9 +20,6 @@ RUN ["install", "-o", "nginx", "-g", "nginx", "-d", \
      "/etc/keys", "/etc/nginx/conf/locations", "/etc/nginx/conf/naxsi/locations", "/etc/nginx/naxsi"]
 ADD ./naxsi/location.rules /etc/nginx/naxsi/location.template
 ADD ./nginx.conf /etc/nginx
-
-# We need to enable the XSLT Module ourselves now, as Alpine no longer has a package to do this for us.
-ADD ./http_xslt_filter.conf /etc/nginx/modules/
 
 ADD ./nginx_big_buffers.conf /etc/nginx/conf/
 ADD ./nginx_rate_limits_null.conf /etc/nginx/conf/
