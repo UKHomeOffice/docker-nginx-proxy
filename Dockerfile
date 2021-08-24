@@ -1,16 +1,13 @@
-FROM alpine:3.13.5@sha256:def822f9851ca422481ec6fee59a9966f12b351c62ccb9aca841526ffaa9f748
+FROM alpine:3.14.1@sha256:be9bdc0ef8e96dbc428dc189b31e2e3b05523d96d12ed627c37aa2936653258c
 
 USER root
 
 ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "upgrade"]
-RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl"]
-# naxsi and awscli are not available from the main Alpine repositories yet.
-RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing", "add", \
-     "nginx-naxsi=1.16.1-r0", "nginx-naxsi-mod-http-naxsi=1.16.1-r0", "nginx-naxsi-mod-http-xslt-filter=1.16.1-r0"]
+RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3", "nginx-mod-http-xslt-filter=1.20.1-r3"]
 
-RUN ["apk", "--no-cache", "--repository=http://dl-cdn.alpinelinux.org/alpine/v3.13/community", "add", "aws-cli=1.18.177-r0"]
+RUN ["pip", "install", "awscli~=1.20.0"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
@@ -23,6 +20,7 @@ RUN ["install", "-o", "nginx", "-g", "nginx", "-d", \
      "/etc/keys", "/etc/nginx/conf/locations", "/etc/nginx/conf/naxsi/locations", "/etc/nginx/naxsi"]
 ADD ./naxsi/location.rules /etc/nginx/naxsi/location.template
 ADD ./nginx.conf /etc/nginx
+
 ADD ./nginx_big_buffers.conf /etc/nginx/conf/
 ADD ./nginx_rate_limits_null.conf /etc/nginx/conf/
 ADD ./nginx_cache_http.conf /etc/nginx/conf/
