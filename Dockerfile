@@ -7,7 +7,7 @@ ENTRYPOINT ["tini", "--"]
 RUN ["apk", "--no-cache", "upgrade"]
 RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3", "nginx-mod-http-xslt-filter=1.20.1-r3"]
 
-RUN ["pip", "install", "awscli"]
+RUN ["pip", "install", "awscli~=1.20.0"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
