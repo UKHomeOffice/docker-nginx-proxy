@@ -564,6 +564,46 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
+start_test "Test VERBOSE_ERROR_PAGES is not set displays default message info" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Something went wrong." ; then
+  echo "Testing VERBOSE_ERROR_PAGES works..."
+else
+  echo "Testing VERBOSE_ERROR_PAGES failed..."
+  exit 1
+fi
+
+start_test "Test FEEDBACK_EMAIL is set, displays contact message info" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"FEEDBACK_EMAIL=test@test.com\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "test@test.com" ; then
+  echo "Testing VERBOSE_ERROR_PAGES works..."
+else
+  echo "Testing VERBOSE_ERROR_PAGES failed..."
+  exit 1
+fi
+
+start_test "Test FEEDBACK_EMAIL is not set, does not display email message info" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "please contact us on" ; then
+  echo "Testing VERBOSE_ERROR_PAGES failed..."
+  exit 1
+else
+  echo "Testing VERBOSE_ERROR_PAGES works..."
+fi
+
 echo "_________________________________"
 echo "We got here, ALL tests successful"
 clean_up

@@ -4,6 +4,12 @@
 set -eu
 set -o pipefail
 
+if [ -z "$GEOIP_LICENSE_KEY" ]; then
+  LOCAL_TEST=true
+else
+  LOCAL_TEST=false
+fi
+
 GEOIP_ACCOUNT_ID="${GEOIP_ACCOUNT_ID:-123456}"
 GEOIP_LICENSE_KEY="${GEOIP_LICENSE_KEY:-xxxxxx}"
 GEOIP_CITY_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${GEOIP_LICENSE_KEY}&suffix=tar.gz"
@@ -52,15 +58,24 @@ mkdir -p ${MAXMIND_PATH}
 ./configure
 make check install
 echo "/usr/local/lib" >> /etc/ld.so.conf.d/libmaxminddb.conf
-curl -fSL ${GEOIP_COUNTRY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
-curl -fSL ${GEOIP_CITY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-City.mmdb
+
+# Only run if not testing locally
+if [ "$LOCAL_TEST" = false ]; then
+  curl -fSL ${GEOIP_COUNTRY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
+  curl -fSL ${GEOIP_CITY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-City.mmdb
+fi
+
 chown -R 1000:1000 ${MAXMIND_PATH}
 popd
 
 pushd geoipupdate
 sed -i 's/YOUR_ACCOUNT_ID_HERE/'"${GEOIP_ACCOUNT_ID}"'/g' GeoIP.conf
 sed -i 's/YOUR_LICENSE_KEY_HERE/'"${GEOIP_LICENSE_KEY}"'/g' GeoIP.conf
-./geoipupdate -f GeoIP.conf -d ${MAXMIND_PATH}
+
+# Only run if not testing locally
+if [ "$LOCAL_TEST" = false ]; then
+  ./geoipupdate -f GeoIP.conf -d ${MAXMIND_PATH}
+fi
 popd
 
 echo "Checking libmaxminddb module"
