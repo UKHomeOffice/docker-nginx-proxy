@@ -17,6 +17,22 @@ In order to run this container you'll need docker installed.
 * [OS X](https://docs.docker.com/mac/started/)
 * [Linux](https://docs.docker.com/linux/started/)
 
+## Creating builds
+When an update has been deployed to master, tag and push the master branch to kick off a Drone build:
+```
+git tag <next_version>
+git push --tags
+```
+
+## Testing Locally
+Authentic GEOIP credentials are needed when curling MaxMind Urls otherwise a 401 is returned. Therefore if no `GEOIP_LICENSE_KEY` secret/env var is set when running `./ci-build.sh`, a `LOCAL_TEST` variable is set to true to ensure the relevant urls are not called. This means not having to start up a Drone build every single time you want to test something and your local machine reuses any Docker cache available to it making the test/retry process much faster.
+
+*MAC USERS*
+You will need to install wget so that this can run in the `./ci-build.sh` script:
+```
+brew install wget
+```
+
 ## Usage
 
 ### Environment Variables

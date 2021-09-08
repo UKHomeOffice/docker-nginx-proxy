@@ -1,3 +1,5 @@
 .idea
 /tmp/*
 *.swp
+client-ca
+upstream-*
