@@ -10,4 +10,10 @@
   CODE: <!--#echo var="http_x_naxsi_sig" --><br />
   TIME: <!--#config timefmt="%Y-%m-%dT%H:%M:%S %Z" --><!--#echo var="date_local" -->
 </code>
+<!--#else -->
+  <!--#set var="title" value="Something went wrong." -->
+  <p>Text entered appears suspicious. This is likely due to unusual repeat or individual special characters, i.e. @@ or && or |. Please delete any unnecessary special characters and try again.</p>
+  <!--#if expr="${FEEDBACK_EMAIL}" -->
+  <p>If this problem persists, please contact us on <!--#echo var="${FEEDBACK_EMAIL}" --> so we can remedy any issues and improve our service.</p>
+  <!--#endif -->
 <!--#endif -->
