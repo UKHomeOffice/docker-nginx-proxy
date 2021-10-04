@@ -6,6 +6,13 @@ export LOG_UUID=FALSE
 
 . /defaults.sh
 
+if [ "$HTTP2" = "TRUE" ]; then
+    HTTP2="http2"
+else
+    HTTP2=""
+fi
+
+
 cat > ${NGIX_CONF_DIR}/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     ${SERVER_CERT};
     ssl_certificate_key ${SERVER_KEY};
@@ -51,7 +58,7 @@ else
     export REMOTE_IP_VAR="remote_addr"
     cat >> ${NGIX_LISTEN_CONF} <<-EOF-LISTEN-NONPP
 		listen ${HTTP_LISTEN_PORT};
-		listen ${HTTPS_LISTEN_PORT} ssl;
+		listen ${HTTPS_LISTEN_PORT} ssl ${HTTP2};
 		set \$real_client_ip_if_set '';
 	EOF-LISTEN-NONPP
 fi

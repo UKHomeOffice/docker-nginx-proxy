@@ -100,6 +100,7 @@ This is useful when testing or for development instances or when a load-balancer
 * `SSL_SESSION_TIMEOUT` - Specifies a time during which a client may reuse the session parameters (defaults to 10min)
 * `HTTP_LISTEN_PORT` - Change the default inside the container from 10080.
 * `HTTPS_LISTEN_PORT` - Change the default inside the container from 10443.
+* `HTTP2` - Defaults to false `FALSE`. Specifies whether http2 should be used
 * `HTTPS_REDIRECT` - Toggle whether or not we force redirects to HTTPS.  Defaults to true.
 * `ALLOW_COUNTRY_CSV` - List of [country codes](http://dev.maxmind.com/geoip/legacy/codes/iso3166/) to allow.
 * `STATSD_METRICS` - Toggle if metrics are logged to statsd (defaults to true)

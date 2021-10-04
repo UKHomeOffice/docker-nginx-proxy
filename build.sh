@@ -87,6 +87,7 @@ pushd openresty
             --add-module="../naxsi/naxsi_src" \
             --add-module="../nginx-statsd" \
             --with-http_realip_module \
+            --with-http_v2_module \
             --with-http_stub_status_module
 make install
 popd
