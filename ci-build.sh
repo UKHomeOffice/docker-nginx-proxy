@@ -122,7 +122,7 @@ start_test "Start with minimal settings" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=443\""
 
 echo "Test it's up and working..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
 docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 echo "Test sslv2 not accepted...."
@@ -602,6 +602,29 @@ if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "please contact u
   exit 1
 else
   echo "Testing VERBOSE_ERROR_PAGES works..."
+fi
+
+start_test "Test HTTP2 is set, http2 is used" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"HTTP2=TRUE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "http2" ; then
+  echo "Testing HTTP2 failed..."
+  exit 1
+else
+  echo "Testing HTTP2 works..."
+fi
+
+start_test "Test HTTP2 is not set, http2 is not used" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "http2" ; then
+  echo "Testing HTTP2 works..."
+  exit 1
+else
+  echo "Testing HTTP2 failed..."
 fi
 
 echo "_________________________________"
