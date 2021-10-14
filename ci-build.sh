@@ -620,7 +620,7 @@ start_test "Test HTTP2 is not set, http2 is not used" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\`
+echo "$(curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\`)"
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "http2" ; then
   echo "Testing HTTP2 is used..."
   exit 1
