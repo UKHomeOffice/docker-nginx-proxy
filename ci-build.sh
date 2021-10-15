@@ -604,6 +604,7 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
+echo "$(curl -kvso https://${DOCKER_HOST_NAME}:${PORT}/)"
 start_test "Start with http2" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
@@ -611,7 +612,6 @@ start_test "Start with http2" "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTP2=TRUE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-
 if curl -kvso https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
   echo "Testing HTTP2 Works"
 else
@@ -626,7 +626,6 @@ start_test "Start with http2" "${STD_CMD} \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTP2=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-
 if ! curl -kvso https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
   echo "Testing HTTP2 FALSE Works"
 else
