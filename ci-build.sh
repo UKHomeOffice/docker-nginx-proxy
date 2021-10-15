@@ -122,7 +122,7 @@ start_test "Start with minimal settings" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=443\""
 
 echo "Test it's up and working..."
-wget -O /dev/null --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
 docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 echo "Test sslv2 not accepted...."
@@ -604,28 +604,34 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
-start_test "Test HTTP2 is set, http2 is used" "${STD_CMD} \
+start_test "Start with http2" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTP2=TRUE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "http2" ; then
-  echo "Testing HTTP2 failed..."
-  exit 1
+
+if curl -kvso https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
+  echo "Testing HTTP2 Works"
 else
-  echo "Testing HTTP2 is used..."
+  echo "HTTP2 didnt work"
+  exit 1
 fi
 
-start_test "Test HTTP2 is not set, http2 is not used" "${STD_CMD} \
+start_test "Start with http2" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"HTTP2=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
-echo "$(curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\`)"
-if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "http2" ; then
-  echo "Testing HTTP2 is used..."
-  exit 1
+
+if ! curl -kvso https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
+  echo "Testing HTTP2 FALSE Works"
 else
-  echo "Testing HTTP2 isnt used..."
+  echo "HTTP2 FALSE didnt work"
+  exit 1
 fi
 
 echo "_________________________________"
