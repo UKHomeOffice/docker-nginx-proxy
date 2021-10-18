@@ -626,7 +626,7 @@ start_test "Test to ensure HTTP/2 is disabled when HTTP2 is set to false" "${STD
            -e \"HTTP2=FALSE\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 if ! curl -kv https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
-  echo "Testing HTTP2 FALSE Works"
+  echo "Testing HTTP2 FALSE Flag Works"
 else
   echo "HTTP2 FALSE didnt work"
   exit 1
