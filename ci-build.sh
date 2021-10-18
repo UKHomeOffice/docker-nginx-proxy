@@ -604,7 +604,7 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
-start_test "Start with http2" "${STD_CMD} \
+start_test "Test to ensure HTTP/2 is enabled when HTTP2 is set to true" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
@@ -618,7 +618,7 @@ else
   exit 1
 fi
 
-start_test "Start with http2" "${STD_CMD} \
+start_test "Test to ensure HTTP/2 is disabled when HTTP2 is set to false" "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
