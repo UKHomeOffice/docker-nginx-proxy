@@ -604,6 +604,34 @@ else
   echo "Testing VERBOSE_ERROR_PAGES works..."
 fi
 
+start_test "Test to ensure HTTP/2 is enabled when HTTP2 is set to true" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"HTTP2=TRUE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if curl -kv https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
+  echo "Testing HTTP2 Works"
+else
+  echo "HTTP2 didnt work"
+  exit 1
+fi
+
+start_test "Test to ensure HTTP/2 is disabled when HTTP2 is set to false" "${STD_CMD} \
+           -e \"PROXY_SERVICE_HOST=http://${MOCKSERVER}\" \
+           -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
+           -e \"DNSMASK=TRUE\" \
+           -e \"ENABLE_UUID_PARAM=FALSE\" \
+           -e \"HTTP2=FALSE\" \
+           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+if ! curl -kv https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
+  echo "Testing HTTP2 FALSE Flag Works"
+else
+  echo "HTTP2 FALSE didnt work"
+  exit 1
+fi
+
 echo "_________________________________"
 echo "We got here, ALL tests successful"
 clean_up
