@@ -1,7 +1,0 @@
-sudo: required
-
-services:
-  - docker
-
-script:
-  - travis_retry ./ci-build.sh
