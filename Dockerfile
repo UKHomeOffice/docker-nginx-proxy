@@ -1,11 +1,11 @@
-FROM alpine:3.14.1@sha256:be9bdc0ef8e96dbc428dc189b31e2e3b05523d96d12ed627c37aa2936653258c
+FROM alpine:3.14.3@sha256:5e604d3358ab7b6b734402ce2e19ddd822a354dc14843f34d36c603521dbb4f9
 
 USER root
 
 ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "upgrade"]
-RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.1-r3", "nginx-mod-http-xslt-filter=1.20.1-r3"]
+RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.2-r0", "nginx-mod-http-xslt-filter=1.20.2-r0"]
 
 RUN ["pip", "install", "awscli~=1.20.0"]
 
