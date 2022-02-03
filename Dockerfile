@@ -5,7 +5,18 @@ USER root
 ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "upgrade"]
-RUN ["apk", "--no-cache", "add", "tini", "dnsmasq", "bash", "curl", "openssl", "python3", "py-pip", "nginx-mod-http-naxsi=1.20.2-r0", "nginx-mod-http-xslt-filter=1.20.2-r0"]
+RUN ["apk", "--no-cache", "add", \
+  "bash", \
+  "curl", \
+  "dnsmasq", \
+  # If you update these nginx packages you MUST update the software components list: https://pay-team-manual.cloudapps.digital/manual/policies-and-procedures/software-components-list.html
+  "nginx-mod-http-naxsi=1.20.2-r0", \
+  "nginx-mod-http-xslt-filter=1.20.2-r0", \
+  "openssl", \
+  "py-pip", \
+  "python3", \
+  "tini" \
+]
 
 RUN ["pip", "install", "awscli~=1.20.0"]
 
