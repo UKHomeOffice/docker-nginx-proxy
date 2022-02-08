@@ -9,7 +9,9 @@ We run the nginx proxy inside a Fargate container for all of our apps.
 To update and deploy a new nginx-proxy container:
 
 - Raise a pull request, get an approval and merge it.
-- The [Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) 
+- The [pay-nginx-proxy jenkins build](https://build.ci.pymnt.uk/job/pay-nginx-proxy/) will be automatically triggered.
+- When the jenkins build is copmlete the 
+[Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) 
 will pull the Docker image from DockerHub, tag it as `*-release` and push to the AWS test account's ECR repository.
 - Concourse will attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,
   the `*-release` image will be pushed to the AWS staging account's ECR repository.
