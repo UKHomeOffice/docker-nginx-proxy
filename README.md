@@ -6,14 +6,17 @@ We run the nginx proxy inside a Fargate container for all of our apps.
 
 ## Fargate deployment
 
-To update and deploy a new nginx-forward-proxy container:
+To update and deploy a new nginx-proxy container:
 
 - Raise a pull request, get an approval and merge it.
-- The [Concourse `deploy-to-test` pipeline](https://cd.gds-reliability.engineering/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) will pull the Docker image from DockerHub, tag it as `*-release` and push to the AWS test account's ECR repository.
+- The [Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) 
+will pull the Docker image from DockerHub, tag it as `*-release` and push to the AWS test account's ECR repository.
 - Concourse will attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,
   the `*-release` image will be pushed to the AWS staging account's ECR repository.
-- The [Concourse `deploy-to-staging` pipeline](https://cd.gds-reliability.engineering/teams/pay-deploy/pipelines/deploy-to-staging?group=nginx-proxy) will then deploy Toolbox to the staging environment. If successful, the `*-release` image will be pushed to the AWS staging account's ECR repository. push to the AWS production account's repository.
-- The [Concourse `deploy-to-production` pipeline](https://cd.gds-reliability.engineering/teams/pay-deploy/pipelines/deploy-to-production?group=nginx-proxy) will deploy Toolbox with the new `*-release` nginx-proxy container.
+- The [Concourse `deploy-to-staging` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-deploy/pipelines/deploy-to-staging?group=nginx-proxy) 
+will then deploy Toolbox to the staging environment. If successful, the `*-release` image will be pushed to the AWS staging account's ECR repository. push to the AWS production account's repository.
+- The [Concourse `deploy-to-production` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-deploy/pipelines/deploy-to-production?group=nginx-proxy) 
+will deploy Toolbox with the new `*-release` nginx-proxy container.
 
 ## Usage
 
