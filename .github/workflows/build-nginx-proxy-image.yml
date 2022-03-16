@@ -1,0 +1,174 @@
+name: Build Nginx Proxy Docker Image
+
+env:
+  IMAGE_NAME: nginx-proxy
+  AWS_REGION: eu-west-1
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Test Pay Nginx Proxy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        with:
+          fetch-depth: '1'
+
+      - name: Run Shell Check on go.sh
+        shell: bash
+        run: docker run --rm -v "${GITHUB_WORKSPACE}:/mnt" koalaman/shellcheck:stable@sha256:ec26f2ad1492bf4343a7f82227fec67a19e4729b5ad02f6a2fe1a2b44cc037ff -x go.sh
+
+      - name: Build Docker Compose Testing Stack
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose build
+
+      - name: Start Nginx Testing Stack
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d mockserver
+
+      - name: Test Minimal Server
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-minimal
+
+          until docker inspect tests_test-minimal_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+          
+          echo "Testing Minimal Server..."
+          curl --fail -sk -o /dev/null "https://localhost:10443"
+          echo "Check the log output"
+          docker-compose logs test-minimal  | grep -E '\{[^:]+:'10443' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
+          echo "Test limited protcol and SSL cipher... "
+          docker-compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect test-minimal:10443"  &> /dev/null;
+          echo "Test SSLv2 not accepted... "
+          if docker-compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect test-minimal:10443"  &> /dev/null; then
+            echo "FAIL: SSL default settings allow SSLv2..."
+            exit 2
+          fi
+          docker-compose stop test-minimal
+
+      - name: Test GZip Config
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-gzip
+
+          until docker inspect tests_test-gzip_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Test that GZip is configured..."
+          curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
+
+          docker-compose stop test-gzip
+
+      - name: Test Multi-Proxy Config
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-multi-proxy
+
+          until docker inspect tests_test-multi-proxy_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Test for location 1 @ /..."
+          curl --fail -sk -o /dev/null https://localhost:10443/
+          echo "Test for payment page..."
+          curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://localhost:10443/using-govuk-pay
+
+          docker-compose stop test-multi-proxy
+
+      - name: Test Multi-Location, Single Proxy and NAXSI Config
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-multi-location-naxsi
+
+          until docker inspect tests_test-multi-location-naxsi_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Test for all OK..."
+          curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://localhost:10443/
+
+          docker-compose stop test-multi-location-naxsi
+
+      - name: Test Custom Upload Size Config
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-custom-upload
+
+          until docker inspect tests_test-custom-upload_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Generate a random test file..."
+          dd if=/dev/urandom of=/tmp/bigfile.txt bs=1048576 count=10
+
+          echo "Upload the large test file..."
+          curl -sk -o /tmp/upload_test.txt -F "file=@/tmp/bigfile.txt;filename=nameinpost" https://localhost:10443/uploads/doc
+
+          echo "Grepping the response..."
+          grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
+
+          docker-compose stop test-custom-upload
+
+      - name: Test Static File Cache Setting
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-static-cache
+
+          until docker inspect tests_test-static-cache_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Test for all OK..."
+          curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
+
+          docker-compose stop test-static-cache
+
+      - name: Test Big Buffers Setting
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose up -d test-big-buffers
+
+          until docker inspect tests_test-big-buffers_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+            sleep 2
+          done
+
+          echo "Test for all OK..."
+          curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
+
+          docker-compose stop test-big-buffers
+
+      - name: Shutdown Docker Compose Stack
+        if: always()
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/tests
+          docker-compose down
+
+  # release:
+  #   if: github.ref == 'refs/heads/master'
+  #   needs: test
+  #   name: Release
+  #   permissions:
+  #     contents: write
+  #   uses: alphagov/pay-ci/.github/workflows/_create-alpha-release-tag.yml@master
