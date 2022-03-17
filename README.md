@@ -133,6 +133,13 @@ docker run -e 'PROXY_SERVICE_HOST=http://stackexchange.com' \
            quay.io/ukhomeofficedigital/nginx-proxy:v1.0.0
 ```
 
+## Testing
+The proxy is tested using a handful of the scenarios listed above with a 
+mock server instance in a Docker Compose stack and is currently executed by a 
+Github Actions Workflow.
+
+View the `.github/workflows` and `tests/` directories for more info.
+
 ## Built With
 
 * [Nginx](https://www.nginx.com/resources/wiki/) - The proxy server core software.
