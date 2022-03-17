@@ -1,19 +1,21 @@
-name: Build Nginx Proxy Docker Image
-
-env:
-  IMAGE_NAME: nginx-proxy
-  AWS_REGION: eu-west-1
+name: Build and Test Nginx Proxy Docker Image
 
 on:
   pull_request:
-  push:
-    branches:
-      - master
+  workflow_call:
 
 jobs:
   test:
-    name: Test Pay Nginx Proxy
+    name: Build & Test Pay Nginx Proxy
     runs-on: ubuntu-latest
+
+    # Runs locally in about 4.5 minutes - if it takes longer than this, something has gone wrong.
+    timeout-minutes: 10 
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: tests
 
     steps:
       - name: Checkout Repo
@@ -22,25 +24,17 @@ jobs:
           fetch-depth: '1'
 
       - name: Run Shell Check on go.sh
-        shell: bash
+        working-directory: ./
         run: docker run --rm -v "${GITHUB_WORKSPACE}:/mnt" koalaman/shellcheck:stable@sha256:ec26f2ad1492bf4343a7f82227fec67a19e4729b5ad02f6a2fe1a2b44cc037ff -x go.sh
 
       - name: Build Docker Compose Testing Stack
-        shell: bash
-        run: |
-          cd ${GITHUB_WORKSPACE}/tests
-          docker-compose build
+        run: docker-compose build
 
       - name: Start Nginx Testing Stack
-        shell: bash
-        run: |
-          cd ${GITHUB_WORKSPACE}/tests
-          docker-compose up -d mockserver
+        run: docker-compose up -d mockserver
 
       - name: Test Minimal Server
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-minimal
 
           until docker inspect tests_test-minimal_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -61,9 +55,7 @@ jobs:
           docker-compose stop test-minimal
 
       - name: Test GZip Config
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-gzip
 
           until docker inspect tests_test-gzip_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -76,9 +68,7 @@ jobs:
           docker-compose stop test-gzip
 
       - name: Test Multi-Proxy Config
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-multi-proxy
 
           until docker inspect tests_test-multi-proxy_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -93,9 +83,7 @@ jobs:
           docker-compose stop test-multi-proxy
 
       - name: Test Multi-Location, Single Proxy and NAXSI Config
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-multi-location-naxsi
 
           until docker inspect tests_test-multi-location-naxsi_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -108,9 +96,7 @@ jobs:
           docker-compose stop test-multi-location-naxsi
 
       - name: Test Custom Upload Size Config
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-custom-upload
 
           until docker inspect tests_test-custom-upload_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -129,9 +115,7 @@ jobs:
           docker-compose stop test-custom-upload
 
       - name: Test Static File Cache Setting
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-static-cache
 
           until docker inspect tests_test-static-cache_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -144,9 +128,7 @@ jobs:
           docker-compose stop test-static-cache
 
       - name: Test Big Buffers Setting
-        shell: bash
         run: |
-          cd ${GITHUB_WORKSPACE}/tests
           docker-compose up -d test-big-buffers
 
           until docker inspect tests_test-big-buffers_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
@@ -158,17 +140,6 @@ jobs:
 
           docker-compose stop test-big-buffers
 
-      - name: Shutdown Docker Compose Stack
-        if: always()
-        shell: bash
-        run: |
-          cd ${GITHUB_WORKSPACE}/tests
-          docker-compose down
-
-  # release:
-  #   if: github.ref == 'refs/heads/master'
-  #   needs: test
-  #   name: Release
-  #   permissions:
-  #     contents: write
-  #   uses: alphagov/pay-ci/.github/workflows/_create-alpha-release-tag.yml@master
+      - name: Shutdown Docker Compose Stack (Local Only)
+        if: ${{ env.ACT }}
+        run: docker-compose down
