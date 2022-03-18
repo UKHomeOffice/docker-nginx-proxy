@@ -15,18 +15,9 @@ jobs:
     name: Run Docker Image Tests
     uses: ./.github/workflows/run-tests.yml
 
-  unit-tests:
-    name: Run Unit Tests
-    uses: alphagov/pay-ci/.github/workflows/_run-node-unit-tests.yml@master
-    with:
-      node_version: "12.22.10"
-      test_runner_flags: "--forbid-only --forbid-pending"
-
   tag-release:
     name: Tag Release
-    needs:
-      - image-tests
-      - unit-tests
+    needs: image-tests
     permissions:
       contents: write
     uses: alphagov/pay-ci/.github/workflows/_create-alpha-release-tag.yml@master
