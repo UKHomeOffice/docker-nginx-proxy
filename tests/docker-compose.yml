@@ -1,0 +1,140 @@
+version: "3"
+
+services:
+  nginx:
+    build: "../."
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+  mockserver:
+    image: quii/mockingjay-server:1.9.0
+    logging:
+      driver: "json-file"
+    ports:
+      - 9000:9000
+    volumes:
+      - "./test-servers.yaml:/test-servers.yaml"
+    command:
+      - -config=/test-servers.yaml
+      - -debug
+      - -port=9000
+    healthcheck:
+      test: "curl --fail http://localhost:9000 || exit 1"
+      interval: 10s
+      timeout: 2s
+      retries: 5
+  test-minimal:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - PROXY_SERVICE_HOST=http://www.w3.org
+      - PROXY_SERVICE_PORT=80
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-gzip:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_PORT=9000
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-multi-proxy:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - LOCATIONS_CSV=/,/using-govuk-pay
+      - PROXY_SERVICE_HOST_1=http://www.w3.org
+      - PROXY_SERVICE_PORT_1=80
+      - PROXY_SERVICE_HOST_2=https://www.payments.service.gov.uk
+      - PROXY_SERVICE_PORT_2=443
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-multi-location-naxsi:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - LOCATIONS_CSV=/,/using-govuk-pay
+      - PROXY_SERVICE_HOST=https://www.payments.service.gov.uk
+      - PROXY_SERVICE_PORT=443
+      - NAXSI_RULES_URL_CSV_1=https://raw.githubusercontent.com/nbs-system/naxsi-rules/master/drupal.rules
+      - NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-custom-upload:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_PORT=9000
+      - CLIENT_MAX_BODY_SIZE=15
+      - NAXSI_USE_DEFAULT_RULES=FALSE
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-static-cache:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_PORT=9000
+      - PROXY_STATIC_CACHING=true
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s
+  test-big-buffers:
+    image: pay-nginx-proxy:test
+    logging:
+      driver: "json-file"
+    ports:
+      - 10080:10080
+      - 10443:10443
+    environment:
+      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_PORT=9000
+      - ENABLE_BIG_BUFFERS=true
+    healthcheck:
+      test: "curl --fail http://localhost:10080 || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 2s

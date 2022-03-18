@@ -1,0 +1,23 @@
+name: Post Merge
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency: nginx-proxy-post-merge
+
+jobs:
+  image-tests:
+    name: Run Docker Image Tests
+    uses: ./.github/workflows/run-tests.yml
+
+  tag-release:
+    name: Tag Release
+    needs: image-tests
+    permissions:
+      contents: write
+    uses: alphagov/pay-ci/.github/workflows/_create-alpha-release-tag.yml@master
