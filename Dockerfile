@@ -10,8 +10,8 @@ RUN ["apk", "--no-cache", "add", \
   "curl", \
   "dnsmasq", \
   # If you update these nginx packages you MUST update the software components list: https://pay-team-manual.cloudapps.digital/manual/policies-and-procedures/software-components-list.html
-  "nginx-mod-http-naxsi=1.20.2-r2", \
-  "nginx-mod-http-xslt-filter=1.20.2-r2", \
+  "nginx-mod-http-naxsi=1.22.0-r0", \
+  "nginx-mod-http-xslt-filter=1.22.0-r0", \
   "openssl", \
   "py-pip", \
   "python3", \

@@ -79,7 +79,7 @@ fi
 if [ -n "${ENABLE_BIG_BUFFERS:-}" ]; then
 cat > /etc/nginx/conf/nginx_big_buffers.conf <<-EOF_BIGBUFFERS
     # Proxy Buffer Size Increase
-    proxy_buffer_size 8k;
+    proxy_buffer_size 12k;
 EOF_BIGBUFFERS
 fi
 
