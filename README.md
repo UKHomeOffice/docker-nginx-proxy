@@ -9,16 +9,18 @@ We run the nginx proxy inside a Fargate container for all of our apps.
 To update and deploy a new nginx-proxy container:
 
 - Raise a pull request, get an approval and merge it.
-- The [pay-nginx-proxy jenkins build](https://build.ci.pymnt.uk/job/pay-nginx-proxy/) will be automatically triggered.
-- When the jenkins build is copmlete the 
-[Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) 
-will pull the Docker image from DockerHub, tag it as `*-release` and push to the AWS test account's ECR repository.
-- Concourse will attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,
+- The [Github Actions post-merge workflow](https://github.com/alphagov/pay-nginx-proxy/blob/master/.github/workflows/post-merge.yml) will test a build of the image from the main branch and create a release tag. 
+- The [Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) is triggered by the release tag.
+It will build the Docker image, tag it as `*-release` and push it to the AWS test account's ECR repository (for historical reasons, the image is called 'docker-nginx-proxy' in ECR).
+- Concourse will then attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,
   the `*-release` image will be pushed to the AWS staging account's ECR repository.
 - The [Concourse `deploy-to-staging` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-deploy/pipelines/deploy-to-staging?group=nginx-proxy) 
 will then deploy Toolbox to the staging environment. If successful, the `*-release` image will be pushed to the AWS staging account's ECR repository. push to the AWS production account's repository.
 - The [Concourse `deploy-to-production` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-deploy/pipelines/deploy-to-production?group=nginx-proxy) 
 will deploy Toolbox with the new `*-release` nginx-proxy container.
+
+Note that once the image is pushed to ECR, all other apps that use the nginx sidecar will
+pick up the latest version when they are deployed to that environment. To prevent this, pin the previous nginx release version in Concourse.
 
 ## Usage
 
