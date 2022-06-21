@@ -120,7 +120,7 @@ ESCAPED_LOCATION=$(eval "echo $LOCATION | sed 's;/;\\\/;g'")
 
 cat << EOF_SERVERCACHE_CONF >> /etc/nginx/conf/locations/${LOCATION_ID}.conf
 # Allow Nginx to cache static assets - follow the same proxy config as above.
-location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2)$ {
+location ~* ^${ESCAPED_LOCATION}(.+)\.(jpg|jpeg|gif|png|svg|ico|css|bmp|js|html|htm|ttf|otf|eot|woff|woff2|json)$ {
     proxy_cache staticcache;
     add_header X-Proxy-Cache \$upstream_cache_status;
     
