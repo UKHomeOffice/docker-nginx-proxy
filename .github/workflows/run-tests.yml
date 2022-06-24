@@ -123,7 +123,7 @@ jobs:
           done
 
           echo "Test for all OK..."
-          curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
+          curl -s -I -X GET -k --compressed https://localhost:10443/file.json | grep -q 'Cache-Control: max-age=3600'
 
           docker-compose stop test-static-cache
 

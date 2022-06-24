@@ -55,3 +55,12 @@
      body: '{"message": "Oh dear!"}'
      headers:
        content-type: text/json
+ - name: Cached JSON File
+   request:
+     uri: /file.json
+     method: GET
+   response:
+     code: 200
+     body: '{"message": "OK here"}'
+     headers:
+       content-type: text/json
