@@ -53,6 +53,8 @@ services:
       interval: 10s
       retries: 5
       timeout: 2s
+    depends_on:
+      - mockserver
   test-multi-proxy:
     image: pay-nginx-proxy:test
     logging:
@@ -106,6 +108,8 @@ services:
       interval: 10s
       retries: 5
       timeout: 2s
+    depends_on:
+      - mockserver
   test-static-cache:
     image: pay-nginx-proxy:test
     logging:
@@ -122,6 +126,8 @@ services:
       interval: 10s
       retries: 5
       timeout: 2s
+    depends_on:
+      - mockserver
   test-big-buffers:
     image: pay-nginx-proxy:test
     logging:
@@ -138,3 +144,5 @@ services:
       interval: 10s
       retries: 5
       timeout: 2s
+    depends_on:
+      - mockserver
