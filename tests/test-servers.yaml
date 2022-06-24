@@ -1,66 +1,82 @@
 ---
- - name: All OK
-   request:
-     uri: /
-     method: GET
-   response:
-     code: 200
-     body: '200 is OK :)'
- - name: All OK with params
-   request:
-     uri: /?animal=cow
-     method: GET
-   response:
-     code: 200
-     body: '200 is OK :)'
- - name: All OK with nginxID
-   request:
-     uri: /?nginxId=foo
-     regexuri: \/?nginxId=[a-z]+
-     method: GET
-   response:
-     code: 200
-     body: '200 is OK :)'
- - name: All OK with nginxID and other get params
-   request:
-     uri: /?foo=bar&nginxId=foo
-     regexuri: \/?foo=bar&nginxId=[a-z]+
-     method: GET
-   response:
-     code: 200
-     body: '200 is OK :)'
- - name: Big Doc
-   request:
-     uri: /uploads/doc
-     method: POST
-     content-type: multipart/form-data
-   response:
-     code: 100
-     body: 'Thanks for the big doc'
- - name: API
-   request:
-     uri: /api/
-     method: GET
-   response:
-     code: 200
-     body: '{"message": "OK here"}'
-     headers:
-       content-type: text/json
- - name: API 500
-   request:
-     uri: /api/dead
-     method: GET
-   response:
-     code: 500
-     body: '{"message": "Oh dear!"}'
-     headers:
-       content-type: text/json
- - name: Cached JSON File
-   request:
-     uri: /file.json
-     method: GET
-   response:
-     code: 200
-     body: '{"message": "OK here"}'
-     headers:
-       content-type: text/json
+- name: All OK
+  request:
+    uri: /
+    method: GET
+  response:
+    code: 200
+    body: '200 is OK :)'
+- name: All OK with path
+  request:
+    uri: /path/to/resource
+    method: GET
+  response:
+    code: 200
+    body: '200 is OK :) with path'
+- name: All OK with params
+  request:
+    uri: /?animal=cow
+    method: GET
+  response:
+    code: 200
+    body: '200 is OK :)'
+- name: All OK with nginxID
+  request:
+    uri: /?nginxId=foo
+    regexuri: \/?nginxId=[a-z]+
+    method: GET
+  response:
+    code: 200
+    body: '200 is OK :)'
+- name: All OK with nginxID and other get params
+  request:
+    uri: /?foo=bar&nginxId=foo
+    regexuri: \/?foo=bar&nginxId=[a-z]+
+    method: GET
+  response:
+    code: 200
+    body: '200 is OK :)'
+- name: Big Doc
+  request:
+    uri: /uploads/doc
+    method: POST
+    content-type: multipart/form-data
+  response:
+    code: 100
+    body: 'Thanks for the big doc'
+- name: API
+  request:
+    uri: /api/
+    method: GET
+  response:
+    code: 200
+    body: '{"message": "OK here"}'
+    headers:
+      content-type: text/json
+- name: API 500
+  request:
+    uri: /api/dead
+    method: GET
+  response:
+    code: 500
+    body: '{"message": "Oh dear!"}'
+    headers:
+      content-type: text/json
+- name: Cached JSON File
+  request:
+    uri: /file.json
+    method: GET
+  response:
+    code: 200
+    body: '{"message": "OK here"}'
+    headers:
+      content-type: text/json
+- name: Healthcheck
+  request:
+    uri: /healthcheck
+    method: GET
+  response:
+    code: 200
+    body: '{"message": "Healthy"}'
+    headers:
+      content-type: text/json

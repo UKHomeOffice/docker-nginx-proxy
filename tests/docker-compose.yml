@@ -6,7 +6,7 @@ services:
     image: pay-nginx-proxy:test
     logging:
       driver: "json-file"
-  mockserver:
+  mockserver-1:
     image: quii/mockingjay-server:1.9.0
     logging:
       driver: "json-file"
@@ -19,7 +19,24 @@ services:
       - -debug
       - -port=9000
     healthcheck:
-      test: "curl --fail http://localhost:9000 || exit 1"
+      test: "wget 127.0.0.1:9000/healthcheck -q -O /dev/null || exit 1"
+      interval: 10s
+      timeout: 2s
+      retries: 5
+  mockserver-2:
+    image: quii/mockingjay-server:1.9.0
+    logging:
+      driver: "json-file"
+    ports:
+      - 9001:9001
+    volumes:
+      - "./test-servers.yaml:/test-servers.yaml"
+    command:
+      - -config=/test-servers.yaml
+      - -debug
+      - -port=9001
+    healthcheck:
+      test: "wget 127.0.0.1:9001/healthcheck -q -O /dev/null || exit 1"
       interval: 10s
       timeout: 2s
       retries: 5
@@ -31,8 +48,8 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=http://www.w3.org
-      - PROXY_SERVICE_PORT=80
+      - PROXY_SERVICE_HOST=https://www.w3.org
+      - PROXY_SERVICE_PORT=443
     healthcheck:
       test: "curl --fail http://localhost:10080 || exit 1"
       interval: 10s
@@ -46,7 +63,7 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_HOST=http://mockserver-1      
       - PROXY_SERVICE_PORT=9000
     healthcheck:
       test: "curl --fail http://localhost:10080 || exit 1"
@@ -54,7 +71,7 @@ services:
       retries: 5
       timeout: 2s
     depends_on:
-      - mockserver
+      - mockserver-1  
   test-multi-proxy:
     image: pay-nginx-proxy:test
     logging:
@@ -63,16 +80,19 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - LOCATIONS_CSV=/,/using-govuk-pay
-      - PROXY_SERVICE_HOST_1=http://www.w3.org
-      - PROXY_SERVICE_PORT_1=80
-      - PROXY_SERVICE_HOST_2=https://www.payments.service.gov.uk
-      - PROXY_SERVICE_PORT_2=443
+      - LOCATIONS_CSV=/,/path/to/resource
+      - PROXY_SERVICE_HOST_1=http://mockserver-1
+      - PROXY_SERVICE_PORT_1=9000
+      - PROXY_SERVICE_HOST_2=http://mockserver-2
+      - PROXY_SERVICE_PORT_2=9001
     healthcheck:
       test: "curl --fail http://localhost:10080 || exit 1"
       interval: 10s
       retries: 5
       timeout: 2s
+    depends_on:
+      - mockserver-1
+      - mockserver-2
   test-multi-location-naxsi:
     image: pay-nginx-proxy:test
     logging:
@@ -99,7 +119,7 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_HOST=http://mockserver-1
       - PROXY_SERVICE_PORT=9000
       - CLIENT_MAX_BODY_SIZE=15
       - NAXSI_USE_DEFAULT_RULES=FALSE
@@ -109,7 +129,7 @@ services:
       retries: 5
       timeout: 2s
     depends_on:
-      - mockserver
+      - mockserver-1
   test-static-cache:
     image: pay-nginx-proxy:test
     logging:
@@ -118,7 +138,7 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_HOST=http://mockserver-1      
       - PROXY_SERVICE_PORT=9000
       - PROXY_STATIC_CACHING=true
     healthcheck:
@@ -127,7 +147,7 @@ services:
       retries: 5
       timeout: 2s
     depends_on:
-      - mockserver
+      - mockserver-1  
   test-big-buffers:
     image: pay-nginx-proxy:test
     logging:
@@ -136,7 +156,7 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=http://mockserver
+      - PROXY_SERVICE_HOST=http://mockserver-1      
       - PROXY_SERVICE_PORT=9000
       - ENABLE_BIG_BUFFERS=true
     healthcheck:
@@ -145,4 +165,4 @@ services:
       retries: 5
       timeout: 2s
     depends_on:
-      - mockserver
+      - mockserver-1

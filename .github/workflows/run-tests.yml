@@ -30,9 +30,6 @@ jobs:
       - name: Build Docker Compose Testing Stack
         run: docker-compose build
 
-      - name: Start Nginx Testing Stack
-        run: docker-compose up -d mockserver
-
       - name: Test Minimal Server
         run: |
           docker-compose up -d test-minimal
@@ -69,7 +66,7 @@ jobs:
 
       - name: Test Multi-Proxy Config
         run: |
-          docker-compose up -d test-multi-proxy
+          docker-compose up -d --force-recreate test-multi-proxy
 
           until docker inspect tests_test-multi-proxy_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
@@ -77,8 +74,10 @@ jobs:
 
           echo "Test for location 1 @ /..."
           curl --fail -sk -o /dev/null https://localhost:10443/
-          echo "Test for payment page..."
-          curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://localhost:10443/using-govuk-pay
+          docker-compose logs mockserver-1 | grep -E '(Matched on All OK)'
+          echo "Test for location 2 @ /path/to/resource"
+          curl --fail -sk -o /dev/null https://localhost:10443/path/to/resource
+          docker-compose logs mockserver-2 | grep -E '(Matched on All OK with path)'
 
           docker-compose stop test-multi-proxy
 
