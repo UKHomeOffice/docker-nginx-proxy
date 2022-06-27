@@ -235,4 +235,8 @@ if [ "${STATSD_METRICS}" = "TRUE" ]; then
     echo "statsd_count \"waf.status.\$status\" 1;" > ${NGIX_CONF_DIR}/nginx_statsd_metrics.conf
 fi
 
+if [ -z "RELOAD_PERIODIC_INTERVAL" ]; then
+    echo "123"
+fi
+
 eval "${NGINX_BIN} -g \"daemon off;\""
