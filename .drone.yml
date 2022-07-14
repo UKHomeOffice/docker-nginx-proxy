@@ -43,7 +43,10 @@ steps:
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "v5.0.0"
+  - docker pull quay.io/ukhomeofficedigital/nginx-proxy:v4.2.0
+  - docker tag quay.io/ukhomeofficedigital/nginx-proxy:v4.2.0 quay.io/ukhomeofficedigital/nginx-proxy:latest
+  - docker push quay.io/ukhomeofficedigital/nginx-proxy:latest
+  #- ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "v5.0.0"
   environment:
     DOCKER_BASEDIR: /ukhomeofficedigital/
     DOCKER_IMAGE: nginx-proxy
