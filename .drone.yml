@@ -10,7 +10,7 @@ workspace:
   path: /workdir
 
 #comment for now
-# steps:
+steps:
 # - name: build_and_test_image
 #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
 #   commands:
