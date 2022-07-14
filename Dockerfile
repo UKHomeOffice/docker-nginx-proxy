@@ -1,7 +1,9 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM redhat/ubi8:latest
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
+
+RUN yum upgrade -y
 
 WORKDIR /root
 ADD ./build.sh /root/

@@ -39,24 +39,6 @@ steps:
     - push
     - pull_request
 
-- name: push_image_to_artifactory
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-  commands:
-  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
-  environment:
-    DOCKER_BASEDIR: /
-    DOCKER_IMAGE: nginx-proxy
-    DOCKER_PASSWORD:
-      from_secret: docker_password
-    DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
-    DOCKER_USERNAME: docker-nginx-proxy-robot
-  depends_on:
-    - build_and_test_image
-  when:
-    event:
-    - tag
-
 - name: push_image_to_quay
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
@@ -73,7 +55,7 @@ steps:
     - build_and_test_image
   when:
     event:
-    - tag
+    - push
 
 services:
 - name: docker

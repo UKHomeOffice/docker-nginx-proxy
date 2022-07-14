@@ -36,7 +36,6 @@ yum -y install \
     perl \
     pcre-devel \
     pcre \
-    readline-devel \
     tar \
     unzip \
     wget
