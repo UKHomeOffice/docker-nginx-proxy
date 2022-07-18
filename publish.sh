@@ -47,4 +47,5 @@ tag_n_push() {
 tag_n_push "${PATCH}"
 tag_n_push "${MINOR}"
 tag_n_push "${MAJOR}"
-tag_n_push "latest-test"
+#tag_n_push "latest"
+tag_n_push "test"

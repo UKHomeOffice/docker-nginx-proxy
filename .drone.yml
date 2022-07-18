@@ -9,45 +9,59 @@ platform:
 workspace:
   path: /workdir
 
-#comment for now
 steps:
-# - name: build_and_test_image
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-#   commands:
-#   - apk add curl bash wget tar
-#   - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
-#   - ./ci-build.sh
-#   environment:
-#     GEOIP_ACCOUNT_ID:
-#       from_secret: geoip_account_id
-#     GEOIP_LICENSE_KEY:
-#       from_secret: geoip_license_key
-#   when:
-#     event:
-#     - pull_request
-#     - push
-#     - tag
+- name: build_and_test_image
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+  commands:
+  - apk add curl bash wget tar
+  - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
+  - ./ci-build.sh
+  environment:
+    GEOIP_ACCOUNT_ID:
+      from_secret: geoip_account_id
+    GEOIP_LICENSE_KEY:
+      from_secret: geoip_license_key
+  when:
+    event:
+    - pull_request
+    - push
+    - tag
 
-# - name: anchore_scan
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-#   environment:
-#     IMAGE_NAME: ngx:latest
-#     WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
-#   depends_on:
-#     - build_and_test_image
-#   when:
-#     event:
-#     - push
-#     - pull_request
+- name: anchore_scan
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+  environment:
+    IMAGE_NAME: ngx:latest
+    WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
+  depends_on:
+    - build_and_test_image
+  when:
+    event:
+    - push
+    - pull_request
+
+- name: push_image_to_artifactory
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+  commands:
+  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
+  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+  environment:
+    DOCKER_BASEDIR: /
+    DOCKER_IMAGE: nginx-proxy
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
+    DOCKER_USERNAME: docker-nginx-proxy-robot
+  depends_on:
+    - build_and_test_image
+  when:
+    event:
+    - tag
 
 - name: push_image_to_quay
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
-  - docker pull quay.io/ukhomeofficedigital/nginx-proxy:v4.2.0
-  - docker tag quay.io/ukhomeofficedigital/nginx-proxy:v4.2.0 quay.io/ukhomeofficedigital/nginx-proxy:latest
-  - docker push quay.io/ukhomeofficedigital/nginx-proxy:latest
-  #- ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "v5.0.0"
+  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "v5.0.0"
   environment:
     DOCKER_BASEDIR: /ukhomeofficedigital/
     DOCKER_IMAGE: nginx-proxy
@@ -55,8 +69,8 @@ steps:
       from_secret: docker_quay_password
     DOCKER_REPO: quay.io
     DOCKER_USERNAME: ukhomeofficedigital+nginx_proxy
-  # depends_on:
-  #   - build_and_test_image
+  depends_on:
+    - build_and_test_image
   when:
     event:
     - push
