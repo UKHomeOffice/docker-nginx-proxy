@@ -46,6 +46,10 @@ RUN useradd -u 1000 nginx && \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP
 
+# adding this to allow for changes at runtime.
+RUN chown -R nginx:nginx /usr/local/openresty/
+RUN chmod -R 777 /usr/local/openresty/
+
 WORKDIR /usr/local/openresty
 
 EXPOSE 10080 10443
