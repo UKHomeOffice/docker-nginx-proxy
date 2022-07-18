@@ -50,8 +50,6 @@ WORKDIR /usr/local/openresty
 
 EXPOSE 10080 10443
 
-#USER 1000
-# Using root to debug issue
-USER root
+USER 1000
 
 ENTRYPOINT [ "/go.sh" ]

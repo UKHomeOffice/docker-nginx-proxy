@@ -19,7 +19,7 @@ GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v4.7.
 GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.6.0/libmaxminddb-1.6.0.tar.gz'
 LUAROCKS_URL='https://luarocks.github.io/luarocks/releases/luarocks-3.7.0.tar.gz'
 NAXSI_URL='https://github.com/nbs-system/naxsi/archive/1.3.tar.gz'
-OPEN_RESTY_URL='http://openresty.org/download/openresty-1.19.3.2.tar.gz'
+OPEN_RESTY_URL='http://openresty.org/download/openresty-1.21.4.1.tar.gz'
 STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1-ngxpatch.tar.gz'
 
 MAXMIND_PATH='/usr/share/GeoIP'
