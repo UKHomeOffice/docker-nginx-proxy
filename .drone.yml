@@ -81,8 +81,6 @@ steps:
   image: quay.io/ukhomeofficedigital/trivyscanner:master
   commands:
   - trivy image --ignore-unfixed --exit-code 0 --no-progress quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_TAG}
-  depends_on:
-    - push_image_to_quay
   when:
     branch:
       exclude:
