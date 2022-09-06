@@ -40,21 +40,6 @@ steps:
 #     - push
 #     - pull_request
 
-- name: trivy_scan
-  pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/trivyscanner:master
-  commands:
-  - trivy image --ignore-unfixed --exit-code 0 --no-progress ngx:latest
-  depends_on:
-    - build_and_test_image
-  when:
-    branch:
-      exclude:
-      - master 
-    event:
-    - push
-    - pull_request
-
 - name: push_image_to_artifactory
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
@@ -90,6 +75,21 @@ steps:
   when:
     event:
     - tag
+
+- name: trivy_scan
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/trivyscanner:master
+  commands:
+  - trivy image --ignore-unfixed --exit-code 0 --no-progress quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_TAG}
+  depends_on:
+    - push_image_to_quay
+  when:
+    branch:
+      exclude:
+      - master 
+    event:
+    - push
+    - pull_request
 
 services:
 - name: docker
