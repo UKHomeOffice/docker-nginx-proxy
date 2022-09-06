@@ -28,14 +28,29 @@ steps:
     - push
     - tag
 
-- name: anchore_scan
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-  environment:
-    IMAGE_NAME: ngx:latest
-    WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
+# - name: anchore_scan
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+#   environment:
+#     IMAGE_NAME: ngx:latest
+#     WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
+#   depends_on:
+#     - build_and_test_image
+#   when:
+#     event:
+#     - push
+#     - pull_request
+
+- name: trivy_scan
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/trivyscanner:master
+  commands:
+  - trivy image --ignore-unfixed --exit-code 0 --no-progress ngx:latest
   depends_on:
     - build_and_test_image
   when:
+    branch:
+      exclude:
+      - master 
     event:
     - push
     - pull_request
