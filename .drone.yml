@@ -76,18 +76,6 @@ steps:
     event:
     - tag
 
-- name: trivy_scan
-  pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/trivyscanner:master
-  commands:
-  - trivy image --ignore-unfixed --exit-code 0 --no-progress quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_TAG}
-  when:
-    branch:
-      exclude:
-      - master 
-    event:
-    - tag
-
 services:
 - name: docker
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
