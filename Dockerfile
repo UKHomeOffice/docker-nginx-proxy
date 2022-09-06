@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM quay.io/centos/centos:stream8
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
@@ -35,7 +35,8 @@ ADD ./readyness.sh /
 ADD ./helper.sh /
 ADD ./refresh_geoip.sh /
 
-RUN yum remove -y kernel-headers && \
+RUN yum update -y && \
+    yum remove -y kernel-headers && \
     yum clean all
 
 RUN useradd -u 1000 nginx && \
