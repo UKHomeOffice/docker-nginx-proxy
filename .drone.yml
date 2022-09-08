@@ -15,7 +15,8 @@ steps:
   commands:
   - apk add curl bash wget tar
   - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
-  - docker build --build-arg GEOIP_ACCOUNT_ID=${GEOIP_ACCOUNT_ID} --build-arg GEOIP_LICENSE_KEY=${GEOIP_LICENSE_KEY} -t ngx:latest .
+  - echo $${GEOIP_ACCOUNT_ID}
+  - echo $${GEOIP_LICENSE_KEY}
   # - ./ci-build.sh
   environment:
     GEOIP_ACCOUNT_ID:
@@ -58,30 +59,26 @@ steps:
 #     event:
 #     - tag
 
-- name: push_image_to_quay
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-  commands:
-  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
-  environment:
-    DOCKER_BASEDIR: /ukhomeofficedigital/
-    DOCKER_IMAGE: nginx-proxy
-    DOCKER_QUAY_PASSWORD:
-      from_secret: docker_quay_password
-    DOCKER_REPO: quay.io
-    DOCKER_USERNAME: ukhomeofficedigital+nginx_proxy
-  depends_on:
-    - build_and_test_image
-  when:
-    event:
-    - tag
+# - name: push_image_to_quay
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+#   commands:
+#   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
+#   - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+#   environment:
+#     DOCKER_BASEDIR: /ukhomeofficedigital/
+#     DOCKER_IMAGE: nginx-proxy
+#     DOCKER_QUAY_PASSWORD:
+#       from_secret: docker_quay_password
+#     DOCKER_REPO: quay.io
+#     DOCKER_USERNAME: ukhomeofficedigital+nginx_proxy
+#   depends_on:
+#     - build_and_test_image
+#   when:
+#     event:
+#     - tag
 
 services:
 - name: docker
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
 
-- name: anchore-submission-server
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-  pull: always
-  commands:
-    - /run.sh server
+
