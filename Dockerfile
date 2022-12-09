@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM ubuntu:jammy
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
