@@ -48,7 +48,7 @@ services:
       - 10080:10080
       - 10443:10443
     environment:
-      - PROXY_SERVICE_HOST=https://www.w3.org
+      - PROXY_SERVICE_HOST=https://www.payments.service.gov.uk
       - PROXY_SERVICE_PORT=443
     healthcheck:
       test: "curl --fail http://localhost:10080 || exit 1"
