@@ -1,4 +1,4 @@
-FROM alpine:3.17.3@sha256:124c7d2707904eea7431fffe91522a01e5a861a624ee31d03372cc1d138a3126
+FROM alpine:3.18.0@sha256:02bb6f428431fbc2809c5d1b41eab5a68350194fb508869a33cb1af4444c9b11
 
 USER root
 
@@ -10,8 +10,8 @@ RUN ["apk", "--no-cache", "add", \
   "curl", \
   "dnsmasq", \
   # If you update these nginx packages you MUST update the software components list: https://pay-team-manual.cloudapps.digital/manual/policies-and-procedures/software-components-list.html
-  "nginx-mod-http-naxsi=1.22.1-r0", \
-  "nginx-mod-http-xslt-filter=1.22.1-r0", \
+  "nginx-mod-http-naxsi=1.24.0-r3", \
+  "nginx-mod-http-xslt-filter=1.24.0-r3", \
   "openssl", \
   "py-pip", \
   "python3", \
