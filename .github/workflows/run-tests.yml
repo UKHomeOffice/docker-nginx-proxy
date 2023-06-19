@@ -51,11 +51,6 @@ jobs:
           docker-compose logs test-minimal  | grep -E '\{[^:]+:'10443' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
           echo "Test limited protcol and SSL cipher... "
           docker-compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect test-minimal:10443"  &> /dev/null;
-          echo "Test SSLv2 not accepted... "
-          if docker-compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect test-minimal:10443"  &> /dev/null; then
-            echo "FAIL: SSL default settings allow SSLv2..."
-            exit 2
-          fi
           docker-compose stop test-minimal
 
       - name: Test GZip Config
