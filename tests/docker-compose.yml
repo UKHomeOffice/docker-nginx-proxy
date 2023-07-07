@@ -102,7 +102,7 @@ services:
       - 10443:10443
     environment:
       - LOCATIONS_CSV=/,/reset-password
-      - PROXY_SERVICE_HOST=https://selfservice.payments.service.gov.uk/
+      - PROXY_SERVICE_HOST=https://selfservice.payments.service.gov.uk
       - PROXY_SERVICE_PORT=443
       - NAXSI_RULES_URL_CSV_1=https://raw.githubusercontent.com/nbs-system/naxsi-rules/master/drupal.rules
       - NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432
