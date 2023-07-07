@@ -92,7 +92,7 @@ jobs:
           done
 
           echo "Test for all OK..."
-          curl --fail -sk -o /dev/null -H "Host: www.payments.service.gov.uk" https://localhost:10443/
+          curl --fail -sk -o /dev/null -H "Host: selfservice.payments.service.gov.uk" https://localhost:10443/
 
           docker-compose stop test-multi-location-naxsi
 
