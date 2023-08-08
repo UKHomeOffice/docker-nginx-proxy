@@ -18,7 +18,7 @@ RUN ["apk", "--no-cache", "add", \
   "tini" \
 ]
 
-RUN ["pip", "install", "awscli~=1.20.0"]
+RUN ["pip", "install", "awscli~=1.29.21"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
