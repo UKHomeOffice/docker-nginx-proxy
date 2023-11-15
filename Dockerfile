@@ -43,6 +43,7 @@ RUN useradd -u 1000 nginx && \
       /usr/local/openresty/naxsi/locations \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
     chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP
+RUN nginx -v
 
 WORKDIR /usr/local/openresty
 
