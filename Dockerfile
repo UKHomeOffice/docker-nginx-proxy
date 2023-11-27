@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM quay.io/ukhomeofficedigital/rockylinux-base:0.0.2
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
