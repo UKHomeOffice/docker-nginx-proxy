@@ -27,20 +27,20 @@ steps:
     - push
     - tag
 
-- name: scan-image
-  pull: Always
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
-  resources:
-    limits:
-      cpu: 1000
-      memory: 1024Mi
-  environment:
-    IMAGE_NAME: quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_COMMIT_SHA}
-    IGNORE_UNFIXED: "true"
-  when:
-    event:
-    - pull_request
-    - push
+# - name: scan-image
+#   pull: Always
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
+#   resources:
+#     limits:
+#       cpu: 1000
+#       memory: 1024Mi
+#   environment:
+#     IMAGE_NAME: quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_COMMIT_SHA}
+#     IGNORE_UNFIXED: "true"
+#   when:
+#     event:
+#     - pull_request
+#     - push
 
 - name: push_image_to_artifactory
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
