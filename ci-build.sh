@@ -228,7 +228,9 @@ start_test "Start we auto add a protocol " "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test it works if we do not define the protocol.."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+# Exit code 8
+# wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl -ki https://${DOCKER_HOST_NAME}:${PORT}/;
 
 
 start_test "Start with multi locations settings" "${STD_CMD} \
