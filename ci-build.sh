@@ -308,8 +308,11 @@ echo "Test it's up and working..."
 #   echo "Failed to verify service is up"
 #   exit 1
 # fi
+# Comment this out, replace with cURL.
+# wget -O /dev/null -v --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/ || echo "Service is up!"
 
-wget -O /dev/null -v --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/ || echo "Service is up!"
+curl -ki https://${DOCKER_HOST_NAME}:${PORT}/;
+echo "Service is up and running."
 
 tear_down_container "${MUTUAL_TLS}"
 
