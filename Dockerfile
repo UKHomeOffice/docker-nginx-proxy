@@ -6,19 +6,16 @@ ENTRYPOINT ["tini", "--"]
 
 RUN ["apk", "--no-cache", "upgrade"]
 RUN ["apk", "--no-cache", "add", \
+  "aws-cli", \
   "bash", \
   "curl", \
   "dnsmasq", \
   # If you update these nginx packages you MUST update the software components list: https://pay-team-manual.cloudapps.digital/manual/policies-and-procedures/software-components-list.html
-  "nginx-mod-http-naxsi=1.24.0-r7", \
-  "nginx-mod-http-xslt-filter=1.24.0-r7", \
+  "nginx-mod-http-naxsi=1.24.0-r14", \
+  "nginx-mod-http-xslt-filter=1.24.0-r14", \
   "openssl", \
-  "py-pip", \
-  "python3", \
   "tini" \
 ]
-
-RUN ["pip", "install", "awscli~=1.29.21"]
 
 RUN ["install", "-d", "/etc/nginx/ssl"]
 RUN ["openssl", "dhparam", "-out", "/etc/nginx/ssl/dhparam.pem", "2048"]
