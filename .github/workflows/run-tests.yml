@@ -144,3 +144,6 @@ jobs:
       - name: Shutdown Docker Compose Stack (Local Only)
         if: ${{ env.ACT }}
         run: docker-compose down
+
+  check-docker-base-images-are-manifests:
+    uses: alphagov/pay-ci/.github/workflows/_validate_docker_image_is_manifest.yml@master
