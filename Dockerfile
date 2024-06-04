@@ -1,4 +1,4 @@
-FROM alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+FROM alpine:3.20.0@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238ebd
 
 USER root
 
@@ -11,8 +11,8 @@ RUN ["apk", "--no-cache", "add", \
   "curl", \
   "dnsmasq", \
   # If you update these nginx packages you MUST update the software components list: https://manual.payments.service.gov.uk/manual/policies-and-procedures/software-components-list.html
-  "nginx-mod-http-naxsi=1.24.0-r16", \
-  "nginx-mod-http-xslt-filter=1.24.0-r16", \
+  "nginx-mod-http-naxsi=1.26.1-r0", \
+  "nginx-mod-http-xslt-filter=1.26.1-r0", \
   "openssl", \
   "tini" \
 ]
