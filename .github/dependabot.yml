@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: daily
       time: "03:00"
+    ignore:
+      - dependency-name: "alpine"
+        versions:
+          - "> 3.19"
     open-pull-requests-limit: 10
     labels:
       - dependencies
