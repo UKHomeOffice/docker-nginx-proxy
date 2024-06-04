@@ -11,8 +11,8 @@ RUN ["apk", "--no-cache", "add", \
   "curl", \
   "dnsmasq", \
   # If you update these nginx packages you MUST update the software components list: https://manual.payments.service.gov.uk/manual/policies-and-procedures/software-components-list.html
-  "nginx-mod-http-naxsi=1.24.0-r15", \
-  "nginx-mod-http-xslt-filter=1.24.0-r15", \
+  "nginx-mod-http-naxsi=1.24.0-r16", \
+  "nginx-mod-http-xslt-filter=1.24.0-r16", \
   "openssl", \
   "tini" \
 ]
