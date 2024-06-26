@@ -35,72 +35,72 @@ jobs:
         run: docker run --rm -v "${GITHUB_WORKSPACE}:/mnt" koalaman/shellcheck:stable@sha256:ec26f2ad1492bf4343a7f82227fec67a19e4729b5ad02f6a2fe1a2b44cc037ff -x go.sh
 
       - name: Build Docker Compose Testing Stack
-        run: docker-compose build
+        run: docker compose build
 
       - name: Test Minimal Server
         run: |
-          docker-compose up -d test-minimal
+          docker compose up -d test-minimal
 
-          until docker inspect tests_test-minimal_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-minimal-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
           
           echo "Testing Minimal Server..."
           curl --fail -sk -o /dev/null "https://localhost:10443"
           echo "Check the log output"
-          docker-compose logs test-minimal  | grep -E '\{[^:]+:'10443' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
+          docker compose logs test-minimal  | grep -E '\{[^:]+:'10443' [0-9a-f]+ - [0-9.]+ - \[[0-9]+/[A-Z][a-z][a-z]/[0-9:]{13} \+[0-9]{4}\] "GET / HTTP/1\.1" [0-9]{3} [0-9]+ [0-9]+\.[0-9]{3} - "-" "[^"]+"\}'
           echo "Test limited protcol and SSL cipher... "
-          docker-compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect test-minimal:10443"  &> /dev/null;
-          docker-compose stop test-minimal
+          docker compose run --rm --entrypoint bash nginx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect test-minimal:10443"  &> /dev/null;
+          docker compose stop test-minimal
 
       - name: Test GZip Config
         run: |
-          docker-compose up -d test-gzip
+          docker compose up -d test-gzip
 
-          until docker inspect tests_test-gzip_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-gzip-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
           echo "Test that GZip is configured..."
           curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
 
-          docker-compose stop test-gzip
+          docker compose stop test-gzip
 
       - name: Test Multi-Proxy Config
         run: |
-          docker-compose up -d --force-recreate test-multi-proxy
+          docker compose up -d --force-recreate test-multi-proxy
 
-          until docker inspect tests_test-multi-proxy_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-multi-proxy-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
           echo "Test for location 1 @ /..."
           curl --fail -sk -o /dev/null https://localhost:10443/
-          docker-compose logs mockserver-1 | grep -E '(Matched on All OK)'
+          docker compose logs mockserver-1 | grep -E '(Matched on All OK)'
           echo "Test for location 2 @ /path/to/resource"
           curl --fail -sk -o /dev/null https://localhost:10443/path/to/resource
-          docker-compose logs mockserver-2 | grep -E '(Matched on All OK with path)'
+          docker compose logs mockserver-2 | grep -E '(Matched on All OK with path)'
 
-          docker-compose stop test-multi-proxy
+          docker compose stop test-multi-proxy
 
       - name: Test Multi-Location, Single Proxy and NAXSI Config
         run: |
-          docker-compose up -d test-multi-location-naxsi
+          docker compose up -d test-multi-location-naxsi
 
-          until docker inspect tests_test-multi-location-naxsi_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-multi-location-naxsi-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
           echo "Test for all OK..."
           curl --fail -sk -o /dev/null -H "Host: selfservice.payments.service.gov.uk" https://localhost:10443/
 
-          docker-compose stop test-multi-location-naxsi
+          docker compose stop test-multi-location-naxsi
 
       - name: Test Custom Upload Size Config
         run: |
-          docker-compose up -d test-custom-upload
+          docker compose up -d test-custom-upload
 
-          until docker inspect tests_test-custom-upload_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-custom-upload-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -113,37 +113,37 @@ jobs:
           echo "Grepping the response..."
           grep "Thanks for the big doc" /tmp/upload_test.txt &> /dev/null
 
-          docker-compose stop test-custom-upload
+          docker compose stop test-custom-upload
 
       - name: Test Static File Cache Setting
         run: |
-          docker-compose up -d test-static-cache
+          docker compose up -d test-static-cache
 
-          until docker inspect tests_test-static-cache_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-static-cache-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
           echo "Test for all OK..."
           curl -s -I -X GET -k --compressed https://localhost:10443/file.json | grep -q 'Cache-Control: max-age=3600'
 
-          docker-compose stop test-static-cache
+          docker compose stop test-static-cache
 
       - name: Test Big Buffers Setting
         run: |
-          docker-compose up -d test-big-buffers
+          docker compose up -d test-big-buffers
 
-          until docker inspect tests_test-big-buffers_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-big-buffers-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
           echo "Test for all OK..."
           curl -s -I -X GET -k --compressed https://localhost:10443/gzip | grep -q 'Content-Encoding: gzip'
 
-          docker-compose stop test-big-buffers
+          docker compose stop test-big-buffers
 
       - name: Shutdown Docker Compose Stack (Local Only)
         if: ${{ env.ACT }}
-        run: docker-compose down
+        run: docker compose down
 
   check-docker-base-images-are-manifests:
     uses: alphagov/pay-ci/.github/workflows/_validate_docker_image_is_manifest.yml@master
