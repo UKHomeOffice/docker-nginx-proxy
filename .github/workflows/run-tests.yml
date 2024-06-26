@@ -41,7 +41,7 @@ jobs:
         run: |
           docker compose up -d test-minimal
 
-          until docker inspect tests_test-minimal_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-minimal-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
           
@@ -57,7 +57,7 @@ jobs:
         run: |
           docker compose up -d test-gzip
 
-          until docker inspect tests_test-gzip_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-gzip-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -70,7 +70,7 @@ jobs:
         run: |
           docker compose up -d --force-recreate test-multi-proxy
 
-          until docker inspect tests_test-multi-proxy_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-multi-proxy-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -87,7 +87,7 @@ jobs:
         run: |
           docker compose up -d test-multi-location-naxsi
 
-          until docker inspect tests_test-multi-location-naxsi_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-multi-location-naxsi-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -100,7 +100,7 @@ jobs:
         run: |
           docker compose up -d test-custom-upload
 
-          until docker inspect tests_test-custom-upload_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-custom-upload-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -119,7 +119,7 @@ jobs:
         run: |
           docker compose up -d test-static-cache
 
-          until docker inspect tests_test-static-cache_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-static-cache-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
@@ -132,7 +132,7 @@ jobs:
         run: |
           docker compose up -d test-big-buffers
 
-          until docker inspect tests_test-big-buffers_1 --format='{{.State.Health.Status}}' | grep -q healthy; do
+          until docker inspect tests-test-big-buffers-1 --format='{{.State.Health.Status}}' | grep -q healthy; do
             sleep 2
           done
 
