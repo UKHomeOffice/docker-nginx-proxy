@@ -3,8 +3,8 @@ FROM alpine:3.20.3
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
 
-WORKDIR /root
 ADD ./build.sh /root/
+WORKDIR /root
 RUN ./build.sh
 
 RUN yum install -y openssl && \
