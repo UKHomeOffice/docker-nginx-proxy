@@ -120,6 +120,7 @@ yum -y remove \
     libcurl-devel \
     perl \
     pcre-devel \
-    readline-devel
+    readline-devel \
+    zlib 
 
 yum clean all
