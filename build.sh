@@ -111,7 +111,7 @@ luarocks install uuid
 luarocks install luasocket
 
 echo "Removing unnecessary developer tooling"
-rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module --skip-broken
+rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module 
 yum -y remove \
     gcc-c++ \
     gcc \
@@ -123,6 +123,6 @@ yum -y remove \
     pcre-devel \
     readline-devel \
     zlib \
-    zlib-devel 
+    zlib-devel --skip-broken
 
 yum clean all
