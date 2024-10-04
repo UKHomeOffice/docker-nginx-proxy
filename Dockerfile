@@ -1,10 +1,10 @@
-FROM alpine:3.20.3
+FROM quay.io/ukhomeofficedigital/rockylinux-base:0.0.2
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
 
-ADD ./build.sh /root/
 WORKDIR /root
+ADD ./build.sh /root/
 RUN ./build.sh
 
 RUN yum install -y openssl && \
