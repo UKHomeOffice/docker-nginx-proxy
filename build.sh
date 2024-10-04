@@ -40,7 +40,8 @@ yum -y install \
     tar \
     unzip \
     wget \
-    zlib
+    zlib \
+    zlib-devel 
 
 mkdir -p openresty luarocks naxsi nginx-statsd geoip geoipupdate ngx_http_geoip2_module
 
@@ -121,6 +122,7 @@ yum -y remove \
     perl \
     pcre-devel \
     readline-devel \
-    zlib 
+    zlib \
+    zlib-devel
 
 yum clean all
