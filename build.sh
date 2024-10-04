@@ -112,6 +112,7 @@ luarocks install luasocket
 
 echo "Removing unnecessary developer tooling"
 rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module 
+echo "Yum remove tooling"
 yum -y remove \
     gcc-c++ \
     gcc \
