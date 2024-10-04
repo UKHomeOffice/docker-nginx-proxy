@@ -123,6 +123,6 @@ yum -y remove \
     pcre-devel \
     readline-devel \
     zlib \
-    zlib-devel
+    zlib-devel 
 
 yum clean all
