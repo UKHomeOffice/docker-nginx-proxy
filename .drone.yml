@@ -35,7 +35,7 @@ steps:
       cpu: 1000
       memory: 1024Mi
   environment:
-    IMAGE_NAME: quay.io/ukhomeofficedigital/nginx-proxy:${DRONE_COMMIT_SHA}
+    IMAGE_NAME: quay.io/ukhomeofficedigital/nginx-proxy:latest
     IGNORE_UNFIXED: "true"
   when:
     event:
