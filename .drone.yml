@@ -18,9 +18,9 @@ steps:
   - ./ci-build.sh
   environment:
     GEOIP_ACCOUNT_ID:
-      from_secret: geoip_account_id
+      from_secret: GEOIP_ACCOUNT_ID
     GEOIP_LICENSE_KEY:
-      from_secret: geoip_license_key
+      from_secret: GEOIP_LICENSE_KEY
   when:
     event:
     - pull_request
