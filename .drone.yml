@@ -14,6 +14,7 @@ steps:
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
   - /usr/local/bin/wait
+  - platform linux/amd64
   - apk add curl bash wget tar
   # - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
   # - ./ci-build.sh
