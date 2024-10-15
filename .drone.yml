@@ -13,9 +13,13 @@ steps:
 - name: build_and_test_image
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
+  - /usr/local/bin/wait
   - apk add curl bash wget tar
   - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
   - ./ci-build.sh
+  volumes:
+    - name: dockersock
+      path: /var/run
   environment:
     GEOIP_ACCOUNT_ID:
       from_secret: geoip_account_id
@@ -84,3 +88,6 @@ services:
   pull: always
   commands:
     - /run.sh server
+volumes:
+  - name: dockersock
+    temp: {}
