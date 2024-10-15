@@ -13,7 +13,7 @@ steps:
 - name: build_and_test_image
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
-  # - apk add curl bash wget tar
+  - apk add curl bash wget tar
   # - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
   # - ./ci-build.sh
   - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
@@ -85,6 +85,9 @@ services:
 - name: docker
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
 
+volumes:
+  - name: dockersock
+    temp: {}
 # - name: anchore-submission-server
 #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
 #   pull: always
