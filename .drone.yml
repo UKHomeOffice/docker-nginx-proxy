@@ -31,35 +31,38 @@ steps:
     - push
     - tag
 
-- name: anchore_scan
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+- name: scan-image
+  pull: always
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
+  resources:
+    limits:
+      cpu: 1000
+      memory: 1024Mi
   environment:
-    IMAGE_NAME: ngx:latest
-    WHITELIST: CVE-2019-5827 # Red Hat won't fix - https://access.redhat.com/security/cve/cve-2019-5827
-  depends_on:
-    - build_and_test_image
+    IMAGE_NAME: quay.io/ukhomeofficedigital/nginx-proxy:latest
+    IGNORE_UNFIXED: "true"
   when:
     event:
     - push
     - pull_request
 
-- name: push_image_to_artifactory
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-  commands:
-  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
-  environment:
-    DOCKER_BASEDIR: /
-    DOCKER_IMAGE: nginx-proxy
-    DOCKER_PASSWORD:
-      from_secret: docker_password
-    DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
-    DOCKER_USERNAME: docker-nginx-proxy-robot
-  depends_on:
-    - build_and_test_image
-  when:
-    event:
-    - tag
+# - name: push_image_to_artifactory
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+#   commands:
+#   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
+#   - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+#   environment:
+#     DOCKER_BASEDIR: /
+#     DOCKER_IMAGE: nginx-proxy
+#     DOCKER_PASSWORD:
+#       from_secret: docker_password
+#     DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
+#     DOCKER_USERNAME: docker-nginx-proxy-robot
+#   depends_on:
+#     - build_and_test_image
+#   when:
+#     event:
+#     - tag
 
 - name: push_image_to_quay
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
@@ -83,11 +86,6 @@ services:
 - name: docker
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
 
-- name: anchore-submission-server
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-  pull: always
-  commands:
-    - /run.sh server
 volumes:
   - name: dockersock
     temp: {}

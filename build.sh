@@ -39,7 +39,9 @@ yum -y install \
     readline-devel \
     tar \
     unzip \
-    wget
+    wget \
+    zlib \
+    zlib-devel 
 
 mkdir -p openresty luarocks naxsi nginx-statsd geoip geoipupdate ngx_http_geoip2_module
 
