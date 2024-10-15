@@ -6,8 +6,8 @@ platform:
   os: linux
   arch: amd64
 
-workspace:
-  path: /workdir
+# workspace:
+#   path: /workdir
 
 steps:
 - name: build_and_test_image
