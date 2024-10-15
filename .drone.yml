@@ -18,6 +18,9 @@ steps:
   # - ./ci-build.sh
   - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
   - docker build --no-cache -t nginx-proxy-govuk:$${DRONE_COMMIT_SHA} .
+  volumes:
+    - name: dockersock
+      path: /var/run
   environment:
     GEOIP_ACCOUNT_ID:
       from_secret: geoip_account_id
