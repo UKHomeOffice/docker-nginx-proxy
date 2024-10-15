@@ -13,19 +13,21 @@ steps:
 - name: build_and_test_image
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
-  - apk add curl bash wget tar
-  - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
+  # - apk add curl bash wget tar
+  # - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
   # - ./ci-build.sh
+  - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
+  - docker build --no-cache -t nginx-proxy-govuk:$${DRONE_COMMIT_SHA} .
   environment:
     GEOIP_ACCOUNT_ID:
       from_secret: geoip_account_id
     GEOIP_LICENSE_KEY:
       from_secret: geoip_license_key
+      
   when:
     event:
     - pull_request
     - push
-    - tag
 
 # - name: anchore_scan
 #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
@@ -39,29 +41,31 @@ steps:
 #     - push
 #     - pull_request
 
-- name: push_image_to_artifactory
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-  commands:
-  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
-  environment:
-    DOCKER_BASEDIR: /
-    DOCKER_IMAGE: nginx-proxy
-    DOCKER_PASSWORD:
-      from_secret: docker_password
-    DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
-    DOCKER_USERNAME: docker-nginx-proxy-robot
-  depends_on:
-    - build_and_test_image
-  when:
-    event:
-    - tag
+# - name: push_image_to_artifactory
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+#   commands:
+#   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" "$${DOCKER_REPO}"
+#   - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+#   environment:
+#     DOCKER_BASEDIR: /
+#     DOCKER_IMAGE: nginx-proxy
+#     DOCKER_PASSWORD:
+#       from_secret: docker_password
+#     DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
+#     DOCKER_USERNAME: docker-nginx-proxy-robot
+#   depends_on:
+#     - build_and_test_image
+#   when:
+#     event:
+#     - tag
 
 - name: push_image_to_quay
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_QUAY_PASSWORD}" "$${DOCKER_REPO}"
-  - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+  # - ./publish.sh "ngx" "$${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}" "$${DRONE_TAG}"
+  - docker tag $${DOCKER_IMAGE}:$${DRONE_COMMIT_SHA} $${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}:$${DRONE_TAG}
+  - docker push $${DOCKER_REPO}$${DOCKER_BASEDIR}$${DOCKER_IMAGE}:$${DRONE_TAG}
   environment:
     DOCKER_BASEDIR: /ukhomeofficedigital/
     DOCKER_IMAGE: nginx-proxy
