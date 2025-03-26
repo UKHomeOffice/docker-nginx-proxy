@@ -25,7 +25,7 @@ STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1-ngxpatch.
 MAXMIND_PATH='/usr/share/GeoIP'
 
 # Install dependencies to build from source
-yum -y install \
+dnf -y install \
     gcc-c++ \
     gcc \
     git \
@@ -39,7 +39,8 @@ yum -y install \
     readline-devel \
     tar \
     unzip \
-    wget
+    wget \
+    zlib-devel
 
 mkdir -p openresty luarocks naxsi nginx-statsd geoip geoipupdate ngx_http_geoip2_module
 
@@ -110,7 +111,7 @@ luarocks install luasocket
 
 echo "Removing unnecessary developer tooling"
 rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module
-yum -y remove \
+dnf -y remove \
     gcc-c++ \
     gcc \
     git \
@@ -121,4 +122,4 @@ yum -y remove \
     pcre-devel \
     readline-devel
 
-yum clean all
+dnf clean all

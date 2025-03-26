@@ -1,4 +1,6 @@
-FROM quii/mockingjay-server:1.9.0
+FROM quii/mockingjay-server:1.12.0
 
 COPY test-servers.yaml /test-servers.yaml
 COPY monkey-business.yaml /monkey-business.yaml
+
+CMD ["-config=/test-servers.yaml", "-monkeyConfig=/monkey-business.yaml", "-debug", "-port=9001"]

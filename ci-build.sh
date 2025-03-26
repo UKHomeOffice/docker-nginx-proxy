@@ -97,20 +97,15 @@ echo "travis_fold:end:BUILD"
 echo "Running mocking-server..."
 docker build -t mockserver:latest ${WORKDIR} -f docker-config/Dockerfile.mockserver
 ${STD_CMD} -d \
-           --name="${MOCKSERVER}" mockserver:latest \
-           -config=/test-servers.yaml \
-           -debug \
-           -port=${MOCKSERVER_PORT}
+           --name="${MOCKSERVER}" mockserver:latest
+
 docker run --rm --link "${MOCKSERVER}:${MOCKSERVER}" martin/wait -c "${MOCKSERVER}:${MOCKSERVER_PORT}"
 
 echo "Running slow-mocking-server..."
 docker build -t slowmockserver:latest ${WORKDIR} -f docker-config/Dockerfile.slowmockserver
 ${STD_CMD} -d \
-           --name="${SLOWMOCKSERVER}" slowmockserver:latest \
-           -config=/test-servers.yaml \
-           -monkeyConfig=/monkey-business.yaml \
-           -debug \
-           -port=${SLOWMOCKSERVER_PORT}
+           --name="${SLOWMOCKSERVER}" slowmockserver:latest
+
 docker run --rm --link "${SLOWMOCKSERVER}:${SLOWMOCKSERVER}" martin/wait -c "${SLOWMOCKSERVER}:${SLOWMOCKSERVER_PORT}"
 
 echo "=========="
@@ -122,11 +117,11 @@ start_test "Start with minimal settings" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=443\""
 
 echo "Test it's up and working..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test limited protcol and SSL cipher... "
-docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
+docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | openssl s_client -cipher 'AES256+EECDH' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 echo "Test sslv2 not accepted...."
-if docker run --link ${INSTANCE}:${INSTANCE}--rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -ssl2 -connect ${INSTANCE}:10443" &> /dev/null; then
+if docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | openssl s_client -ssl2 -connect ${INSTANCE}:10443" &> /dev/null; then
   echo "FAIL SSL defaults settings allow ssl2 ......"
   exit 2
 fi
@@ -215,7 +210,7 @@ start_test "Start with SSL CIPHER set and PROTOCOL" "${STD_CMD} \
            -e \"SSL_CIPHERS=DHE-RSA-AES256-SHA\" \
            -e \"SSL_PROTOCOLS=TLSv1.2\""
 echo "Test accepts defined protocol and cipher....."
-docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | /usr/bin/openssl s_client -cipher 'DHE-RSA-AES256-SHA' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
+docker run --link ${INSTANCE}:${INSTANCE} --rm --entrypoint bash ngx -c "echo GET / | openssl s_client -cipher 'DHE-RSA-AES256-SHA' -tls1_2 -connect ${INSTANCE}:10443" &> /dev/null;
 
 
 
@@ -301,7 +296,7 @@ start_test "Start with upstream client certs" \
            --link \"${MUTUAL_TLS}:${MUTUAL_TLS}\" "
 
 echo "Test it's up and working..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 tear_down_container "${MUTUAL_TLS}"
 
 echo "Test failure to verify upstream server cert..."

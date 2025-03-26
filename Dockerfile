@@ -1,4 +1,9 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM almalinux:9.5
+
+RUN dnf update -y && \
+    dnf autoremove -y && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
 
 ARG GEOIP_ACCOUNT_ID
 ARG GEOIP_LICENSE_KEY
@@ -7,8 +12,8 @@ WORKDIR /root
 ADD ./build.sh /root/
 RUN ./build.sh
 
-RUN yum install -y openssl && \
-    yum clean all && \
+RUN dnf install -y openssl && \
+    dnf clean all && \
     mkdir -p /etc/keys && \
     openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test' && \
     chmod 644 /etc/keys/key
@@ -16,8 +21,8 @@ RUN yum install -y openssl && \
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
 
-RUN yum install -y bind-utils dnsmasq && \
-    yum clean all
+RUN dnf install -y bind-utils dnsmasq && \
+    dnf clean all
 
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template
 ADD ./nginx*.conf /usr/local/openresty/nginx/conf/
@@ -35,8 +40,8 @@ ADD ./readyness.sh /
 ADD ./helper.sh /
 ADD ./refresh_geoip.sh /
 
-RUN yum remove -y kernel-headers && \
-    yum clean all
+RUN dnf remove -y kernel-headers && \
+    dnf clean all
 
 RUN useradd -u 1000 nginx && \
     install -o nginx -g nginx -d \
