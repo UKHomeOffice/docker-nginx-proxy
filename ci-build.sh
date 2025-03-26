@@ -319,8 +319,8 @@ start_test "Start with failing upstream server verification" \
            -e \"VERIFY_SERVER_CERT=TRUE\" \
            --link \"${STANDARD_TLS}:${STANDARD_TLS}\" "
 
-echo "Test it blocks the request, returning a 502..."
-if curl -ki https://${DOCKER_HOST_NAME}:${PORT}/ | grep "502 Bad Gateway" ; then
+echo "Test it blocks the request, returning a 500..."
+if curl -ki https://${DOCKER_HOST_NAME}:${PORT}/ | grep "500 Internal Server Error" ; then
     echo "Passed failure to verify upstream server cert"
 else
     echo "Failed failure to verify upstream server cert"
