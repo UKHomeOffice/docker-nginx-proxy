@@ -146,7 +146,7 @@ start_test "Test GEODB settings can reject..." "${STD_CMD} \
            -e \"ADD_NGINX_LOCATION_CFG=error_page 403 /nginx-proxy/50x.shtml;\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test GeoIP config IS rejected..."
-if ! curl -v -k -H "X-Forwarded-For: 1.1.1.1" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
+if ! curl -v -k -H "X-Forwarded-For: 8.8.8.8" https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \/ | grep '403 Forbidden' ; then
   echo "We were expecting to be rejected with 403 error here - we are not in the Congo!"
   exit 2
 else
@@ -158,7 +158,7 @@ start_test "Test rate limits 1 per second" "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           -e \"REQS_PER_MIN_PER_IP=60\" \
+           -e \"REQS_PER_MIN_PER_IP=1\" \
            -e \"REQS_PER_PAGE=0\" \
            -e \"CONCURRENT_CONNS_PER_IP=1\" \
            --link \"${MOCKSERVER}:${MOCKSERVER}\" "
@@ -219,8 +219,7 @@ start_test "Start we auto add a protocol " "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=80\""
 
 echo "Test it works if we do not define the protocol.."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
-
+curl -ki https://${DOCKER_HOST_NAME}:${PORT}/
 
 start_test "Start with multi locations settings" "${STD_CMD} \
            -e \"LOCATIONS_CSV=/,/wiki/Wikipedia:About\" \
@@ -231,9 +230,9 @@ start_test "Start with multi locations settings" "${STD_CMD} \
 
 
 echo "Test for location 1 @ /..."
-wget -O /dev/null --quiet --no-check-certificate https://${DOCKER_HOST_NAME}:${PORT}/
+curl -ki https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Test for wikipedia about page..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/wiki/Wikipedia:About
+curl -ki -H "Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/wiki/Wikipedia:About
 
 start_test "Start with Multiple locations, single proxy and NAXSI download." "${STD_CMD} \
            -e \"PROXY_SERVICE_HOST=https://en.wikipedia.org\" \
@@ -243,7 +242,7 @@ start_test "Start with Multiple locations, single proxy and NAXSI download." "${
            -e \"NAXSI_RULES_MD5_CSV_1=3b3c24ed61683ab33d8441857c315432\""
 
 echo "Test for all OK..."
-wget -O /dev/null --quiet --no-check-certificate --header="Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/
+curl -ki -H "Host: en.wikipedia.org" https://${DOCKER_HOST_NAME}:${PORT}/
 
 echo "Test client certs..."
 cd ./client_certs/
