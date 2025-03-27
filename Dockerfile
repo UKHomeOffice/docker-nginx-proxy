@@ -47,8 +47,7 @@ RUN useradd -u 1000 nginx && \
     install -o nginx -g nginx -d \
       /usr/local/openresty/naxsi/locations \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP && \
-    chown -R nginx:nginx /etc/keys
+    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP /etc/keys
 
 WORKDIR /usr/local/openresty
 

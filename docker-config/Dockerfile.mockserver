@@ -1,5 +1,3 @@
 FROM quii/mockingjay-server:1.12.0
 
 COPY test-servers.yaml /test-servers.yaml
-
-CMD ["-config=/test-servers.yaml", "-debug", "-port=9000"]
