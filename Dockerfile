@@ -16,7 +16,7 @@ RUN dnf install -y openssl && \
     dnf clean all && \
     mkdir -p /etc/keys && \
     openssl req -x509 -newkey rsa:2048 -keyout /etc/keys/key -out /etc/keys/crt -days 360 -nodes -subj '/CN=test' && \
-    chmod 644 /etc/keys/key
+    chmod 600 /etc/keys/key
 
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
@@ -47,7 +47,8 @@ RUN useradd -u 1000 nginx && \
     install -o nginx -g nginx -d \
       /usr/local/openresty/naxsi/locations \
       /usr/local/openresty/nginx/{client_body,fastcgi,proxy,scgi,uwsgi}_temp && \
-    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP
+    chown -R nginx:nginx /usr/local/openresty/nginx/{conf,logs} /usr/share/GeoIP && \
+    chown -R nginx:nginx /etc/keys
 
 WORKDIR /usr/local/openresty
 
