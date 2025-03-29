@@ -21,7 +21,7 @@ RUN dnf install -y openssl && \
 # This takes a while so best to do it during build
 RUN openssl dhparam -out /usr/local/openresty/nginx/conf/dhparam.pem 2048
 
-RUN dnf install -y bind-utils dnsmasq && \
+RUN dnf install -y bind-utils dnsmasq diffutils && \
     dnf clean all
 
 ADD ./naxsi/location.rules /usr/local/openresty/naxsi/location.template

@@ -108,6 +108,7 @@ popd
 echo "Installing luarocks packages"
 luarocks install uuid
 luarocks install luasocket
+luarocks install lua-resty-openssl
 
 echo "Removing unnecessary developer tooling"
 rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module
