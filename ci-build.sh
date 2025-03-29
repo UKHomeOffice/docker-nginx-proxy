@@ -101,7 +101,6 @@ ${STD_CMD} -d \
            -config=/test-servers.yaml \
            -debug \
            -port=${MOCKSERVER_PORT}
-
 docker run --rm --link "${MOCKSERVER}:${MOCKSERVER}" martin/wait -c "${MOCKSERVER}:${MOCKSERVER_PORT}"
 
 echo "Running slow-mocking-server..."
@@ -112,7 +111,6 @@ ${STD_CMD} -d \
            -monkeyConfig=/monkey-business.yaml \
            -debug \
            -port=${SLOWMOCKSERVER_PORT}
-
 docker run --rm --link "${SLOWMOCKSERVER}:${SLOWMOCKSERVER}" martin/wait -c "${SLOWMOCKSERVER}:${SLOWMOCKSERVER_PORT}"
 
 echo "=========="
@@ -275,7 +273,6 @@ if curl -sk -o /dev/null --fail https://${DOCKER_HOST_NAME}:${PORT}/standards/ ;
 else
     echo "Passed auth fail"
 fi
-
 echo "Test access OK for /standards/... with client cert..."
 curl -sk -o /dev/null \
      --cert ./client_certs/client.crt \
