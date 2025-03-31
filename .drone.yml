@@ -28,7 +28,7 @@ steps:
     - push
     - tag
 
-- name: scan
+- name: trivy_scan
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
   pull: always
   environment:
@@ -59,7 +59,7 @@ steps:
     DOCKER_REPO: artifactory-internal.digital.homeoffice.gov.uk
     DOCKER_USERNAME: docker-nginx-proxy-robot
   depends_on:
-    - build_and_test_image
+    - trivy_scan
   when:
     event:
     - tag
@@ -77,7 +77,7 @@ steps:
     DOCKER_REPO: quay.io
     DOCKER_USERNAME: ukhomeofficedigital+nginx_proxy
   depends_on:
-    - build_and_test_image
+    - trivy_scan
   when:
     event:
     - tag
