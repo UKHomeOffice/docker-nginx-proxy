@@ -14,8 +14,7 @@ steps:
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
   commands:
   - apk add curl bash wget tar
-  - n=0; while [ "$n" -lt 60 ] && ! docker info >/dev/null 2>&1; do echo "Waiting for Docker to be ready..."; sleep 1; n=$(( n + 1 )); done
-  - if [ "$n" -eq 60 ]; then echo "Docker not ready after 60 seconds. Exiting." >&2; exit 1; fi
+  - /usr/local/bin/wait
   - ./ci-build.sh
   environment:
     GEOIP_ACCOUNT_ID:
