@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>429 Too Many Requests</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 3em; color: #333; }
+    h1 { color: #c0392b; }
+    .box { max-width: 640px; line-height: 1.4; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>429 Too Many Requests</h1>
+    <p>You have sent too many requests in a short period. Please slow down and try again shortly.</p>
+    <p>If you believe this is in error, contact support with the time of the request and the URL you were accessing.</p>
+    <small>Rate limiting protects system stability and fair usage.</small>
+  </div>
+</body>
+</html>
