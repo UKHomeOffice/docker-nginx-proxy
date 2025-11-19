@@ -34,8 +34,8 @@ dnf -y install \
     openssl-devel \
     openssl \
     perl \
-    pcre-devel \
-    pcre \
+    pcre2-devel \
+    pcre2 \
     readline-devel \
     tar \
     unzip \
@@ -120,7 +120,7 @@ dnf -y remove \
     openssl-devel \
     libcurl-devel \
     perl \
-    pcre-devel \
+    pcre2-devel \
     readline-devel
 
 dnf clean all

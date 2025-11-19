@@ -1,4 +1,4 @@
-FROM almalinux:9.5
+FROM almalinux:10.0
 
 RUN dnf update -y && \
     dnf autoremove -y && \
