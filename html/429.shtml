@@ -1,1 +1,8 @@
-<!--#include file="50x.shtml" -->
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body bgcolor="white">
+<center><h1>429 Too Many Requests</h1></center>
+<p>Sorry, you have made too many requests. Please try again later.</p>
+<hr><center>nginx</center>
+</body>
+</html>
