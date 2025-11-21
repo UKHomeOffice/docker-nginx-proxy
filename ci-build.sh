@@ -1,3 +1,4 @@
+docker network create testnet || true
 #!/usr/bin/env bash
 
 set -e
