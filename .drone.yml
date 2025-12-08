@@ -15,6 +15,7 @@ steps:
   commands:
   - apk add curl bash wget tar
   - /usr/local/bin/wait
+  - docker network create testnet || true
   - ./ci-build.sh
   environment:
     GEOIP_ACCOUNT_ID:
