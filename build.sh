@@ -60,22 +60,33 @@ mkdir -p ${MAXMIND_PATH}
 make check install
 echo "/usr/local/lib" >> /etc/ld.so.conf.d/libmaxminddb.conf
 
-# Only run if not testing locally
+# Only run if not testing locally — use geoipupdate with retries
 if [ "$LOCAL_TEST" = false ]; then
-  tmpdir_country=$(mktemp -d)
-  tmpdir_city=$(mktemp -d)
-  curl -fSL ${GEOIP_COUNTRY_URL} | tar -xzf - -C "$tmpdir_country"
-  curl -fSL ${GEOIP_CITY_URL} | tar -xzf - -C "$tmpdir_city"
-  # Move MMDB files from extracted directories into MAXMIND_PATH
-  country_mmdb=$(find "$tmpdir_country" -type f -name '*.mmdb' | head -n1)
-  city_mmdb=$(find "$tmpdir_city" -type f -name '*.mmdb' | head -n1)
-  if [ -n "$country_mmdb" ]; then
-    cp "$country_mmdb" "${MAXMIND_PATH}/GeoLite2-Country.mmdb"
+  echo "Fetching GeoIP databases via geoipupdate"
+  attempts=0
+  max_attempts=5
+  delay=5
+  while [ $attempts -lt $max_attempts ]; do
+    if ./geoipupdate -f GeoIP.conf -d ${MAXMIND_PATH}; then
+      break
+    fi
+    attempts=$((attempts+1))
+    echo "geoipupdate attempt $attempts/$max_attempts failed; retrying in ${delay}s..."
+    sleep $delay
+  done
+  if [ $attempts -ge $max_attempts ]; then
+    echo "Warning: geoipupdate failed after ${max_attempts} attempts. Continuing without GeoIP databases."
   fi
-  if [ -n "$city_mmdb" ]; then
-    cp "$city_mmdb" "${MAXMIND_PATH}/GeoLite2-City.mmdb"
-  fi
-  rm -rf "$tmpdir_country" "$tmpdir_city"
+fi
+
+# Ensure GeoIP databases exist or create harmless placeholders to avoid runtime errors
+if [ ! -f "${MAXMIND_PATH}/GeoLite2-Country.mmdb" ]; then
+  echo "GeoLite2-Country.mmdb missing; creating empty placeholder."
+  install -m 0644 /dev/null "${MAXMIND_PATH}/GeoLite2-Country.mmdb"
+fi
+if [ ! -f "${MAXMIND_PATH}/GeoLite2-City.mmdb" ]; then
+  echo "GeoLite2-City.mmdb missing; creating empty placeholder."
+  install -m 0644 /dev/null "${MAXMIND_PATH}/GeoLite2-City.mmdb"
 fi
 
 chown -R 1000:1000 ${MAXMIND_PATH}
