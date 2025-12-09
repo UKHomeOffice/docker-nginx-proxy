@@ -62,8 +62,20 @@ echo "/usr/local/lib" >> /etc/ld.so.conf.d/libmaxminddb.conf
 
 # Only run if not testing locally
 if [ "$LOCAL_TEST" = false ]; then
-  curl -fSL ${GEOIP_COUNTRY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-Country.mmdb
-  curl -fSL ${GEOIP_CITY_URL} | tar -xz > ${MAXMIND_PATH}/GeoLite2-City.mmdb
+  tmpdir_country=$(mktemp -d)
+  tmpdir_city=$(mktemp -d)
+  curl -fSL ${GEOIP_COUNTRY_URL} | tar -xzf - -C "$tmpdir_country"
+  curl -fSL ${GEOIP_CITY_URL} | tar -xzf - -C "$tmpdir_city"
+  # Move MMDB files from extracted directories into MAXMIND_PATH
+  country_mmdb=$(find "$tmpdir_country" -type f -name '*.mmdb' | head -n1)
+  city_mmdb=$(find "$tmpdir_city" -type f -name '*.mmdb' | head -n1)
+  if [ -n "$country_mmdb" ]; then
+    cp "$country_mmdb" "${MAXMIND_PATH}/GeoLite2-Country.mmdb"
+  fi
+  if [ -n "$city_mmdb" ]; then
+    cp "$city_mmdb" "${MAXMIND_PATH}/GeoLite2-City.mmdb"
+  fi
+  rm -rf "$tmpdir_country" "$tmpdir_city"
 fi
 
 chown -R 1000:1000 ${MAXMIND_PATH}
