@@ -17,6 +17,9 @@ MOCKSERVER_PORT=9000
 SLOWMOCKSERVER_PORT=9001
 WORKDIR="${PWD}"
 
+# Pre-pull readiness helper image to avoid CI hiccups
+docker pull martin/wait:latest || true
+
 function tear_down_container() {
     container=$1
     if docker ps -a | grep "${container}" &>/dev/null ; then
@@ -87,9 +90,17 @@ function start_test() {
       docker start ${INSTANCE}
     fi
   # Small delay to allow DNS/network propagation
-  sleep 2
-  # Wait for instance readiness on network
-  docker run --rm --network testnet martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"
+  sleep 5
+  # Debug: show container network attachments
+  echo "Inspecting container networks for ${INSTANCE}..."
+  docker inspect ${INSTANCE} --format '{{json .NetworkSettings.Networks}}' || true
+  docker ps -a --filter name=${INSTANCE}
+  # Wait for instance readiness on network with retries
+  if ! docker run --rm --network testnet martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"; then
+    echo "Initial wait failed; retrying after short delay..."
+    sleep 3
+    docker run --rm --network testnet martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"
+  fi
 }
 
 clean_up
@@ -106,20 +117,24 @@ echo "travis_fold:end:BUILD"
 echo "Running mocking-server..."
 docker build -t mockserver:latest ${WORKDIR} -f docker-config/Dockerfile.mockserver
 ${STD_CMD} -d \
-           --name="${MOCKSERVER}" mockserver:latest \
+           --name="${MOCKSERVER}" --network testnet mockserver:latest \
            -config=/test-servers.yaml \
            -debug \
            -port=${MOCKSERVER_PORT}
+# Allow brief DNS/network propagation
+sleep 2
 docker run --rm --network testnet martin/wait -c "${MOCKSERVER}:${MOCKSERVER_PORT}"
 
 echo "Running slow-mocking-server..."
 docker build -t slowmockserver:latest ${WORKDIR} -f docker-config/Dockerfile.slowmockserver
 ${STD_CMD} -d \
-           --name="${SLOWMOCKSERVER}" slowmockserver:latest \
+           --name="${SLOWMOCKSERVER}" --network testnet slowmockserver:latest \
            -config=/test-servers.yaml \
            -monkeyConfig=/monkey-business.yaml \
            -debug \
            -port=${SLOWMOCKSERVER_PORT}
+# Allow brief DNS/network propagation
+sleep 2
 docker run --rm --network testnet martin/wait -c "${SLOWMOCKSERVER}:${SLOWMOCKSERVER_PORT}"
 
 echo "=========="
@@ -297,7 +312,7 @@ ${STD_CMD} -d \
            -e "PROXY_SERVICE_PORT=80" \
            -e "CLIENT_CERT_REQUIRED=TRUE" \
            -p 10444:10444 --name="${MUTUAL_TLS}" mutual-tls:latest
-docker run --rm --network testnet martin/wait -p 10444
+docker run --rm --network testnet martin/wait -c "${MUTUAL_TLS}:10444"
 
 start_test "Start with upstream client certs" \
            "${WORKDIR}/client_certs/client.crt" "upstream-client-crt" "/etc/keys/" \
@@ -321,7 +336,7 @@ ${STD_CMD} -d \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
            -p 10444:10444 --name="${STANDARD_TLS}" standard-tls:latest
-docker run --rm --network testnet martin/wait -p 10444
+docker run --rm --network testnet martin/wait -c "${STANDARD_TLS}:10444"
 
 start_test "Start with failing upstream server verification" \
            "${WORKDIR}/client_certs/ca.crt" "upstream-server-ca" "/etc/keys/" \
@@ -449,7 +464,7 @@ start_test "Test text logging format..." "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=text\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test request (with logging as text)..."
 curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 echo "Testing text logs format..."
@@ -461,7 +476,7 @@ start_test "Test json logging format..." "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing json logs format..."
 docker logs ${INSTANCE}  | grep '{"proxy_proto_address":'
@@ -475,7 +490,7 @@ start_test "Test param logging off option works..." "${STD_CMD} \
            -e \"LOG_FORMAT_NAME=json\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"NO_LOGGING_URL_PARAMS=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}?animal=cow
 echo "Testing no logging of url params option works..."
 docker logs ${INSTANCE} 2>/dev/null | grep '{"proxy_proto_address":'
@@ -487,7 +502,7 @@ start_test "Test ENABLE_WEB_SOCKETS..." "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_WEB_SOCKETS=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk -o /dev/null https://${DOCKER_HOST_NAME}:${PORT}/
 
 start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
@@ -497,7 +512,7 @@ start_test "Test ADD_NGINX_LOCATION_CFG param..." "${STD_CMD} \
            -e \"ADD_NGINX_LOCATION_CFG=return 200 NICE;\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 echo "Test extra param works"
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}/wow | grep "NICE"
 
@@ -507,7 +522,7 @@ start_test "Test UUID GET param logging option works..." "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
 docker logs "${MOCKSERVER}" | grep '?nginxId='
@@ -518,7 +533,7 @@ start_test "Test UUID GET param logging option works with other params..." "${ST
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}/?foo=bar
 echo "Testing no logging of url params option works..."
 docker logs "${MOCKSERVER}" | grep '?foo=bar&nginxId='
@@ -529,7 +544,7 @@ start_test "Test UUID header logging option works..." "${STD_CMD} \
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
 docker logs "${MOCKSERVER}" | grep 'nginxid->'
@@ -540,7 +555,7 @@ start_test "Test UUID header logging option passes through supplied value..." "$
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=HEADER\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 curl -sk -H "nginxId: 00000000-1111-2222-3333-444455556666" https://${DOCKER_HOST_NAME}:${PORT}
 echo "Testing no logging of url params option works..."
 docker logs "${MOCKSERVER}" | grep 'nginxid->00000000-1111-2222-3333-444455556666'
@@ -552,7 +567,7 @@ start_test "Test VERBOSE_ERROR_PAGES=TRUE displays debug info" "${STD_CMD} \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"VERBOSE_ERROR_PAGES=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Sorry, we are refusing to process your request." ; then
   echo "Testing VERBOSE_ERROR_PAGES works..."
 else
@@ -565,7 +580,7 @@ start_test "Test VERBOSE_ERROR_PAGES is not set does not display debug info" "${
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Sorry, we are refusing to process your request." ; then
   echo "Testing VERBOSE_ERROR_PAGES failed..."
   exit 1
@@ -578,7 +593,7 @@ start_test "Test VERBOSE_ERROR_PAGES is not set displays default message info" "
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "Something went wrong." ; then
   echo "Testing VERBOSE_ERROR_PAGES works..."
 else
@@ -592,7 +607,7 @@ start_test "Test FEEDBACK_EMAIL is set, displays contact message info" "${STD_CM
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"FEEDBACK_EMAIL=test@test.com\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "test@test.com" ; then
   echo "Testing VERBOSE_ERROR_PAGES works..."
 else
@@ -605,7 +620,7 @@ start_test "Test FEEDBACK_EMAIL is not set, does not display email message info"
            -e \"PROXY_SERVICE_PORT=${MOCKSERVER_PORT}\" \
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -k https://${DOCKER_HOST_NAME}:${PORT}/\?\"==\` | grep "please contact us on" ; then
   echo "Testing VERBOSE_ERROR_PAGES failed..."
   exit 1
@@ -619,7 +634,7 @@ start_test "Test to ensure HTTP/2 is enabled when HTTP2 is set to true" "${STD_C
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTP2=TRUE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if curl -kv https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
   echo "Testing HTTP2 Works"
 else
@@ -633,7 +648,7 @@ start_test "Test to ensure HTTP/2 is disabled when HTTP2 is set to false" "${STD
            -e \"DNSMASK=TRUE\" \
            -e \"ENABLE_UUID_PARAM=FALSE\" \
            -e \"HTTP2=FALSE\" \
-           --link \"${MOCKSERVER}:${MOCKSERVER}\" "
+           --network testnet \"${MOCKSERVER}:${MOCKSERVER}\" "
 if ! curl -kv https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 | grep 'HTTP/2 200' ; then
   echo "Testing HTTP2 FALSE Flag Works"
 else
