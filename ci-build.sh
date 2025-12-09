@@ -79,9 +79,14 @@ function start_test() {
     echo "Running: $@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     # Ensure network flag is present; if not, append --network testnet
     if [[ "$@" != *"--network"* ]]; then
-      bash -c "$@ --name ${INSTANCE} -d --network testnet -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+      bash -c "$@ --name ${INSTANCE} -d --hostname ${INSTANCE} --network-alias ${INSTANCE} --network testnet -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
     else
-      bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+      bash -c "$@ --name ${INSTANCE} -d --hostname ${INSTANCE} --network-alias ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    fi
+    # If container exited immediately, show logs for diagnosis
+    if ! docker ps --filter name=${INSTANCE} --filter status=running | grep ${INSTANCE} &>/dev/null; then
+      echo "Container ${INSTANCE} is not running; printing logs:"
+      docker logs ${INSTANCE} || true
     fi
     # if files needed to be mounted in, the container stops immediately so start it again
     if [[ ${files} != "" ]]; then
@@ -95,6 +100,13 @@ function start_test() {
   echo "Inspecting container networks for ${INSTANCE}..."
   docker inspect ${INSTANCE} --format '{{json .NetworkSettings.Networks}}' || true
   docker ps -a --filter name=${INSTANCE}
+  echo "Verifying DNS resolution on testnet for ${INSTANCE}..."
+  docker run --rm --network testnet busybox nslookup ${INSTANCE} || true
+  # Abort early if container is not running
+  if ! docker ps --filter name=${INSTANCE} --filter status=running | grep ${INSTANCE} &>/dev/null; then
+    echo "${INSTANCE} is not running; readiness check will fail."
+    exit 1
+  fi
   # Wait for instance readiness on network with retries
   if ! docker run --rm --network testnet martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"; then
     echo "Initial wait failed; retrying after short delay..."
