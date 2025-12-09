@@ -74,14 +74,22 @@ function start_test() {
       shift
     done
     echo "Running: $@ --name ${INSTANCE} -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
-    bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    # Ensure network flag is present; if not, append --network testnet
+    if [[ "$@" != *"--network"* ]]; then
+      bash -c "$@ --name ${INSTANCE} -d --network testnet -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    else
+      bash -c "$@ --name ${INSTANCE} -d -p ${PORT}:${HTTPS_LISTEN_PORT} ${TAG}"
+    fi
     # if files needed to be mounted in, the container stops immediately so start it again
     if [[ ${files} != "" ]]; then
       echo "${files}"
       add_files_to_container ${INSTANCE} ${files}
       docker start ${INSTANCE}
     fi
-    docker run --rm --network testnet martin/wait
+  # Small delay to allow DNS/network propagation
+  sleep 2
+  # Wait for instance readiness on network
+  docker run --rm --network testnet martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"
 }
 
 clean_up
