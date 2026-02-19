@@ -32,10 +32,6 @@ check_arg "${SRC}" "SRC"
 check_arg "${DEST}" "DEST"
 check_arg "${VERSION}" "VERSION"
 
-PATCH="${VERSION}"
-MINOR=`echo ${PATCH} | awk -F '.' '{print $1"."$2}'`
-MAJOR=`echo ${MINOR} | awk -F '.' '{print $1}'`
-
 tag_n_push() {
     FULL_NAME="${DEST}:${1}"
     echo -n "Publishing '${SRC}' as '${FULL_NAME}'..."
@@ -44,7 +40,4 @@ tag_n_push() {
     echo " done."
 }
 
-tag_n_push "${PATCH}"
-tag_n_push "${MINOR}"
-tag_n_push "${MAJOR}"
-#tag_n_push "latest"
+tag_n_push "${VERSION}"

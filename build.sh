@@ -17,7 +17,7 @@ GEOIP_COUNTRY_URL="https://download.maxmind.com/app/geoip_download?edition_id=Ge
 GEOIP_MOD_URL='https://github.com/leev/ngx_http_geoip2_module/archive/3.4.tar.gz'
 GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v7.1.1/geoipupdate_7.1.1_linux_amd64.tar.gz'
 GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.12.2/libmaxminddb-1.12.2.tar.gz'
-LUAROCKS_URL='https://luarocks.github.io/luarocks/releases/luarocks-3.12.0.tar.gz'
+LUAROCKS_URL='https://luarocks.github.io/luarocks/releases/luarocks-3.13.0.tar.gz'
 NAXSI_URL='https://github.com/wargio/naxsi/releases/download/1.7/naxsi-1.7-src-with-deps.tar.gz'
 OPEN_RESTY_URL='http://openresty.org/download/openresty-1.27.1.2.tar.gz'
 STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1-ngxpatch.tar.gz'
