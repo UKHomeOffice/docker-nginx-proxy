@@ -18,7 +18,7 @@ cat > /etc/nginx/conf/server_certs.conf <<-EOF_CERT_CONF
     ssl_certificate     /etc/keys/crt;
     ssl_certificate_key /etc/keys/key;
     # Can add SSLv3 for IE 6 but this opens up to poodle
-    ssl_protocols TLSv1.2;
+    ssl_protocols TLSv1.2 TLSv1.3;
     # reduction to only the best ciphers
     # And make sure we prefer them
     ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;
