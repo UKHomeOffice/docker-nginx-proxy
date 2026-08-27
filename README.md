@@ -9,7 +9,7 @@ We run the nginx proxy inside a Fargate container for all of our apps.
 To update and deploy a new nginx-proxy container:
 
 - Raise a pull request, get an approval and merge it.
-- The [Github Actions post-merge workflow](https://github.com/alphagov/pay-nginx-proxy/blob/master/.github/workflows/post-merge.yml) will test a build of the image from the main branch and create a release tag. 
+- The [Github Actions post-merge workflow](https://github.com/govuk-pay/pay-nginx-proxy/blob/master/.github/workflows/post-merge.yml) will test a build of the image from the main branch and create a release tag. 
 - The [Concourse `deploy-to-test` pipeline](https://pay-cd.deploy.payments.service.gov.uk/teams/pay-dev/pipelines/deploy-to-test?group=nginx-proxy) is triggered by the release tag.
 It will build the Docker image, tag it as `*-release` and push it to the AWS test account's ECR repository (for historical reasons, the image is called 'docker-nginx-proxy' in ECR).
 - Concourse will then attempt to deploy Toolbox with the new `*-release` nginx-proxy container. If successful,

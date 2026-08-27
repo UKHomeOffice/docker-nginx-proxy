@@ -11,7 +11,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Detect secrets
-        uses: alphagov/pay-ci/actions/detect-secrets@master
+        uses: govuk-pay/pay-ci/actions/detect-secrets@master
   test:
     name: Build & Test Pay Nginx Proxy
     runs-on: ubuntu-latest
@@ -146,4 +146,4 @@ jobs:
         run: docker compose down
 
   check-docker-base-images-are-manifests:
-    uses: alphagov/pay-ci/.github/workflows/_validate_docker_image_is_manifest.yml@master
+    uses: govuk-pay/pay-ci/.github/workflows/_validate_docker_image_is_manifest.yml@master
