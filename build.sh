@@ -15,11 +15,11 @@ GEOIP_LICENSE_KEY="${GEOIP_LICENSE_KEY:-xxxxxx}"
 GEOIP_CITY_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${GEOIP_LICENSE_KEY}&suffix=tar.gz"
 GEOIP_COUNTRY_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${GEOIP_LICENSE_KEY}&suffix=tar.gz"
 GEOIP_MOD_URL='https://github.com/leev/ngx_http_geoip2_module/archive/3.4.tar.gz'
-GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v7.1.1/geoipupdate_7.1.1_linux_amd64.tar.gz'
-GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.12.2/libmaxminddb-1.12.2.tar.gz'
+GEOIP_UPDATE_CLI='https://github.com/maxmind/geoipupdate/releases/download/v8.0.0/geoipupdate_8.0.0_linux_amd64.tar.gz'
+GEOIP_URL='https://github.com/maxmind/libmaxminddb/releases/download/1.14.1/libmaxminddb-1.14.1.tar.gz'
 LUAROCKS_URL='https://luarocks.github.io/luarocks/releases/luarocks-3.13.0.tar.gz'
 NAXSI_URL='https://github.com/wargio/naxsi/releases/download/1.7/naxsi-1.7-src-with-deps.tar.gz'
-OPEN_RESTY_URL='http://openresty.org/download/openresty-1.27.1.2.tar.gz'
+OPEN_RESTY_URL='http://openresty.org/download/openresty-1.29.2.5.tar.gz'
 STATSD_URL='https://github.com/UKHomeOffice/nginx-statsd/archive/0.0.1-ngxpatch.tar.gz'
 
 MAXMIND_PATH='/usr/share/GeoIP'
@@ -111,7 +111,7 @@ luarocks install luasocket
 luarocks install lua-resty-openssl
 
 echo "Removing unnecessary developer tooling"
-rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module
+rm -fr openresty naxsi nginx-statsd geoip geoipupdate luarocks ngx_http_geoip2_module
 dnf -y remove \
     gcc-c++ \
     gcc \
