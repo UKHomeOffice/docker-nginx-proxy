@@ -80,7 +80,7 @@ function start_test() {
       add_files_to_container ${INSTANCE} ${files}
       docker start ${INSTANCE}
     fi
-    docker run --rm --link ${INSTANCE}:${INSTANCE} martin/wait
+    docker run --rm --link ${INSTANCE}:${INSTANCE} martin/wait -c "${INSTANCE}:${HTTPS_LISTEN_PORT}"
 }
 
 clean_up
@@ -288,7 +288,7 @@ ${STD_CMD} -d \
            -e "PROXY_SERVICE_PORT=80" \
            -e "CLIENT_CERT_REQUIRED=TRUE" \
            -p 10444:10444 --name="${MUTUAL_TLS}" mutual-tls:latest
-docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait -p 10444
+docker run --link "${MUTUAL_TLS}:${MUTUAL_TLS}" --rm martin/wait -c "${MUTUAL_TLS}:10444"
 
 start_test "Start with upstream client certs" \
            "${WORKDIR}/client_certs/client.crt" "upstream-client-crt" "/etc/keys/" \
@@ -312,7 +312,7 @@ ${STD_CMD} -d \
            -e "PROXY_SERVICE_HOST=http://www.w3.org" \
            -e "PROXY_SERVICE_PORT=80" \
            -p 10444:10444 --name="${STANDARD_TLS}" standard-tls:latest
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -p 10444
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -c "${STANDARD_TLS}:10444"
 
 start_test "Start with failing upstream server verification" \
            "${WORKDIR}/client_certs/ca.crt" "upstream-server-ca" "/etc/keys/" \
@@ -343,7 +343,7 @@ ${STD_CMD} -d \
            -e "PROXY_SERVICE_PORT=80" \
            -p 10444:10444 --name="${STANDARD_TLS}" ${TAG}
 docker start ${STANDARD_TLS}
-docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -p 10444
+docker run --link "${STANDARD_TLS}:${STANDARD_TLS}" --rm martin/wait -c "${STANDARD_TLS}:10444"
 
 start_test "Start with succeeding upstream server verification" \
            "${WORKDIR}/client_certs/ca.crt" "upstream-server-ca" "/etc/keys/" \

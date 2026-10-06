@@ -111,7 +111,7 @@ luarocks install luasocket
 luarocks install lua-resty-openssl
 
 echo "Removing unnecessary developer tooling"
-rm -fr openresty naxsi nginx-statsd geoip luarocks ngx_http_geoip2_module
+rm -fr openresty naxsi nginx-statsd geoip geoipupdate luarocks ngx_http_geoip2_module
 dnf -y remove \
     gcc-c++ \
     gcc \
