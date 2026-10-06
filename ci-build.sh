@@ -191,6 +191,7 @@ curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
 curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
 curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
 curl -v -k https://${DOCKER_HOST_NAME}:${PORT} &>/dev/null &
+sleep 1
 echo "Now test we get blocked with second concurrent request..."
 if curl -v -k https://${DOCKER_HOST_NAME}:${PORT}/ 2>&1 \
    | grep '503 Service Temporarily Unavailable' ; then
